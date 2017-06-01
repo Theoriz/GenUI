@@ -7,6 +7,9 @@ using UnityEngine;
 
 public class IOManager : Controllable
 {
+    private string fileName;
+    private bool loaded;
+
     private string directory = "Log\\";
 
     [OSCProperty("fileNames")]
@@ -14,67 +17,113 @@ public class IOManager : Controllable
 
     // Use this for initialization
     void Start () {
-        init();
+       // init();
         id = gameObject.name;
         fileNames = new List<string>();
         ReadFileList();
         controllableMaster.Register(GetComponent<IOManager>());
     }
 
-    private void ReadFileList()
+    void Update()
     {
-        foreach (var t in Directory.GetFiles(directory))
+        if (!loaded)
         {
-            var substrings = t.Split('\\');
-            fileNames.Add(substrings[1]);
+            loaded = true;
+            LoadTempFile();
+        }
+    }
+    private void LoadTempFile()
+    {
+        fileName = "preset.tmp";
+        if (File.Exists(directory + fileName))
+        {
+            load();   
         }
     }
 
-    [OSCMethod("save")]
-    public void save()
+    private void ReadFileList()
+    {
+        fileNames.Clear();
+        foreach (var t in Directory.GetFiles(directory))
+        {
+            var substrings = t.Split('\\');
+            if (substrings[1] != "preset.tmp")
+                fileNames.Add(substrings[1]);
+        }
+        RaiseEventValueChanged("fileNames");
+    }
+
+    [OSCMethod("savePreset")]
+    public void savePreset()
     {
         var date = DateTime.Today.Day + "-" + DateTime.Today.Month + "-" + DateTime.Today.Year + "_" + DateTime.Now.Hour + "-" + DateTime.Now.Minute + "-" + DateTime.Now.Second;
-        var fileName = directory + "MR_" + date + ".txt";
-        var file = File.OpenWrite(fileName);
+        fileName = "MR_" + date + ".txt";
+        save();
+    }
+
+    private void save()
+    {
+        //create file
+        var file = File.OpenWrite(directory + fileName);
         file.Close();
         var lines = new List<string>();
         foreach (var item in controllableMaster.RegisteredControllables)
         {
             lines.Add(JsonUtility.ToJson(item.Value));
         }
-        File.WriteAllLines(fileName, lines.ToArray());
-        Debug.Log("Saved in " + fileName);
+        File.WriteAllLines(directory + fileName, lines.ToArray());
+        if (debugOSC)
+            Debug.Log("Saved in " + directory + fileName);
         ReadFileList();
     }
 
-    [OSCMethod("load")]
-    public void load()
+    [OSCMethod("loadPreset")]
+    public void loadPreset()
     {
-        Debug.Log("Loading " + fileNames.Last());
+        fileName = fileNames.Last();
+        if(File.Exists(directory + fileName))
+            load();
+        else
+        {
+            Debug.LogWarning("File " + fileName + " doesn't exist !");
+            ReadFileList();
+        }
+    }
+
+    private void load()
+    {
+        if (debugOSC)
+            Debug.Log("Loading " + directory + fileName);
+
         string line;
-        var file = new StreamReader(directory + fileNames.Last());
+        var file = new StreamReader(directory + fileName);
         while ((line = file.ReadLine()) != null)
         {
             var substrings = line.Split(',');
             substrings[0] = "";
             var names = substrings[1].Split(':');
             var objectName = names[1].Replace("\"", "");
-
             if (objectName == this.gameObject.name) continue;
-            if (!controllableMaster.RegisteredControllables.ContainsKey(objectName)) continue;
-
+            if (!controllableMaster.RegisteredControllables.ContainsKey(objectName))
+            {
+                if (debugOSC)
+                    Debug.Log("Nothing registered in ControllableMaster");
+                continue;
+            }
 
             for (var i = 2; i < substrings.Length; i++)
             {
                 var propInfoInFile = substrings[i].Split(':');
                 var propertyNameInFile = propInfoInFile[0].Replace("\"", "");
-                    
+                
                 foreach (var propInObject in controllableMaster.RegisteredControllables[objectName].Properties)
                 {
                     if (propInObject.Key == propertyNameInFile)
                     {
-                        Debug.Log("Setting " + propInObject.Key + " with " + propInfoInFile[1]);
+                        if (debugOSC)
+                            Debug.Log("Setting " + propInObject.Key + " with " + propInfoInFile[1]);
 
+                        //TODO Vector3
                         var objs = new List<object> {propInfoInFile[1]};
 
                         controllableMaster.RegisteredControllables[objectName]
@@ -85,6 +134,13 @@ public class IOManager : Controllable
             }
         }
         file.Close();
-        Debug.Log("Done.");
+        if (debugOSC)
+            Debug.Log("Done.");
+    }
+
+    void OnApplicationQuit()
+    {
+        fileName = "preset.tmp";
+        save();
     }
 }

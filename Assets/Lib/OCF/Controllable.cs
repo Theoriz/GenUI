@@ -3,6 +3,7 @@ using System.Collections;
 using System.Reflection;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 
 public class Controllable : MonoBehaviour
@@ -16,7 +17,7 @@ public class Controllable : MonoBehaviour
     public delegate void ValueChangedEvent(string name);
     public event ValueChangedEvent valueChanged;
 
-    protected void init()
+    void Awake()
     {
         //PROPERTIES
         Properties = new List<KeyValuePair<string, FieldInfo>>();
@@ -57,7 +58,7 @@ public class Controllable : MonoBehaviour
     public void setProp(string property, List<object> values)
     {
         
-        if (Properties == null || Methods == null) init();
+     //   if (Properties == null || Methods == null) init();
 
         FieldInfo info = getPropInfoForAddress(property);
         if (info != null)
@@ -116,7 +117,10 @@ public class Controllable : MonoBehaviour
        if (valueChanged != null && !silent) valueChanged(property);
     }
 
-
+    protected void RaiseEventValueChanged(string property)
+    {
+        if (valueChanged != null) valueChanged(property);
+    }
 
 
     public void setMethodProp(MethodInfo info, string property, List<object> values)
@@ -271,4 +275,14 @@ public class Controllable : MonoBehaviour
         return null;
     }
 
+    //void OnEnable()
+    //{
+    //    if(controllableMaster.isReady)
+    //        controllableMaster.Register(GetComponent<CubeControl>());
+    //}
+
+    //void OnDisable()
+    //{
+    //    controllableMaster.UnRegister(this);
+    //}
 }

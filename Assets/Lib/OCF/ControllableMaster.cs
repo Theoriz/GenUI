@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class ControllableMaster : MonoBehaviour
 {
+    public bool debug;
+    private bool isReadyBool;
     public OSCMaster OscMaster;
 
     public Dictionary<string, Controllable> RegisteredControllables;
@@ -15,11 +17,16 @@ public class ControllableMaster : MonoBehaviour
     public delegate void ControllableRemovedEvent(Controllable controllable);
     public event ControllableRemovedEvent controllableRemoved;
 
+    public bool isReady()
+    {
+        return isReadyBool;
+    }
     // Use this for initialization
     void Awake()
     {
         RegisteredControllables = new Dictionary<string, Controllable>();
         OscMaster.valueUpdateReady += UpdateValue;
+        isReadyBool = true;
     }
 
     public void Register(Controllable candidate)
@@ -28,7 +35,8 @@ public class ControllableMaster : MonoBehaviour
         {
             RegisteredControllables.Add(candidate.id, candidate);
             if (controllableAdded != null) controllableAdded(candidate);
-            Debug.Log("Added " + candidate.id);
+            if(debug)
+                Debug.Log("Added " + candidate.id);
         }
         else
         {

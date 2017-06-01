@@ -105,7 +105,7 @@ public class UIMaster : MonoBehaviour
         
         target.valueChanged += (name) =>
         {
-            Debug.Log("Fired value changed : " + name + "and I am " + property.Name);
+           // Debug.Log("Fired value changed : " + name + " and I am " + property.Name);
             if (name == property.Name)
             {
                 newDropdown.GetComponent<Dropdown>().ClearOptions();
@@ -131,7 +131,7 @@ public class UIMaster : MonoBehaviour
         });
         target.valueChanged += (name) =>
         {
-            Debug.Log("Fired value changed : " + name);
+           // Debug.Log("Fired value changed : " + name);
             if (name == property.Name)
                 newSlider.GetComponent<Slider>().value = (float)target.getPropInfoForAddress(name).GetValue(target);
         };
@@ -151,7 +151,7 @@ public class UIMaster : MonoBehaviour
         });
         target.valueChanged += (name) =>
         {
-            Debug.Log("Fired value changed : " + name);
+           // Debug.Log("Fired value changed : " + name);
             if (name == property.Name)
             {
                 //Specific to the prefab architecture
@@ -182,7 +182,7 @@ public class UIMaster : MonoBehaviour
         });
         target.valueChanged += (name) =>
         {
-            Debug.Log("Fired value changed : " + name);
+            //Debug.Log("Fired value changed : " + name);
             if (name == property.Name)
                 newCheckbox.GetComponent<Toggle>().isOn = (bool)target.getPropInfoForAddress(name).GetValue(target);
         };
@@ -235,7 +235,7 @@ public class UIMaster : MonoBehaviour
         cameraComponent.backgroundColor = Color.black;
         cameraComponent.clearFlags = CameraClearFlags.SolidColor;
         cameraComponent.orthographic = true;
-        cameraComponent.near = 0.0f;
+        cameraComponent.nearClipPlane = 0.0f;
         cameraComponent.cullingMask = (1 << 5);
         cameraComponent.backgroundColor = Color.white;
         //Position in display
