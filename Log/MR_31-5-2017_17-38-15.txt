@@ -1,0 +1,3 @@
+{"controllableMaster":{"instanceID":9676},"id":"IO","debugOSC":false,"fileNames":["MR_31-5-2017_17-26-43.txt"]}
+{"controllableMaster":{"instanceID":9676},"id":"Cube1","debugOSC":false,"nombreInt":8,"nombreFloat":79.30000305175781,"rotate":true,"speed":100.0,"pos":{"x":-3.4100000858306886,"y":0.0,"z":0.0}}
+{"controllableMaster":{"instanceID":9676},"id":"Cube2","debugOSC":false,"nombreInt":12,"nombreFloat":12.300000190734864,"rotate":true,"speed":87.0041732788086,"pos":{"x":4.090000152587891,"y":0.0,"z":0.0}}

@@ -125,7 +125,7 @@ namespace UnityOSC
                        
                     }catch (Exception e)
                     {
-                        UnityEngine.Debug.LogWarning("OSCServer collection problem " + e.Message);
+                        UnityEngine.Debug.LogError("OSCServer collection problem " + e.Message);
                         UnityEngine.Debug.LogWarning(e.StackTrace);
                         _lastReceivedPacket.RemoveRange(0, i);
                         Close();

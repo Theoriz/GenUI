@@ -3,35 +3,40 @@ using System.Collections;
 using System.Reflection;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
-public class OSCControllable : MonoBehaviour {
-
-
-    public string oscName;
+public class Controllable : MonoBehaviour
+{
+    public ControllableMaster controllableMaster;
+    public string id;
     public bool debugOSC;
-    public List<KeyValuePair<string,FieldInfo>> oscProperties;
-    public List<KeyValuePair<string, MethodInfo>> oscMethods;
+    public List<KeyValuePair<string,FieldInfo>> Properties;
+    public List<KeyValuePair<string, MethodInfo>> Methods;
 
-    void init()
+    public delegate void ValueChangedEvent(string name);
+    public event ValueChangedEvent valueChanged;
+
+    protected void init()
     {
         //PROPERTIES
-        oscProperties = new List<KeyValuePair<string, FieldInfo>>();
+        Properties = new List<KeyValuePair<string, FieldInfo>>();
         
         Type t = GetType();
         FieldInfo[] objectFields = t.GetFields(BindingFlags.Instance | BindingFlags.Public);
+
         for (int i = 0; i < objectFields.Length; i++)
         {
             FieldInfo info = objectFields[i];
             OSCProperty attribute = Attribute.GetCustomAttribute(info, typeof(OSCProperty)) as OSCProperty;
             if (attribute != null)
             {
-                oscProperties.Add(new KeyValuePair<string, FieldInfo>(attribute.address,info));
+                Properties.Add(new KeyValuePair<string, FieldInfo>(attribute.address,info));
             }
         }
 
         //METHODS
 
-        oscMethods = new List<KeyValuePair<string, MethodInfo>>();
+        Methods = new List<KeyValuePair<string, MethodInfo>>();
 
         MethodInfo[] methodFields = t.GetMethods(BindingFlags.Instance | BindingFlags.Public);
 
@@ -41,7 +46,8 @@ public class OSCControllable : MonoBehaviour {
             OSCMethod attribute = Attribute.GetCustomAttribute(info, typeof(OSCMethod)) as OSCMethod;
             if (attribute != null)
             {
-                oscMethods.Add(new KeyValuePair<string, MethodInfo>(attribute.address, info));
+               // Debug.Log("Added a new method : " + attribute.address);
+                Methods.Add(new KeyValuePair<string, MethodInfo>(attribute.address, info));
             }          
         }
     }
@@ -51,7 +57,7 @@ public class OSCControllable : MonoBehaviour {
     public void setProp(string property, List<object> values)
     {
         
-        if (oscProperties == null || oscMethods == null) init();
+        if (Properties == null || Methods == null) init();
 
         FieldInfo info = getPropInfoForAddress(property);
         if (info != null)
@@ -70,7 +76,7 @@ public class OSCControllable : MonoBehaviour {
 
 
 
-   public void setFieldProp(FieldInfo info, string property, List<object> values)
+   public void setFieldProp(FieldInfo info, string property, List<object> values, bool silent = false)
    { 
         string typeString = info.FieldType.ToString();
 
@@ -81,7 +87,8 @@ public class OSCControllable : MonoBehaviour {
         if (typeString == "System.Single")
         {
             if(values.Count >= 1) info.SetValue(this, getFloat(values[0]));
-        }else if(typeString == "System.Boolean")
+        }
+        else if(typeString == "System.Boolean")
         {
             if (values.Count >= 1) info.SetValue(this, getBool(values[0]));
         }
@@ -106,6 +113,7 @@ public class OSCControllable : MonoBehaviour {
            // Debug.Log("String received : " + values.ToString());
             info.SetValue(this, values[0].ToString());
         }
+       if (valueChanged != null && !silent) valueChanged(property);
     }
 
 
@@ -203,13 +211,18 @@ public class OSCControllable : MonoBehaviour {
         
         return float.NaN;
     }
-
+        
     public int getInt(object value)
     {
         Type t = value.GetType();
         if (t == typeof(float)) return (int)((float)value);
         if (t == typeof(int)) return (int)value;
-        if (t == typeof(string)) return int.Parse((string)value);
+        if (t == typeof(string))
+        {
+            var result = 0;
+            int.TryParse((string)value, out result);
+            return result;
+        }
         if (t == typeof(bool)) return (bool)value ? 1 : 0;
 
         return 0;
@@ -220,7 +233,16 @@ public class OSCControllable : MonoBehaviour {
         Type t = value.GetType();
         if (t == typeof(float)) return (float)value >= 1;
         if (t == typeof(int)) return (int)value >= 1;
-        if (t == typeof(string)) return int.Parse((string)value) >= 1;
+        if (t == typeof(string))
+        {
+            if((string)value == "true") 
+                return true;
+
+            if ((string)value == "false")
+                return false;
+
+            return int.Parse((string)value) >= 1;
+        }
         if (t == typeof(bool)) return (bool)value;
 
         return false;
@@ -228,7 +250,7 @@ public class OSCControllable : MonoBehaviour {
 
     public FieldInfo getPropInfoForAddress(string address)
     {
-        foreach(KeyValuePair<string, FieldInfo> p in oscProperties)
+        foreach(KeyValuePair<string, FieldInfo> p in Properties)
         {
             if(p.Key == address)
             {
@@ -241,18 +263,12 @@ public class OSCControllable : MonoBehaviour {
 
     public MethodInfo getMethodInfoForAddress(string address)
     {
-        foreach (KeyValuePair<string, MethodInfo> p in oscMethods)
+        foreach (KeyValuePair<string, MethodInfo> p in Methods)
         {
-            if (p.Key == address)
-            {
-                return p.Value;
-            }
+            if (p.Key == address)  return p.Value;
         }
 
         return null;
     }
-
-    public virtual void Start() { }
-    public virtual void Update() { }
 
 }

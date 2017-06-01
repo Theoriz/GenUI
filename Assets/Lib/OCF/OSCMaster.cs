@@ -1,34 +1,57 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
+using System.Security;
 using UnityOSC;
 
 
-public class OSCMaster : MonoBehaviour {
-
+public class OSCMaster : MonoBehaviour
+{
     OSCServer server;
     public int port = 6000;
     public bool debugMessage;
 
-    OSCControllable[] controllables;
-    
-	// Use this for initialization
-	void Awake () {
+    Controllable[] controllables;
+
+    public delegate void ValueUpdateReadyEvent(string target, string property, List<object> objects);
+    public event ValueUpdateReadyEvent valueUpdateReady;
+
+    // Use this for initialization
+    void Awake()
+    {
         server = new OSCServer(port);
         server.PacketReceivedEvent += packetReceived;
         server.Connect();
 
-        controllables = FindObjectsOfType<OSCControllable>();
-        foreach(OSCControllable c in controllables)
-        {
-            Debug.Log("Add controllable : " + c.oscName);
-        }
-	}
+        //checkAndAddControllables();
+    }
+
+    //void checkAndAddControllables()
+    //{
+    //    controllables = FindObjectsOfType<Controllable>();
+    //    foreach (Controllable c in controllables)
+    //    {
+    //        Debug.Log("Add controllable : " + c.id);
+    //    }
+    //}
 
     void packetReceived(OSCPacket p)
     {
 
-        OSCMessage m = (OSCMessage)p;
-        
+        if (p.IsBundle())
+        {
+            foreach (OSCMessage m in p.Data)
+            {
+                processMessage(m);
+            }
+        }else processMessage((OSCMessage)p);
+        Debug.Log("Packet processed");
+    }
+
+    void processMessage(OSCMessage m)
+    {
+
         string[] addSplit = m.Address.Split(new char[] { '/' });
 
         if (addSplit.Length != 3)
@@ -40,29 +63,35 @@ public class OSCMaster : MonoBehaviour {
         string target = addSplit[1];
         string property = addSplit[2];
 
-        if(debugMessage) Debug.Log("Message received for Target : " + target + ", property = " + property);
+        if (debugMessage) Debug.Log("Message received for Target : " + target + ", property = " + property);
 
-        OSCControllable c = getControllableForID(target);
-        if (c == null) return;
-        
-        
-        c.setProp(property, m.Data);
+        valueUpdateReady(target, property, m.Data);
+        //controllableMaster.UpdateValue(target, property, m.Data);
+        //Controllable c = getControllableForID(target);
+        //if (c == null)
+        //{
+        //    checkAndAddControllables();
+        //    c = getControllableForID(target);
+        //    if (c == null) return;
+        //}
+        //c.setProp(property, m.Data);
     }
 
-    OSCControllable getControllableForID(string id)
+    //Controllable getControllableForID(string id)
+    //{
+    //    foreach (Controllable c in controllables)
+    //    {
+    //        if (c.id == id) return c;
+    //    }
+    //    return null;
+    //}
+
+    // Update is called once per frame
+    void Update()
     {
-        foreach(OSCControllable c in controllables)
-        {
-            if (c.oscName == id) return c;
-        }
-        return null;
-    }
-	
-	// Update is called once per frame
-	void Update () {
-        Debug.Log("update");
+      //  Debug.Log("update");
         server.Update();
-	}
+    }
 
 
     void OnDestroy()

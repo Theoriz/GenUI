@@ -2,14 +2,22 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CubeControl : OSCControllable
+public class CubeControl : Controllable
 {
+    [OSCProperty("nombreInt")]
+    public int nombreInt;
+
+    [OSCProperty("nombreFloat")]
+    public float nombreFloat;
+
+    [OSCProperty("rotate")]
+    public bool rotate;
 
     [OSCProperty("speed")]
     [Range(0,100)]
-    public float speed = 0;
+    public float speed;
     
-    [OSCProperty("position")]
+    [OSCProperty("pos")]
     public Vector3 pos;
 
     [OSCMethod("setColor")]
@@ -18,16 +26,34 @@ public class CubeControl : OSCControllable
         GetComponent<Renderer>().material.color = col;
     }
 
-	// Use this for initialization
-	public override void Start () {
-		
-	}
+    [OSCMethod("setColorRed")]
+    public void setColorRed()//Color col)
+    {
+        GetComponent<Renderer>().material.color = Color.red;//col;
+    }
+
+    [OSCMethod("setColorWhite")]
+    public void setColorWhite()//Color col)
+    {
+        GetComponent<Renderer>().material.color = Color.white;//col;
+    }
+
+    // Use this for initialization
+    void Start ()
+	{
+	    init();
+        id = gameObject.name;
+        controllableMaster.Register(GetComponent<CubeControl>());
+    }
 
     // Update is called once per frame
-    public override void Update () {
-        transform.position = pos;
-        transform.Rotate(Vector3.up, Time.deltaTime * speed);
-	}
+    void Update ()
+    {
+         pos = transform.position;
+         if(rotate)
+            transform.Rotate(Vector3.up, Time.deltaTime * speed);
 
-  
+         Debug.Log("Nombre (int) : " + nombreInt);
+         Debug.Log("Nombre (float) : " + nombreFloat);
+    }
 }

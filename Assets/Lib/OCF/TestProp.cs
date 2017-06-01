@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class TestProp : OSCControllable
+public class TestProp : Controllable
 {
     [OSCProperty("rotation")]
     public float rotationSpeed;
@@ -16,11 +16,11 @@ public class TestProp : OSCControllable
     public Vector3 pos;
 
     // Use this for initialization
-    public override void Start () {
+    void Start () {
 	}
 
     // Update is called once per frame
-    public override void Update () {
+    void Update () {
         transform.localScale = Vector3.one * (big ? 3 : 1);
         transform.Rotate(Vector3.up, rotationSpeed);
         transform.localPosition = pos;
