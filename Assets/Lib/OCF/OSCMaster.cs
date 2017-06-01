@@ -23,19 +23,7 @@ public class OSCMaster : MonoBehaviour
         server = new OSCServer(port);
         server.PacketReceivedEvent += packetReceived;
         server.Connect();
-
-        //checkAndAddControllables();
     }
-
-    //void checkAndAddControllables()
-    //{
-    //    controllables = FindObjectsOfType<Controllable>();
-    //    foreach (Controllable c in controllables)
-    //    {
-    //        Debug.Log("Add controllable : " + c.id);
-    //    }
-    //}
-
     void packetReceived(OSCPacket p)
     {
 
@@ -66,25 +54,7 @@ public class OSCMaster : MonoBehaviour
         if (debugMessage) Debug.Log("Message received for Target : " + target + ", property = " + property);
 
         valueUpdateReady(target, property, m.Data);
-        //controllableMaster.UpdateValue(target, property, m.Data);
-        //Controllable c = getControllableForID(target);
-        //if (c == null)
-        //{
-        //    checkAndAddControllables();
-        //    c = getControllableForID(target);
-        //    if (c == null) return;
-        //}
-        //c.setProp(property, m.Data);
     }
-
-    //Controllable getControllableForID(string id)
-    //{
-    //    foreach (Controllable c in controllables)
-    //    {
-    //        if (c.id == id) return c;
-    //    }
-    //    return null;
-    //}
 
     // Update is called once per frame
     void Update()

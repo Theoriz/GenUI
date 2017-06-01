@@ -16,7 +16,7 @@ public class ControllableMaster : MonoBehaviour
     public event ControllableRemovedEvent controllableRemoved;
 
     // Use this for initialization
-    void Start()
+    void Awake()
     {
         RegisteredControllables = new Dictionary<string, Controllable>();
         OscMaster.valueUpdateReady += UpdateValue;
@@ -34,9 +34,6 @@ public class ControllableMaster : MonoBehaviour
         {
             Debug.LogWarning("ControllerMaster already contains a Controllable named " + candidate.id);
         }
-        
-        
-        //GameObject.Find("OSC").GetComponent<UIMaster>().CreateUI();
     }
 
     public void UnRegister(Controllable candidate)

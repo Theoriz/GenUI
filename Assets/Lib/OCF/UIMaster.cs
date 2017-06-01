@@ -23,7 +23,7 @@ public class UIMaster : MonoBehaviour
     private Dictionary<string, GameObject> _panels;
 
     // Use this for initialization
-    void Start()
+    void Awake()
     {
         _panels = new Dictionary<string, GameObject>();
         CreateUICamera();
@@ -41,9 +41,10 @@ public class UIMaster : MonoBehaviour
 
     public void CreateUI(Controllable newControllable)
     {
+
         //First we create a panel for the controllable
         var newPanel = Instantiate(PanelPrefab);
-        newPanel.transform.parent = _rootCanvas.transform;
+        newPanel.transform.SetParent(_rootCanvas.transform);
         newPanel.GetComponentInChildren<Text>().text = newControllable.id;
         newPanel.GetComponent<RectTransform>().localScale = new Vector3(1.0f, 1.0f, 1.0f);
         _panels.Add(newControllable.id, newPanel);
@@ -79,15 +80,17 @@ public class UIMaster : MonoBehaviour
             {
                 CreateDropDown(newControllable, property.Value);
             }
-            Debug.Log("Property type : " + propertyType + " of " + property.Key);
+            //Debug.Log("Property type : " + propertyType + " of " + property.Key);
         }
+
+        //black magic to make added UI visible
         _rootCanvas.GetComponent<Canvas>().planeDistance += 1;
     }
 
     private void CreateDropDown(Controllable target, FieldInfo property)
     {
         var newDropdown = Instantiate(DropdownPrefab);
-        newDropdown.transform.parent = _panels.Last().Value.transform;
+        newDropdown.transform.SetParent(_panels.Last().Value.transform);
         newDropdown.GetComponent<Dropdown>().AddOptions((List<string>)target.getPropInfoForAddress(property.Name).GetValue(target));
         newDropdown.GetComponent<Dropdown>().onValueChanged.AddListener((value) =>
         {
@@ -117,7 +120,7 @@ public class UIMaster : MonoBehaviour
         //Debug.Log("Range : " + rangeAttribut.min + ";" + rangeAttribut.max);
         var newSlider = Instantiate(SliderPrefab);
         newSlider.GetComponentInChildren<Text>().text = property.Name;
-        newSlider.transform.parent = _panels.Last().Value.transform;
+        newSlider.transform.SetParent(_panels.Last().Value.transform);
         newSlider.GetComponent<Slider>().maxValue = rangeAttribut.max;
         newSlider.GetComponent<Slider>().minValue = rangeAttribut.min;
         newSlider.GetComponent<Slider>().onValueChanged.AddListener((value) =>
@@ -139,7 +142,7 @@ public class UIMaster : MonoBehaviour
     {
         var newInput = Instantiate(InputPrefab);
         newInput.GetComponent<Text>().text = property.Name;
-        newInput.transform.parent = _panels.Last().Value.transform;
+        newInput.transform.SetParent(_panels.Last().Value.transform);
         newInput.GetComponentInChildren<InputField>().onEndEdit.AddListener((value) =>
         {
             var list = new List<object>();
@@ -170,7 +173,7 @@ public class UIMaster : MonoBehaviour
     {
         var newCheckbox = Instantiate(CheckboxPrefab);
         newCheckbox.GetComponentInChildren<Text>().text = property.Name;
-        newCheckbox.transform.parent = _panels.Last().Value.transform;
+        newCheckbox.transform.SetParent(_panels.Last().Value.transform);
         newCheckbox.GetComponent<Toggle>().onValueChanged.AddListener((value) =>
         {
             var list = new List<object>();
@@ -192,7 +195,7 @@ public class UIMaster : MonoBehaviour
         if (method.GetParameters().Length == 0)
         {
             var newButton = Instantiate(MethodButtonPrefab);
-            newButton.transform.parent = _panels.Last().Value.transform;
+            newButton.transform.SetParent(_panels.Last().Value.transform);
             newButton.GetComponent<RectTransform>().localScale = new Vector3(1.0f, 1.0f, 1.0f);
             newButton.GetComponentInChildren<Text>().text = method.Name;
             newButton.GetComponent<Button>().onClick.AddListener(() =>
@@ -228,7 +231,7 @@ public class UIMaster : MonoBehaviour
         _camera = new GameObject();
         _camera.name = "UICamera";
         var cameraComponent = _camera.AddComponent<Camera>();
-        //Color
+        //camera settings
         cameraComponent.backgroundColor = Color.black;
         cameraComponent.clearFlags = CameraClearFlags.SolidColor;
         cameraComponent.orthographic = true;
