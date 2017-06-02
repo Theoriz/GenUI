@@ -11,6 +11,7 @@ public class UIMaster : MonoBehaviour
 {
     public ControllableMaster TheControllableMaster;
 
+    public GameObject UICanvasPrefab;
     public GameObject PanelPrefab;
     public GameObject MethodButtonPrefab;
     public GameObject SliderPrefab;
@@ -214,16 +215,12 @@ public class UIMaster : MonoBehaviour
 
     private void CreateRootCanvas()
     {
-        _rootCanvas = new GameObject();
-        _rootCanvas.name = "UICanvas";
-        _rootCanvas.transform.parent = _camera.transform;
-        _rootCanvas.layer = 5;
-        var canvasComponent = _rootCanvas.AddComponent<Canvas>();
-        _rootCanvas.AddComponent<VerticalLayoutGroup>();
+        _rootCanvas = Instantiate(UICanvasPrefab);
+
+        var canvasComponent = _rootCanvas.GetComponent<Canvas>();
         canvasComponent.renderMode = RenderMode.ScreenSpaceCamera;
         canvasComponent.worldCamera = _camera.GetComponent<Camera>();
-
-        _rootCanvas.AddComponent<GraphicRaycaster>();
+        _rootCanvas.transform.SetParent(_camera.transform);
     }
 
     private void CreateUICamera()
