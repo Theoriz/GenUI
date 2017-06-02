@@ -120,6 +120,7 @@ public class IOManager : Controllable
                 {
                     if (propInObject.Key == propertyNameInFile)
                     {
+                        propInfoInFile[1] = propInfoInFile[1].Replace("}", "");
                         if (debugOSC)
                             Debug.Log("Setting " + propInObject.Key + " with " + propInfoInFile[1]);
 
