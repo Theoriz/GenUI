@@ -16,7 +16,7 @@ public class CubeControl : Controllable
     [OSCProperty("speed")]
     [Range(0,100)]
     public float speed;
-    
+
     [OSCProperty("pos")]
     public Vector3 pos;
 
@@ -41,6 +41,7 @@ public class CubeControl : Controllable
     // Use this for initialization
     void Start ()
 	{
+        base.init();
         controllableMaster.Register(GetComponent<CubeControl>());
     }
 

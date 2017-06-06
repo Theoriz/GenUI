@@ -21,7 +21,7 @@ public class Controllable : MonoBehaviour
     {
         //PROPERTIES
         Properties = new List<KeyValuePair<string, FieldInfo>>();
-        
+
         Type t = GetType();
         FieldInfo[] objectFields = t.GetFields(BindingFlags.Instance | BindingFlags.Public);
 
@@ -49,11 +49,11 @@ public class Controllable : MonoBehaviour
             {
                // Debug.Log("Added a new method : " + attribute.address);
                 Methods.Add(new KeyValuePair<string, MethodInfo>(attribute.address, info));
-            }          
+            }
         }
     }
 
-    void Start()
+    public void init()
     {
         var masters = GameObject.FindObjectsOfType<ControllableMaster>();//
         if (masters.Length > 1 )
@@ -73,7 +73,7 @@ public class Controllable : MonoBehaviour
 
     public void setProp(string property, List<object> values)
     {
-        
+
      //   if (Properties == null || Methods == null) init();
 
         FieldInfo info = getPropInfoForAddress(property);
@@ -94,7 +94,7 @@ public class Controllable : MonoBehaviour
 
 
    public void setFieldProp(FieldInfo info, string property, List<object> values, bool silent = false)
-   { 
+   {
         string typeString = info.FieldType.ToString();
 
         if(debugOSC) Debug.Log("OSC Field IN TYPE : " + typeString +" " + values[0].ToString());
@@ -151,7 +151,7 @@ public class Controllable : MonoBehaviour
         {
             string typeString = info.GetParameters()[i].ParameterType.ToString();
             //Debug.Log("OSC IN Method, arg "+i+" TYPE : " + typeString + ", num values in OSC Message " + values.Count);
-            
+
             if (typeString == "System.Single")
             {
                 if (values.Count >= valueIndex + 1)
@@ -228,10 +228,10 @@ public class Controllable : MonoBehaviour
         if (t == typeof(int)) return (float)((int)value);
         if (t == typeof(string)) return float.Parse((string)value);
         if (t == typeof(bool)) return (bool)value ? 1 : 0;
-        
+
         return float.NaN;
     }
-        
+
     public int getInt(object value)
     {
         Type t = value.GetType();
@@ -255,7 +255,7 @@ public class Controllable : MonoBehaviour
         if (t == typeof(int)) return (int)value >= 1;
         if (t == typeof(string))
         {
-            if((string)value == "true") 
+            if((string)value == "true")
                 return true;
 
             if ((string)value == "false")
@@ -274,7 +274,7 @@ public class Controllable : MonoBehaviour
         {
             if(p.Key == address)
             {
-                return p.Value; 
+                return p.Value;
             }
         }
 
