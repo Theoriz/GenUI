@@ -227,6 +227,7 @@ public class UIMaster : MonoBehaviour
     {
         _camera = new GameObject();
         _camera.name = "UICamera";
+        _camera.transform.SetParent(this.transform);
         var cameraComponent = _camera.AddComponent<Camera>();
         //camera settings
         cameraComponent.backgroundColor = Color.black;

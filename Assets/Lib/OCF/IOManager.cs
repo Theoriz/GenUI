@@ -10,7 +10,7 @@ public class IOManager : Controllable
     private string fileName;
     private bool loaded;
 
-    private string directory = "Log\\";
+    private string directory = "Presets\\";
 
     [OSCProperty("fileNames")]
     public List<string> fileNames;
@@ -20,6 +20,7 @@ public class IOManager : Controllable
        // init();
         id = gameObject.name;
         fileNames = new List<string>();
+        Directory.CreateDirectory(directory);
         ReadFileList();
         controllableMaster.Register(GetComponent<IOManager>());
     }
