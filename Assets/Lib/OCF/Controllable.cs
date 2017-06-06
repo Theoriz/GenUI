@@ -53,6 +53,22 @@ public class Controllable : MonoBehaviour
         }
     }
 
+    void Start()
+    {
+        var masters = GameObject.FindObjectsOfType<ControllableMaster>();//
+        if (masters.Length > 1 )
+            Debug.LogWarning("There are more than one controllable master, do you have several OSCControlFramework in your scene ?");
+
+        if (masters.Length == 0)
+        {
+            Debug.LogError(
+                "No controllable master found, do you have an instance of OSCControlFramework in your scene ?");
+            return;
+        }
+        controllableMaster = masters[0];
+        id = gameObject.name;
+    }
+
 
 
     public void setProp(string property, List<object> values)

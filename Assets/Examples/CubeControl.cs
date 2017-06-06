@@ -41,8 +41,6 @@ public class CubeControl : Controllable
     // Use this for initialization
     void Start ()
 	{
-	    //init();
-        id = gameObject.name;
         controllableMaster.Register(GetComponent<CubeControl>());
     }
 
