@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class IOManager : Controllable
 {
@@ -49,7 +50,11 @@ public class IOManager : Controllable
         {
             var substrings = t.Split('\\');
             if (substrings[1] != "preset.tmp")
-                fileNames.Add(substrings[1]);
+            {
+                var subsubstrings = substrings[1].Split('_');
+                if(subsubstrings[0] == SceneManager.GetActiveScene().name)
+                    fileNames.Add(substrings[1]);
+            }
         }
         RaiseEventValueChanged("fileNames");
     }
@@ -58,7 +63,7 @@ public class IOManager : Controllable
     public void savePreset()
     {
         var date = DateTime.Today.Day + "-" + DateTime.Today.Month + "-" + DateTime.Today.Year + "_" + DateTime.Now.Hour + "-" + DateTime.Now.Minute + "-" + DateTime.Now.Second;
-        fileName = "MR_" + date + ".txt";
+        fileName = SceneManager.GetActiveScene().name + "_" + date + ".txt";
         save();
     }
 
