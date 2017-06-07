@@ -291,14 +291,8 @@ public class Controllable : MonoBehaviour
         return null;
     }
 
-    //void OnEnable()
-    //{
-    //    if(controllableMaster.isReady)
-    //        controllableMaster.Register(GetComponent<CubeControl>());
-    //}
-
-    //void OnDisable()
-    //{
-    //    controllableMaster.UnRegister(this);
-    //}
+    void OnDestroy()
+    {
+        controllableMaster.UnRegister(GetComponent<Controllable>());
+    }
 }
