@@ -71,7 +71,7 @@ public class UIMaster : MonoBehaviour
             {
                 CreateCheckbox(newControllable, property.Value);
             }
-            if (propertyType.ToString() == "System.Int32" || propertyType.ToString() == "System.Float")
+            if (propertyType.ToString() == "System.Int32" || propertyType.ToString() == "System.Float" || propertyType.ToString() == "System.String")
             {
                 CreateInput(newControllable, property.Value);
             }
@@ -155,14 +155,8 @@ public class UIMaster : MonoBehaviour
             if (name == property.Name)
             {
                 //Specific to the prefab architecture
-                if(property.FieldType.ToString() == "System.Single")
                     newInput.transform.GetChild(0).Find("Placeholder").gameObject.GetComponent<Text>().text = "" + 
-                    (float) target.getPropInfoForAddress(name).GetValue(target);
-                else
-                {
-                    newInput.transform.GetChild(0).Find("Placeholder").gameObject.GetComponent<Text>().text = "" +
-                     (int)target.getPropInfoForAddress(name).GetValue(target);
-                }
+                    Convert.ChangeType(target.getPropInfoForAddress(name).GetValue(target), property.FieldType);
             }
         };
         newInput.transform.GetChild(0).Find("Placeholder").gameObject.GetComponent<Text>().text = target.getPropInfoForAddress(property.Name).GetValue(target).ToString();

@@ -10,6 +10,9 @@ public class CubeControl : Controllable
     [OSCProperty("nombreFloat")]
     public float nombreFloat;
 
+    [OSCProperty("myString")]
+    public string myString;
+
     [OSCProperty("rotate")]
     public bool rotate;
 
