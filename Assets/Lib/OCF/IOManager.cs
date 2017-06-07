@@ -43,7 +43,7 @@ public class IOManager : Controllable
         }
     }
 
-    private void ReadFileList()
+    public void ReadFileList()
     {
         fileNames.Clear();
         foreach (var t in Directory.GetFiles(directory))
