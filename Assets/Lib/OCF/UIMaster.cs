@@ -8,8 +8,6 @@ using UnityEngine.UI;
 
 public class UIMaster : MonoBehaviour
 {
-    public ControllableMaster TheControllableMaster;
-
     public GameObject UICanvasPrefab;
     public GameObject PanelPrefab;
     public GameObject MethodButtonPrefab;
@@ -29,8 +27,8 @@ public class UIMaster : MonoBehaviour
         CreateUICamera();
         CreateRootCanvas();
 
-        TheControllableMaster.controllableAdded += CreateUI;
-        TheControllableMaster.controllableRemoved += RemoveUI;
+        ControllableMaster.controllableAdded += CreateUI;
+        ControllableMaster.controllableRemoved += RemoveUI;
     }
 
     public void RemoveUI(Controllable dyingControllable)

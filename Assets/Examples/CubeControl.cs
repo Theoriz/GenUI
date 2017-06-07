@@ -4,48 +4,52 @@ using UnityEngine;
 
 public class CubeControl : Controllable
 {
-    [OSCProperty("nombreInt")]
+    [OSCProperty]
     public int nombreInt;
 
-    [OSCProperty("nombreFloat")]
+    [OSCProperty]
     public float nombreFloat;
 
-    [OSCProperty("myString")]
+    [OSCProperty]
     public string myString;
 
-    [OSCProperty("rotate")]
+    [OSCProperty]
     public bool rotate;
 
-    [OSCProperty("speed")]
+    [OSCProperty]
     [Range(0,100)]
     public float speed;
 
-    [OSCProperty("pos")]
+    [OSCProperty]
     public Vector3 pos;
 
-    [OSCMethod("setColor")]
+    [OSCProperty]
+    public Color cubeColor;
+
+    [OSCMethod]
     public void setColor(Color col)
     {
-        GetComponent<Renderer>().material.color = col;
+        cubeColor = col;
+        GetComponent<Renderer>().material.color = cubeColor;
     }
 
-    [OSCMethod("setColorRed")]
+    [OSCMethod]
     public void setColorRed()//Color col)
     {
-        GetComponent<Renderer>().material.color = Color.red;//col;
+        setColor(Color.red);//col;
     }
 
-    [OSCMethod("setColorWhite")]
+    [OSCMethod]
     public void setColorWhite()//Color col)
     {
-        GetComponent<Renderer>().material.color = Color.white;//col;
+        setColor(Color.white);//col;
     }
 
     // Use this for initialization
     void Start ()
-	{
-        base.init();
-        controllableMaster.Register(GetComponent<CubeControl>());
+    {
+
+        GetComponent<Renderer>().material.color = cubeColor;
     }
 
     // Update is called once per frame
@@ -55,7 +59,7 @@ public class CubeControl : Controllable
          if(rotate)
             transform.Rotate(Vector3.up, Time.deltaTime * speed);
 
-         Debug.Log("Nombre (int) : " + nombreInt);
-         Debug.Log("Nombre (float) : " + nombreFloat);
+         //Debug.Log("Nombre (int) : " + nombreInt);
+         //Debug.Log("Nombre (float) : " + nombreFloat);
     }
 }

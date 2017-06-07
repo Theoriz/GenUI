@@ -5,22 +5,40 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Reflection.Emit;
+using System.Threading;
+
+[Serializable]
+public class ControllableData
+{
+    public string dataID;
+
+    public List<string> nameList;
+    public List<string> valueList;
+
+    public ControllableData()
+    {
+        nameList = new List<string>();
+        valueList = new List<string>();
+
+    }
+}
 
 public class Controllable : MonoBehaviour
 {
-    public ControllableMaster controllableMaster;
     public string id;
     public bool debugOSC;
-    public List<KeyValuePair<string,FieldInfo>> Properties;
-    public List<KeyValuePair<string, MethodInfo>> Methods;
+    public Dictionary<string,FieldInfo> Properties;
+    public Dictionary<string, MethodInfo> Methods;
 
     public delegate void ValueChangedEvent(string name);
     public event ValueChangedEvent valueChanged;
 
+
     void Awake()
     {
         //PROPERTIES
-        Properties = new List<KeyValuePair<string, FieldInfo>>();
+        Properties = new Dictionary<string, FieldInfo>();
 
         Type t = GetType();
         FieldInfo[] objectFields = t.GetFields(BindingFlags.Instance | BindingFlags.Public);
@@ -31,13 +49,13 @@ public class Controllable : MonoBehaviour
             OSCProperty attribute = Attribute.GetCustomAttribute(info, typeof(OSCProperty)) as OSCProperty;
             if (attribute != null)
             {
-                Properties.Add(new KeyValuePair<string, FieldInfo>(attribute.address,info));
+                Properties.Add(info.Name,info);
             }
         }
 
         //METHODS
 
-        Methods = new List<KeyValuePair<string, MethodInfo>>();
+        Methods = new Dictionary<string, MethodInfo>();
 
         MethodInfo[] methodFields = t.GetMethods(BindingFlags.Instance | BindingFlags.Public);
 
@@ -48,25 +66,18 @@ public class Controllable : MonoBehaviour
             if (attribute != null)
             {
                // Debug.Log("Added a new method : " + attribute.address);
-                Methods.Add(new KeyValuePair<string, MethodInfo>(attribute.address, info));
+                Methods.Add(info.Name, info);
             }
         }
+
+        if (id == "") id = gameObject.name;
+        ControllableMaster.Register(this);
     }
 
-    public void init()
-    {
-        var masters = GameObject.FindObjectsOfType<ControllableMaster>();//
-        if (masters.Length > 1 )
-            Debug.LogWarning("There are more than one controllable master, do you have several OSCControlFramework in your scene ?");
 
-        if (masters.Length == 0)
-        {
-            Debug.LogError(
-                "No controllable master found, do you have an instance of OSCControlFramework in your scene ?");
-            return;
-        }
-        controllableMaster = masters[0];
-        id = gameObject.name;
+    void OnDestroy()
+    {
+        ControllableMaster.UnRegister(this);
     }
 
 
@@ -122,7 +133,8 @@ public class Controllable : MonoBehaviour
         }
         else if (typeString == "UnityEngine.Color")
         {
-            if (values.Count >= 4) info.SetValue(this, new Color(getFloat(values[0]), getFloat(values[1]), getFloat(values[2]), getFloat(values[3])));
+            if(values.Count == 1) info.SetValue(this, (Color)values[0]);
+            else if (values.Count >= 4) info.SetValue(this, new Color(getFloat(values[0]), getFloat(values[1]), getFloat(values[2]), getFloat(values[3])));
             else if(values.Count >= 3) info.SetValue(this, new Color(getFloat(values[0]), getFloat(values[1]), getFloat(values[2]),1));
         }
         else if (typeString == "System.String")
@@ -226,7 +238,13 @@ public class Controllable : MonoBehaviour
         Type t = value.GetType();
         if (t == typeof(float)) return (float)value;
         if (t == typeof(int)) return (float)((int)value);
-        if (t == typeof(string)) return float.Parse((string)value);
+        if (t == typeof(string))
+        {
+            float result = 0;
+            float.TryParse((string)value, out result);
+            return result;
+        }
+
         if (t == typeof(bool)) return (bool)value ? 1 : 0;
 
         return float.NaN;
@@ -239,7 +257,7 @@ public class Controllable : MonoBehaviour
         if (t == typeof(int)) return (int)value;
         if (t == typeof(string))
         {
-            var result = 0;
+            int result = 0;
             int.TryParse((string)value, out result);
             return result;
         }
@@ -255,13 +273,17 @@ public class Controllable : MonoBehaviour
         if (t == typeof(int)) return (int)value >= 1;
         if (t == typeof(string))
         {
-            if((string)value == "true")
+            string s = ((string) value).ToLower();
+            if (s == "true" || s == "1")
                 return true;
 
-            if ((string)value == "false")
+            if (s == "false" || s == "0")
                 return false;
 
-            return int.Parse((string)value) >= 1;
+            int result = 0;
+            int.TryParse((string)value, out result);
+
+            return result >= 1;
         }
         if (t == typeof(bool)) return (bool)value;
 
@@ -291,8 +313,158 @@ public class Controllable : MonoBehaviour
         return null;
     }
 
-    void OnDestroy()
+    public object getData()
     {
-        controllableMaster.UnRegister(GetComponent<Controllable>());
+        ControllableData data = new ControllableData();
+        data.dataID = id;
+
+        foreach (FieldInfo p in Properties.Values)
+        {
+            data.nameList.Add(p.Name);
+            data.valueList.Add(p.GetValue(this).ToString());
+        }
+        
+        return data;
     }
+
+    public void loadData(ControllableData data)
+    {
+       int index = 0;
+       foreach (string dn in data.nameList)
+        {
+            List<object> values = new List<object>();
+            values.Add(getObjectForValue(Properties[dn].FieldType.ToString(), data.valueList[index]));
+            setFieldProp(Properties[dn], dn, values);
+            index++;
+        }
+    }
+
+    /*
+    Int32 fieldOffset = 0;(
+    var assemblyName
+        = new AssemblyName("MyDynamicAssembly");
+    var assemblyBuilder
+        = AppDomain.CurrentDomain.DefineDynamicAssembly(
+            assemblyName,
+            AssemblyBuilderAccess.Run);
+    var moduleBuilder
+        = assemblyBuilder.DefineDynamicModule("MyDynamicModule");
+
+    var myTypeBuilder = moduleBuilder.DefineType("data", TypeAttributes.Public);
+
+    // add public fields to match the source object
+    foreach (FieldInfo sourceField in Properties.Values)
+    {
+        FieldBuilder fieldBuilder
+            = myTypeBuilder.DefineField(
+                sourceField.Name,
+                sourceField.FieldType,
+                FieldAttributes.Public);
+        fieldBuilder.SetOffset(fieldOffset);
+        fieldOffset++;
+    }
+
+    // create the dynamic class
+    Type dynamicType = myTypeBuilder.CreateType();
+
+    // create an instance of the class
+    newData = Activator.CreateInstance(dynamicType);
+
+    // copy the values of the public fields of the
+    // source object to the dynamic object
+    foreach (FieldInfo sourceField in Properties.Values)
+    {
+        FieldInfo destField
+            = newData.GetType().GetField(sourceField.Name);
+        destField.SetValue(
+            newData,
+            sourceField.GetValue(this));
+    }
+
+    // give the new class to the caller for casting purposes
+    outType = dynamicType;
+
+    return newData;
+    */
+    
+
+    
+
+    object getObjectForValue(string typeString, string value)
+    {
+        if (typeString == "System.Single") return getFloat(value);
+        if (typeString == "System.Boolean") return getBool(value);
+        if (typeString == "System.Int32") return getInt(value);
+        if (typeString == "UnityEngine.Vector2") return StringToVector2(value);
+        if( typeString == "UnityEngine.Vector3") return StringToVector3(value);
+        if (typeString == "UnityEngine.Color") return StringToColor(value);
+        if (typeString == "System.String") return value;
+
+        return null;
+    }
+
+
+    public static Color StringToColor(string sColor)
+    {
+        // Remove the parentheses
+        if (sColor.StartsWith("RGBA(") && sColor.EndsWith(")"))
+        {
+            sColor = sColor.Substring(5, sColor.Length - 6);
+        }
+
+        // split the items
+        string[] sArray = sColor.Split(',');
+
+        // store as a Vector3
+        Color result = new Color(
+            float.Parse(sArray[0]),
+            float.Parse(sArray[1]),
+            float.Parse(sArray[2]),
+            float.Parse(sArray[3])
+        );
+
+
+        return result;
+    }
+
+    public static Vector2 StringToVector2(string sVector)
+    {
+        // Remove the parentheses
+        if (sVector.StartsWith("(") && sVector.EndsWith(")"))
+        {
+            sVector = sVector.Substring(1, sVector.Length - 2);
+        }
+
+        // split the items
+        string[] sArray = sVector.Split(',');
+
+        // store as a Vector3
+        Vector2 result = new Vector2(
+            float.Parse(sArray[0]),
+            float.Parse(sArray[1])
+            );
+
+        return result;
+    }
+
+    public static Vector3 StringToVector3(string sVector)
+    {
+        // Remove the parentheses
+        if (sVector.StartsWith("(") && sVector.EndsWith(")"))
+        {
+            sVector = sVector.Substring(1, sVector.Length - 2);
+        }
+
+        // split the items
+        string[] sArray = sVector.Split(',');
+
+        // store as a Vector3
+        Vector3 result = new Vector3(
+            float.Parse(sArray[0]),
+            float.Parse(sArray[1]),
+            float.Parse(sArray[2]));
+
+        return result;
+    }
+
 }

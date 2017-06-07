@@ -3,16 +3,16 @@ using System.Collections;
 
 public class TestProp : Controllable
 {
-    [OSCProperty("rotation")]
+    [OSCProperty]
     public float rotationSpeed;
 
-    [OSCProperty("big")]
+    [OSCProperty]
     public bool big;
 
-    [OSCProperty("color")]
+    [OSCProperty]
     public int color;
 
-    [OSCProperty("position")]
+    [OSCProperty]
     public Vector3 pos;
 
     // Use this for initialization

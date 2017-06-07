@@ -3,33 +3,19 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ControllableMaster : MonoBehaviour
+public static class ControllableMaster 
 {
-    public bool debug;
-    private bool isReadyBool;
-    public OSCMaster OscMaster;
+    public static bool debug;
 
-    public Dictionary<string, Controllable> RegisteredControllables;
+    public static Dictionary<string, Controllable> RegisteredControllables = new Dictionary<string, Controllable>();
 
     public delegate void ControllableAddedEvent(Controllable controllable);
-    public event ControllableAddedEvent controllableAdded;
+    public static event ControllableAddedEvent controllableAdded;
 
     public delegate void ControllableRemovedEvent(Controllable controllable);
-    public event ControllableRemovedEvent controllableRemoved;
+    public static event ControllableRemovedEvent controllableRemoved;
 
-    public bool isReady()
-    {
-        return isReadyBool;
-    }
-    // Use this for initialization
-    void Awake()
-    {
-        RegisteredControllables = new Dictionary<string, Controllable>();
-        OscMaster.valueUpdateReady += UpdateValue;
-        isReadyBool = true;
-    }
-
-    public void Register(Controllable candidate)
+    public static void Register(Controllable candidate)
     {
         if (!RegisteredControllables.ContainsKey(candidate.id))
         {
@@ -44,13 +30,16 @@ public class ControllableMaster : MonoBehaviour
         }
     }
 
-    public void UnRegister(Controllable candidate)
+    public static void UnRegister(Controllable candidate)
     {
-        if(RegisteredControllables.ContainsKey(candidate.id)) RegisteredControllables.Remove(candidate.id);
-        if (controllableAdded != null) controllableRemoved(candidate);
+        if (RegisteredControllables.ContainsKey(candidate.id))
+        {
+            RegisteredControllables.Remove(candidate.id);
+            if (controllableRemoved != null) controllableRemoved(candidate);
+        }
     }
 
-    public void UpdateValue(string target, string property, List<object> values)
+    public static void UpdateValue(string target, string property, List<object> values)
     {
         if (RegisteredControllables.ContainsKey(target))
             RegisteredControllables[target].setProp(property, values);

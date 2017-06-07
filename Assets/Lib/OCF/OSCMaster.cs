@@ -53,7 +53,7 @@ public class OSCMaster : MonoBehaviour
 
         if (debugMessage) Debug.Log("Message received for Target : " + target + ", property = " + property);
 
-        valueUpdateReady(target, property, m.Data);
+        ControllableMaster.UpdateValue(target, property, m.Data);
     }
 
     // Update is called once per frame
