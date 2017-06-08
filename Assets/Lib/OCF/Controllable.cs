@@ -70,7 +70,7 @@ public class Controllable : MonoBehaviour
             }
         }
 
-        if (id == "") id = gameObject.name;
+        if (id == "" || id == null) id = gameObject.name;
         ControllableMaster.Register(this);
     }
 
@@ -323,7 +323,7 @@ public class Controllable : MonoBehaviour
             data.nameList.Add(p.Name);
             data.valueList.Add(p.GetValue(this).ToString());
         }
-        
+
         return data;
     }
 
@@ -386,9 +386,9 @@ public class Controllable : MonoBehaviour
 
     return newData;
     */
-    
 
-    
+
+
 
     object getObjectForValue(string typeString, string value)
     {
