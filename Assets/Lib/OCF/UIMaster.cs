@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 public class UIMaster : MonoBehaviour
 {
-    public GameObject UICanvasPrefab;
+    public Transform Panel;
     public GameObject PanelPrefab;
     public GameObject MethodButtonPrefab;
     public GameObject SliderPrefab;
@@ -24,8 +24,6 @@ public class UIMaster : MonoBehaviour
     void Awake()
     {
         _panels = new Dictionary<string, GameObject>();
-        CreateUICamera();
-        CreateRootCanvas();
 
         ControllableMaster.controllableAdded += CreateUI;
         ControllableMaster.controllableRemoved += RemoveUI;
@@ -42,7 +40,7 @@ public class UIMaster : MonoBehaviour
 
         //First we create a panel for the controllable
         var newPanel = Instantiate(PanelPrefab);
-        newPanel.transform.SetParent(_rootCanvas.transform);
+        newPanel.transform.SetParent(Panel.transform);
         newPanel.GetComponentInChildren<Text>().text = newControllable.id;
         newPanel.GetComponent<RectTransform>().localScale = new Vector3(1.0f, 1.0f, 1.0f);
         _panels.Add(newControllable.id, newPanel);
@@ -57,6 +55,14 @@ public class UIMaster : MonoBehaviour
         foreach (var property in newControllable.Properties)
         {
             var propertyType = property.Value.FieldType;
+            OSCProperty attribute = Attribute.GetCustomAttribute(property.Value, typeof(OSCProperty)) as OSCProperty;
+            if (attribute.TargetList != "" && attribute.TargetList != null)
+            {
+                var associatedListFieldInfo = newControllable.getFieldInfoByName(attribute.TargetList);
+                CreateDropDown(newControllable, associatedListFieldInfo, property.Value);
+                continue;
+            }
+            //property.Value.Attributes O
             if (propertyType.ToString() == "System.Single")
             {
                 var rangeAttribut = (RangeAttribute[]) property.Value.GetCustomAttributes(typeof(RangeAttribute), false);
@@ -64,51 +70,81 @@ public class UIMaster : MonoBehaviour
                     CreateInput(newControllable, property.Value);
                 else
                     CreateSlider(newControllable, property.Value, rangeAttribut[0]);
+                continue;
             }
             if (propertyType.ToString() == "System.Boolean")
             {
                 CreateCheckbox(newControllable, property.Value);
+                continue;
             }
             if (propertyType.ToString() == "System.Int32" || propertyType.ToString() == "System.Float" || propertyType.ToString() == "System.String")
             {
                 CreateInput(newControllable, property.Value);
-            }
-
-            if (propertyType.ToString() == "System.Collections.Generic.List`1[System.String]")
-            {
-                CreateDropDown(newControllable, property.Value);
+                continue;
             }
             //Debug.Log("Property type : " + propertyType + " of " + property.Key);
         }
 
-        //black magic to make added UI visible
-        _rootCanvas.GetComponent<Canvas>().planeDistance += 1;
     }
 
-    private void CreateDropDown(Controllable target, FieldInfo property)
+    private void CreateDropDown(Controllable target, FieldInfo listProperty, FieldInfo activeElement)
     {
         var newDropdown = Instantiate(DropdownPrefab);
         newDropdown.transform.SetParent(_panels.Last().Value.transform);
-        newDropdown.GetComponent<Dropdown>().AddOptions((List<string>)target.getPropInfoForAddress(property.Name).GetValue(target));
+        var listToDisplay = new List<string>();
+
+        //TODO remove string
+        var listInObject = (List<string>) listProperty.GetValue(target);
+
+        foreach (var item in listInObject)
+        {
+            listToDisplay.Add(item.ToString());
+        }
+
+        //Set value if element in list
+        var linkedList = (List<string>) listProperty.GetValue(target);
+        if (linkedList.Count > 0) { 
+            string startValue = linkedList[newDropdown.GetComponent<Dropdown>().value-1];
+            target.setFieldProp(activeElement, activeElement.Name, new List<object> {startValue});
+        }
+
+    newDropdown.GetComponent<Dropdown>().AddOptions(listToDisplay);
         newDropdown.GetComponent<Dropdown>().onValueChanged.AddListener((value) =>
         {
-            var currentList = (List<string>) target.getPropInfoForAddress(property.Name).GetValue(target);
-            var selected = currentList[value];
-            currentList.Add(selected);
-            currentList.RemoveAt(value);
-            newDropdown.GetComponent<Dropdown>().value = currentList.Count - 1;
-            List<object> objParams = currentList.ConvertAll(s => (object)s);
-            target.setFieldProp(property, property.Name, objParams);
+            //var currentList = (List<string>) target.getPropInfoForAddress(property.Name).GetValue(target);
+            //var selected = currentList[value];
+            //currentList.Add(selected);
+            //currentList.RemoveAt(value);
+            //newDropdown.GetComponent<Dropdown>().value = currentList.Count - 1;
+            Debug.Log("UI value changed  :" + value);
+            var associatedList = (List<string>) listProperty.GetValue(target);
+            string activeItem = associatedList[value];
+
+            List<object> objParams = new List<object> {activeItem};
+
+            target.setFieldProp(activeElement, activeElement.Name, objParams);
         });
         
         target.valueChanged += (name) =>
         {
-           // Debug.Log("Fired value changed : " + name + " and I am " + property.Name);
-            if (name == property.Name)
+            //Not proud of this code ..;
+            var toAdd = new List<string>();
+            foreach (var actualItem in (List<string>)listProperty.GetValue(target))
             {
-                newDropdown.GetComponent<Dropdown>().ClearOptions();
-                newDropdown.GetComponent<Dropdown>().AddOptions((List<string>)target.getPropInfoForAddress(property.Name).GetValue(target));
+                var isInList = false;
+                var tempList = newDropdown.GetComponent<Dropdown>().options;
+                foreach (var t in tempList)
+                {
+                    if (t.text == actualItem)
+                        isInList = true;
+                }
+                if (!isInList)
+                    toAdd.Add(actualItem);
             }
+            
+            Debug.Log("Value of target changed");
+
+            newDropdown.GetComponent<Dropdown>().AddOptions(toAdd);
         };
         newDropdown.GetComponent<RectTransform>().localScale = new Vector3(1.0f, 1.0f, 1.0f);
     }
@@ -203,33 +239,5 @@ public class UIMaster : MonoBehaviour
             }
         }
     }
-
-    private void CreateRootCanvas()
-    {
-        _rootCanvas = Instantiate(UICanvasPrefab);
-
-        var canvasComponent = _rootCanvas.GetComponent<Canvas>();
-        canvasComponent.renderMode = RenderMode.ScreenSpaceCamera;
-        canvasComponent.worldCamera = _camera.GetComponent<Camera>();
-        _rootCanvas.transform.SetParent(_camera.transform);
-    }
-
-    private void CreateUICamera()
-    {
-        _camera = new GameObject();
-        _camera.name = "UICamera";
-        _camera.transform.SetParent(this.transform);
-        var cameraComponent = _camera.AddComponent<Camera>();
-        //camera settings
-        cameraComponent.backgroundColor = Color.black;
-        cameraComponent.clearFlags = CameraClearFlags.SolidColor;
-        cameraComponent.orthographic = true;
-        cameraComponent.nearClipPlane = 0.0f;
-        cameraComponent.cullingMask = (1 << 5);
-        cameraComponent.backgroundColor = Color.white;
-        //Position in display
-        var newRect = cameraComponent.rect;
-        newRect.x = -0.7f;
-        cameraComponent.rect = newRect;
-    }
+    
 }

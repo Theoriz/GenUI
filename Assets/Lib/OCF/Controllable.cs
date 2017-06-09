@@ -4,9 +4,11 @@ using System.Reflection;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Reflection.Emit;
 using System.Threading;
+using UnityEngine.SceneManagement;
 
 [Serializable]
 public class ControllableData
@@ -20,20 +22,76 @@ public class ControllableData
     {
         nameList = new List<string>();
         valueList = new List<string>();
-
     }
 }
 
 public class Controllable : MonoBehaviour
 {
     public string id;
-    public bool debugOSC;
-    public Dictionary<string,FieldInfo> Properties;
+    public bool debug;
+    public string targetDirectory;
+
+    public Dictionary<string, FieldInfo> Properties;
     public Dictionary<string, MethodInfo> Methods;
 
     public delegate void ValueChangedEvent(string name);
+
     public event ValueChangedEvent valueChanged;
 
+    [OSCProperty(TargetList = "presetList", IncludeInPresets = false)] public string currentPreset;
+
+    public List<string> presetList;
+
+    public void ReadFileList()
+    {
+        presetList.Clear();
+        targetDirectory = "Presets/" + SceneManager.GetActiveScene().name + "/" + id + "/";
+        Directory.CreateDirectory(targetDirectory);
+        foreach (var t in Directory.GetFiles(targetDirectory))
+        {
+            var onlyFileName = t.Split('/').Last();
+            presetList.Add(onlyFileName);
+        }
+
+        RaiseEventValueChanged("presetList");
+    }
+
+    [OSCMethod]
+    public void SavePreset()
+    {
+        var date = DateTime.Today.Day + "-" + DateTime.Today.Month + "-" + DateTime.Today.Year + "_" +
+                   DateTime.Now.Hour + "-" + DateTime.Now.Minute + "-" + DateTime.Now.Second;
+        var fileName = date + ".pst";
+        Debug.Log(targetDirectory + fileName);
+        //create file
+        var file = File.OpenWrite(targetDirectory + fileName);
+        file.Close();
+
+        File.WriteAllText(targetDirectory + fileName, JsonUtility.ToJson(this.getData()));
+
+        if (debug)
+            Debug.Log("Saved in " + targetDirectory + fileName);
+
+        ReadFileList();
+    }
+
+    [OSCMethod]
+    public void LoadPreset()
+    {
+        //if (debug)
+            Debug.Log("Loading " + currentPreset);
+
+        var file = new StreamReader(targetDirectory + currentPreset);
+        ControllableData cData = JsonUtility.FromJson<ControllableData>(file.ReadLine());
+
+        loadData(cData);
+        DataLoaded();
+
+        if (debug)
+            Debug.Log("Done.");
+    }
+
+    public virtual void DataLoaded() { }
 
     void Awake()
     {
@@ -70,7 +128,10 @@ public class Controllable : MonoBehaviour
             }
         }
 
-        if (id == "" || id == null) id = gameObject.name;
+        presetList = new List<string>();
+        ReadFileList();
+
+        if (string.IsNullOrEmpty(id)) id = gameObject.name;
         ControllableMaster.Register(this);
     }
 
@@ -80,7 +141,19 @@ public class Controllable : MonoBehaviour
         ControllableMaster.UnRegister(this);
     }
 
+    public FieldInfo getFieldInfoByName(string requestedName)
+    {
+        var objectFields = GetType().GetFields(BindingFlags.Instance | BindingFlags.Public);
+        FieldInfo requestedField = null;
 
+        foreach (var item in objectFields)
+        {
+            if(item.Name == requestedName)
+                requestedField = item;
+        }
+
+        return requestedField;
+    }
 
     public void setProp(string property, List<object> values)
     {
@@ -108,7 +181,7 @@ public class Controllable : MonoBehaviour
    {
         string typeString = info.FieldType.ToString();
 
-        if(debugOSC) Debug.Log("OSC Field IN TYPE : " + typeString +" " + values[0].ToString());
+        if(debug) Debug.Log("OSC Field IN TYPE : " + typeString +" " + values.Count+" // "+values[0].ToString());
 
         // if we detect any attribute print out the data.
 
@@ -156,7 +229,7 @@ public class Controllable : MonoBehaviour
 
         object[] parameters = new object[info.GetParameters().Length];
 
-        if(debugOSC) Debug.Log("Set Method, num expected parameters : " + parameters.Length);
+        if(debug) Debug.Log("Set Method, num expected parameters : " + parameters.Length);
 
         int valueIndex = 0;
         for(int i=0;i<parameters.Length;i++)
@@ -320,8 +393,13 @@ public class Controllable : MonoBehaviour
 
         foreach (FieldInfo p in Properties.Values)
         {
-            data.nameList.Add(p.Name);
-            data.valueList.Add(p.GetValue(this).ToString());
+            OSCProperty attribute = Attribute.GetCustomAttribute(p, typeof(OSCProperty)) as OSCProperty;
+            Debug.Log("Attribute : " + p.Name + " savable : " + attribute.IncludeInPresets);
+            if (attribute.IncludeInPresets)
+            {
+                data.nameList.Add(p.Name);
+                data.valueList.Add(p.GetValue(this).ToString());
+            }
         }
 
         return data;

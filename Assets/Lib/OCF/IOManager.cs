@@ -9,7 +9,6 @@ using UnityEngine.SceneManagement;
 public class IOManager : Controllable
 {
     private string fileName;
-
     private string directory = "Presets\\";
 
     [OSCProperty]
@@ -69,7 +68,7 @@ public class IOManager : Controllable
             lines.Add(JsonUtility.ToJson(item.Value.getData()));
         }
         File.WriteAllLines(directory + fileName, lines.ToArray());
-        if (debugOSC)
+        if (debug)
             Debug.Log("Saved in " + directory + fileName);
         ReadFileList();
     }
@@ -89,7 +88,7 @@ public class IOManager : Controllable
 
     private void load()
     {
-        if (debugOSC)
+        if (debug)
             Debug.Log("Loading " + directory + fileName);
 
 
@@ -104,7 +103,7 @@ public class IOManager : Controllable
             if (cData.dataID == this.id || cData.dataID == null) continue;
             if (!ControllableMaster.RegisteredControllables.ContainsKey(cData.dataID))
             {
-                if (debugOSC)
+                if (debug)
                     Debug.Log(cData.dataID + " not registered in ControllableMaster");
                 continue;
             }
@@ -159,7 +158,7 @@ public class IOManager : Controllable
 
 
 
-        if (debugOSC)
+        if (debug)
             Debug.Log("Done.");
     }
 

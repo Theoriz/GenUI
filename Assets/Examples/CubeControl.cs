@@ -62,4 +62,9 @@ public class CubeControl : Controllable
          //Debug.Log("Nombre (int) : " + nombreInt);
          //Debug.Log("Nombre (float) : " + nombreFloat);
     }
+
+    public override void DataLoaded()
+    {
+        setColor(cubeColor);
+    }
 }

@@ -7,6 +7,8 @@ public class OSCMetadata : Attribute
 [AttributeUsage(AttributeTargets.Field)]
 public class OSCProperty : OSCMetadata
 {
+    public string TargetList;
+    public bool IncludeInPresets = true;
 }
 
 [AttributeUsage(AttributeTargets.Method)]
