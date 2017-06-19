@@ -142,7 +142,7 @@ public class UIMaster : MonoBehaviour
                     toAdd.Add(actualItem);
             }
             
-            Debug.Log("Value of target changed");
+            Debug.Log(target.id + " UI has been updated");
 
             newDropdown.GetComponent<Dropdown>().AddOptions(toAdd);
         };

@@ -62,17 +62,25 @@ public class Controllable : MonoBehaviour
         var date = DateTime.Today.Day + "-" + DateTime.Today.Month + "-" + DateTime.Today.Year + "_" +
                    DateTime.Now.Hour + "-" + DateTime.Now.Minute + "-" + DateTime.Now.Second;
         var fileName = date + ".pst";
-        Debug.Log(targetDirectory + fileName);
+        targetDirectory = "Presets/" + SceneManager.GetActiveScene().name + "/" + id + "/";
+        Debug.Log("Saving in " + targetDirectory + fileName + "...");
         //create file
         var file = File.OpenWrite(targetDirectory + fileName);
         file.Close();
 
+        CallMeBeforeSave();
         File.WriteAllText(targetDirectory + fileName, JsonUtility.ToJson(this.getData()));
 
         if (debug)
             Debug.Log("Saved in " + targetDirectory + fileName);
 
         ReadFileList();
+    }
+
+    //Override it if you want to do things ust before a preset save
+    public virtual void CallMeBeforeSave()
+    {
+        
     }
 
     [OSCMethod]
@@ -145,7 +153,7 @@ public class Controllable : MonoBehaviour
     {
         var objectFields = GetType().GetFields(BindingFlags.Instance | BindingFlags.Public);
         FieldInfo requestedField = null;
-
+   
         foreach (var item in objectFields)
         {
             if(item.Name == requestedName)
@@ -181,8 +189,9 @@ public class Controllable : MonoBehaviour
    {
         string typeString = info.FieldType.ToString();
 
-        if(debug) Debug.Log("OSC Field IN TYPE : " + typeString +" " + values.Count+" // "+values[0].ToString());
-
+        if(debug)
+            Debug.Log("Setting attribut  " + property + " of type " + typeString +" with " + values.Count+" value(s) // "+values[0].ToString());
+    
         // if we detect any attribute print out the data.
 
         if (typeString == "System.Single")
@@ -198,10 +207,12 @@ public class Controllable : MonoBehaviour
             if (values.Count >= 1) info.SetValue(this, getInt(values[0]));
         } else if (typeString == "UnityEngine.Vector2")
         {
+            if (values.Count == 1) info.SetValue(this, (Vector2)values[0]);
             if (values.Count >= 2) info.SetValue(this, new Vector2(getFloat(values[0]), getFloat(values[1])));
         }
         else if (typeString == "UnityEngine.Vector3")
         {
+            if (values.Count == 1) info.SetValue(this, (Vector3)values[0]);
             if (values.Count >= 3) info.SetValue(this, new Vector3(getFloat(values[0]), getFloat(values[1]), getFloat(values[2])));
         }
         else if (typeString == "UnityEngine.Color")
@@ -394,11 +405,22 @@ public class Controllable : MonoBehaviour
         foreach (FieldInfo p in Properties.Values)
         {
             OSCProperty attribute = Attribute.GetCustomAttribute(p, typeof(OSCProperty)) as OSCProperty;
-            Debug.Log("Attribute : " + p.Name + " savable : " + attribute.IncludeInPresets);
             if (attribute.IncludeInPresets)
             {
+                Debug.Log("Attribute : " + p.Name + " of type " + p.FieldType + " is saved.");
                 data.nameList.Add(p.Name);
-                data.valueList.Add(p.GetValue(this).ToString());
+                
+                //Because a simple "toString" doesn't give the full value
+                if (p.FieldType.ToString() == "UnityEngine.Vector3")
+                {
+                    data.valueList.Add(((Vector3) p.GetValue(this)).ToString("F8"));
+                }
+                else if (p.FieldType.ToString() == "System.Single")
+                {
+                    data.valueList.Add(((float)p.GetValue(this)).ToString("F8"));
+                }
+                else 
+                    data.valueList.Add(p.GetValue(this).ToString());
             }
         }
 
@@ -413,6 +435,7 @@ public class Controllable : MonoBehaviour
             List<object> values = new List<object>();
             values.Add(getObjectForValue(Properties[dn].FieldType.ToString(), data.valueList[index]));
             setFieldProp(Properties[dn], dn, values);
+                
             index++;
         }
     }
