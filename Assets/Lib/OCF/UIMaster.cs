@@ -16,6 +16,8 @@ public class UIMaster : MonoBehaviour
     public GameObject InputPrefab;
     public GameObject DropdownPrefab;
 
+    public bool showDebug;
+
     private GameObject _camera;
     private GameObject _rootCanvas;
     private Dictionary<string, GameObject> _panels;
@@ -31,13 +33,14 @@ public class UIMaster : MonoBehaviour
 
     public void RemoveUI(Controllable dyingControllable)
     {
+        if(showDebug)
+            Debug.Log("Removing UI for " + dyingControllable.name + "|" + dyingControllable.id);
         Destroy(_panels[dyingControllable.id]);
         _panels.Remove(dyingControllable.name);
     }
 
     public void CreateUI(Controllable newControllable)
     {
-
         //First we create a panel for the controllable
         var newPanel = Instantiate(PanelPrefab);
         newPanel.transform.SetParent(Panel.transform);
@@ -48,7 +51,7 @@ public class UIMaster : MonoBehaviour
         //Read all methods and add button
         foreach (var method in newControllable.Methods)
         {
-            CreateButton(newControllable, method.Value);
+            CreateButton(newPanel.transform, newControllable, method.Value);
         }
 
         //Read all properties and add associated UI
@@ -59,7 +62,7 @@ public class UIMaster : MonoBehaviour
             if (attribute.TargetList != "" && attribute.TargetList != null)
             {
                 var associatedListFieldInfo = newControllable.getFieldInfoByName(attribute.TargetList);
-                CreateDropDown(newControllable, associatedListFieldInfo, property.Value);
+                CreateDropDown(newPanel.transform, newControllable, associatedListFieldInfo, property.Value);
                 continue;
             }
             //property.Value.Attributes O
@@ -67,19 +70,19 @@ public class UIMaster : MonoBehaviour
             {
                 var rangeAttribut = (RangeAttribute[]) property.Value.GetCustomAttributes(typeof(RangeAttribute), false);
                 if(rangeAttribut.Length == 0)
-                    CreateInput(newControllable, property.Value);
+                    CreateInput(newPanel.transform, newControllable, property.Value);
                 else
-                    CreateSlider(newControllable, property.Value, rangeAttribut[0]);
+                    CreateSlider(newPanel.transform, newControllable, property.Value, rangeAttribut[0]);
                 continue;
             }
             if (propertyType.ToString() == "System.Boolean")
             {
-                CreateCheckbox(newControllable, property.Value);
+                CreateCheckbox(newPanel.transform, newControllable, property.Value);
                 continue;
             }
             if (propertyType.ToString() == "System.Int32" || propertyType.ToString() == "System.Float" || propertyType.ToString() == "System.String")
             {
-                CreateInput(newControllable, property.Value);
+                CreateInput(newPanel.transform, newControllable, property.Value);
                 continue;
             }
             //Debug.Log("Property type : " + propertyType + " of " + property.Key);
@@ -87,10 +90,10 @@ public class UIMaster : MonoBehaviour
 
     }
 
-    private void CreateDropDown(Controllable target, FieldInfo listProperty, FieldInfo activeElement)
+    private void CreateDropDown(Transform parent, Controllable target, FieldInfo listProperty, FieldInfo activeElement)
     {
         var newDropdown = Instantiate(DropdownPrefab);
-        newDropdown.transform.SetParent(_panels.Last().Value.transform);
+        newDropdown.transform.SetParent(parent);
         var listToDisplay = new List<string>();
 
         //TODO remove string
@@ -116,7 +119,7 @@ public class UIMaster : MonoBehaviour
             //currentList.Add(selected);
             //currentList.RemoveAt(value);
             //newDropdown.GetComponent<Dropdown>().value = currentList.Count - 1;
-            Debug.Log("UI value changed  :" + value);
+            //Debug.Log("UI value changed  :" + value);
             var associatedList = (List<string>) listProperty.GetValue(target);
             string activeItem = associatedList[value];
 
@@ -142,19 +145,19 @@ public class UIMaster : MonoBehaviour
                     toAdd.Add(actualItem);
             }
             
-            Debug.Log(target.id + " UI has been updated");
+            //Debug.Log(target.id + " UI has been updated");
 
             newDropdown.GetComponent<Dropdown>().AddOptions(toAdd);
         };
         newDropdown.GetComponent<RectTransform>().localScale = new Vector3(1.0f, 1.0f, 1.0f);
     }
 
-    private void CreateSlider(Controllable target, FieldInfo property, RangeAttribute rangeAttribut)
+    private void CreateSlider(Transform parent, Controllable target, FieldInfo property, RangeAttribute rangeAttribut)
     {
         //Debug.Log("Range : " + rangeAttribut.min + ";" + rangeAttribut.max);
         var newSlider = Instantiate(SliderPrefab);
         newSlider.GetComponentInChildren<Text>().text = property.Name;
-        newSlider.transform.SetParent(_panels.Last().Value.transform);
+        newSlider.transform.SetParent(parent);
         newSlider.GetComponent<Slider>().maxValue = rangeAttribut.max;
         newSlider.GetComponent<Slider>().minValue = rangeAttribut.min;
         newSlider.GetComponent<Slider>().onValueChanged.AddListener((value) =>
@@ -172,11 +175,11 @@ public class UIMaster : MonoBehaviour
         newSlider.GetComponent<RectTransform>().localScale = new Vector3(1.0f, 1.0f, 1.0f);
     }
 
-    private void CreateInput(Controllable target, FieldInfo property)
+    private void CreateInput(Transform parent, Controllable target, FieldInfo property)
     {
         var newInput = Instantiate(InputPrefab);
         newInput.GetComponent<Text>().text = property.Name;
-        newInput.transform.SetParent(_panels.Last().Value.transform);
+        newInput.transform.SetParent(parent);
         newInput.GetComponentInChildren<InputField>().onEndEdit.AddListener((value) =>
         {
             var list = new List<object>();
@@ -197,11 +200,11 @@ public class UIMaster : MonoBehaviour
         newInput.GetComponent<RectTransform>().localScale = new Vector3(1.0f, 1.0f, 1.0f);
     }
 
-    private void CreateCheckbox(Controllable target, FieldInfo property)
+    private void CreateCheckbox(Transform parent, Controllable target, FieldInfo property)
     {
         var newCheckbox = Instantiate(CheckboxPrefab);
         newCheckbox.GetComponentInChildren<Text>().text = property.Name;
-        newCheckbox.transform.SetParent(_panels.Last().Value.transform);
+        newCheckbox.transform.SetParent(parent);
         newCheckbox.GetComponent<Toggle>().onValueChanged.AddListener((value) =>
         {
             var list = new List<object>();
@@ -217,13 +220,13 @@ public class UIMaster : MonoBehaviour
         newCheckbox.GetComponent<RectTransform>().localScale = new Vector3(1.0f, 1.0f, 1.0f);
     }
 
-    private void CreateButton(Controllable target, MethodInfo method)
+    private void CreateButton(Transform parent, Controllable target, MethodInfo method)
     {
         //As we can't expose parameter in UI, ignore methods with arguments 
         if (method.GetParameters().Length == 0)
         {
             var newButton = Instantiate(MethodButtonPrefab);
-            newButton.transform.SetParent(_panels.Last().Value.transform);
+            newButton.transform.SetParent(parent);
             newButton.GetComponent<RectTransform>().localScale = new Vector3(1.0f, 1.0f, 1.0f);
             newButton.GetComponentInChildren<Text>().text = method.Name;
             newButton.GetComponent<Button>().onClick.AddListener(() =>

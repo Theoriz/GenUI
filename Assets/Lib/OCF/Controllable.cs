@@ -28,6 +28,7 @@ public class ControllableData
 public class Controllable : MonoBehaviour
 {
     public string id;
+    public string folder = "";
     public bool debug;
     public string targetDirectory;
 
@@ -45,7 +46,7 @@ public class Controllable : MonoBehaviour
     public void ReadFileList()
     {
         presetList.Clear();
-        targetDirectory = "Presets/" + SceneManager.GetActiveScene().name + "/" + id + "/";
+        targetDirectory = "Presets/" + (folder.Length > 0?folder:SceneManager.GetActiveScene().name) + "/" + id + "/";
         Directory.CreateDirectory(targetDirectory);
         foreach (var t in Directory.GetFiles(targetDirectory))
         {
@@ -59,12 +60,14 @@ public class Controllable : MonoBehaviour
     [OSCMethod]
     public void SavePreset()
     {
+
         var date = DateTime.Today.Day + "-" + DateTime.Today.Month + "-" + DateTime.Today.Year + "_" +
                    DateTime.Now.Hour + "-" + DateTime.Now.Minute + "-" + DateTime.Now.Second;
         var fileName = date + ".pst";
-        targetDirectory = "Presets/" + SceneManager.GetActiveScene().name + "/" + id + "/";
+        targetDirectory = "Presets/" + (folder.Length > 0 ? folder : SceneManager.GetActiveScene().name) + "/" + id + "/";
         Debug.Log("Saving in " + targetDirectory + fileName + "...");
         //create file
+        if (!Directory.Exists(targetDirectory)) Directory.CreateDirectory(targetDirectory);
         var file = File.OpenWrite(targetDirectory + fileName);
         file.Close();
 
@@ -433,9 +436,13 @@ public class Controllable : MonoBehaviour
        foreach (string dn in data.nameList)
         {
             List<object> values = new List<object>();
-            values.Add(getObjectForValue(Properties[dn].FieldType.ToString(), data.valueList[index]));
-            setFieldProp(Properties[dn], dn, values);
-                
+            FieldInfo info;
+            if(Properties.TryGetValue(dn,out info))
+            {
+                values.Add(getObjectForValue(Properties[dn].FieldType.ToString(), data.valueList[index]));
+                setFieldProp(Properties[dn], dn, values);
+            }
+
             index++;
         }
     }

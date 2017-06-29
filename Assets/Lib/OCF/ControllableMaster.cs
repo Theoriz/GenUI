@@ -20,9 +20,9 @@ public static class ControllableMaster
         if (!RegisteredControllables.ContainsKey(candidate.id))
         {
             RegisteredControllables.Add(candidate.id, candidate);
-            if (controllableAdded != null) controllableAdded(candidate);
-            if(debug)
-                Debug.Log("Added " + candidate.id);
+            if(controllableAdded != null) controllableAdded(candidate);
+
+            //Debug.Log("Added " + candidate.id);
         }
         else
         {
