@@ -48,7 +48,6 @@ public class CubeControl : Controllable
     // Use this for initialization
     void Start ()
     {
-
         GetComponent<Renderer>().material.color = cubeColor;
     }
 

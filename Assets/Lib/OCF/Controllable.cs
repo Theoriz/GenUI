@@ -43,6 +43,53 @@ public class Controllable : MonoBehaviour
 
     public List<string> presetList;
 
+
+    void Awake()
+    {
+        //PROPERTIES
+        Properties = new Dictionary<string, FieldInfo>();
+
+        Type t = GetType();
+        FieldInfo[] objectFields = t.GetFields(BindingFlags.Instance | BindingFlags.Public);
+
+        for (int i = 0; i < objectFields.Length; i++)
+        {
+            FieldInfo info = objectFields[i];
+            OSCProperty attribute = Attribute.GetCustomAttribute(info, typeof(OSCProperty)) as OSCProperty;
+            if (attribute != null)
+            {
+                Properties.Add(info.Name, info);
+            }
+        }
+
+        //METHODS
+
+        Methods = new Dictionary<string, MethodInfo>();
+
+        MethodInfo[] methodFields = t.GetMethods(BindingFlags.Instance | BindingFlags.Public);
+
+        for (int i = 0; i < methodFields.Length; i++)
+        {
+            MethodInfo info = methodFields[i];
+            OSCMethod attribute = Attribute.GetCustomAttribute(info, typeof(OSCMethod)) as OSCMethod;
+            if (attribute != null)
+            {
+                // Debug.Log("Added a new method : " + attribute.address);
+                Methods.Add(info.Name, info);
+            }
+        }
+
+        presetList = new List<string>();
+        ReadFileList();
+
+
+        if (string.IsNullOrEmpty(id)) id = gameObject.name;
+        ControllableMaster.Register(this);
+
+        if (presetList.Count > 1)
+            currentPreset = presetList[1];
+    }
+
     public void ReadFileList()
     {
         presetList.Clear();
@@ -80,12 +127,6 @@ public class Controllable : MonoBehaviour
         ReadFileList();
     }
 
-    //Override it if you want to do things ust before a preset save
-    public virtual void CallMeBeforeSave()
-    {
-        
-    }
-
     [OSCMethod]
     public void LoadPreset()
     {
@@ -102,50 +143,13 @@ public class Controllable : MonoBehaviour
             Debug.Log("Done.");
     }
 
+    //Override it if you want to do things after a load 
     public virtual void DataLoaded() { }
-
-    void Awake()
+    //Override it if you want to do things before a preset save
+    public virtual void CallMeBeforeSave()
     {
-        //PROPERTIES
-        Properties = new Dictionary<string, FieldInfo>();
 
-        Type t = GetType();
-        FieldInfo[] objectFields = t.GetFields(BindingFlags.Instance | BindingFlags.Public);
-
-        for (int i = 0; i < objectFields.Length; i++)
-        {
-            FieldInfo info = objectFields[i];
-            OSCProperty attribute = Attribute.GetCustomAttribute(info, typeof(OSCProperty)) as OSCProperty;
-            if (attribute != null)
-            {
-                Properties.Add(info.Name,info);
-            }
-        }
-
-        //METHODS
-
-        Methods = new Dictionary<string, MethodInfo>();
-
-        MethodInfo[] methodFields = t.GetMethods(BindingFlags.Instance | BindingFlags.Public);
-
-        for (int i = 0; i < methodFields.Length; i++)
-        {
-            MethodInfo info = methodFields[i];
-            OSCMethod attribute = Attribute.GetCustomAttribute(info, typeof(OSCMethod)) as OSCMethod;
-            if (attribute != null)
-            {
-               // Debug.Log("Added a new method : " + attribute.address);
-                Methods.Add(info.Name, info);
-            }
-        }
-
-        presetList = new List<string>();
-        ReadFileList();
-
-        if (string.IsNullOrEmpty(id)) id = gameObject.name;
-        ControllableMaster.Register(this);
     }
-
 
     void OnDestroy()
     {
@@ -164,6 +168,11 @@ public class Controllable : MonoBehaviour
         }
 
         return requestedField;
+    }
+
+    protected void RaiseEventValueChanged(string property)
+    {
+        if (valueChanged != null) valueChanged(property);
     }
 
     public void setProp(string property, List<object> values)
@@ -186,9 +195,7 @@ public class Controllable : MonoBehaviour
         }
     }
 
-
-
-   public void setFieldProp(FieldInfo info, string property, List<object> values, bool silent = false)
+    public void setFieldProp(FieldInfo info, string property, List<object> values, bool silent = false)
    {
         string typeString = info.FieldType.ToString();
 
@@ -231,12 +238,6 @@ public class Controllable : MonoBehaviour
         }
        if (valueChanged != null && !silent) valueChanged(property);
     }
-
-    protected void RaiseEventValueChanged(string property)
-    {
-        if (valueChanged != null) valueChanged(property);
-    }
-
 
     public void setMethodProp(MethodInfo info, string property, List<object> values)
     {
@@ -318,7 +319,6 @@ public class Controllable : MonoBehaviour
 
         info.Invoke(this, parameters);
     }
-
 
     public float getFloat(object value)
     {

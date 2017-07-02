@@ -120,34 +120,57 @@ public class UIMaster : MonoBehaviour
             //currentList.RemoveAt(value);
             //newDropdown.GetComponent<Dropdown>().value = currentList.Count - 1;
             //Debug.Log("UI value changed  :" + value);
-            var associatedList = (List<string>) listProperty.GetValue(target);
+            var associatedList = (List<string>)listProperty.GetValue(target);
             string activeItem = associatedList[value];
 
-            List<object> objParams = new List<object> {activeItem};
+            List<object> objParams = new List<object> { activeItem };
 
             target.setFieldProp(activeElement, activeElement.Name, objParams);
         });
         
         target.valueChanged += (name) =>
         {
-            //Not proud of this code ..;
-            var toAdd = new List<string>();
-            foreach (var actualItem in (List<string>)listProperty.GetValue(target))
-            {
-                var isInList = false;
-                var tempList = newDropdown.GetComponent<Dropdown>().options;
-                foreach (var t in tempList)
-                {
-                    if (t.text == actualItem)
-                        isInList = true;
-                }
-                if (!isInList)
-                    toAdd.Add(actualItem);
-            }
+            ////Not proud of this code ..;
+            //var toAdd = new List<string>();
+            //var listInControllable = (List<string>) listProperty.GetValue(target);
+            //foreach (var actualItem in listInControllable)
+            //{
+            //    var isInList = false;
+            //    var tempList = newDropdown.GetComponent<Dropdown>().options;
+            //    foreach (var t in tempList)
+            //    {
+            //        if (t.text == actualItem)
+            //            isInList = true;
+            //    }
+            //    if (!isInList)
+            //        toAdd.Add(actualItem);
+            //}
             
             //Debug.Log(target.id + " UI has been updated");
+            newDropdown.GetComponent<Dropdown>().ClearOptions();
+            newDropdown.GetComponent<Dropdown>().AddOptions((List<string>) listProperty.GetValue(target));
 
-            newDropdown.GetComponent<Dropdown>().AddOptions(toAdd);
+            //switch string order to match index
+
+            var options = newDropdown.GetComponent<Dropdown>().options;
+            var actualIndex = newDropdown.GetComponent<Dropdown>().value;
+            if (options.Count > 1)
+            {
+                var selectedElementInControllable = activeElement.GetValue(target);
+                var temp = options[actualIndex];
+                var replacementIndex = 0;
+
+                for (var i = 0 ; i < options.Count ; i++)
+                {
+                    if (options[i].text == options[actualIndex].text)
+                        replacementIndex = i;
+                }
+
+                options[actualIndex].text = (string)selectedElementInControllable;
+                options[replacementIndex].text = temp.text;
+            }
+
+            //newDropdown.GetComponent<Dropdown>().value = listInControllable.IndexOf((string)activeElement.GetValue(target))-1;
         };
         newDropdown.GetComponent<RectTransform>().localScale = new Vector3(1.0f, 1.0f, 1.0f);
     }
