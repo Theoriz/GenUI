@@ -31,6 +31,7 @@ public class Controllable : MonoBehaviour
     public string folder = "";
     public bool debug;
     public string targetDirectory;
+    public bool usePanel;
 
     public Dictionary<string, FieldInfo> Properties;
     public Dictionary<string, MethodInfo> Methods;
@@ -42,9 +43,11 @@ public class Controllable : MonoBehaviour
     [OSCProperty(TargetList = "presetList", IncludeInPresets = false)] public string currentPreset;
 
     public List<string> presetList;
+    
+    private string LastUsedPreset;
+    private string tempFileName = "temp.mr";
 
-
-    void Awake()
+    public virtual void Awake()
     {
         //PROPERTIES
         Properties = new Dictionary<string, FieldInfo>();
@@ -86,8 +89,25 @@ public class Controllable : MonoBehaviour
         if (string.IsNullOrEmpty(id)) id = gameObject.name;
         ControllableMaster.Register(this);
 
+        LoadLatestUsedPreset();
         if (presetList.Count > 1)
             currentPreset = presetList[1];
+    }
+
+    private void LoadLatestUsedPreset()
+    {
+        if (!File.Exists(targetDirectory + tempFileName)) return;
+
+        var file = new StreamReader(targetDirectory + tempFileName);
+        
+        var lastPresetRead =  file.ReadLine();
+
+        if (string.IsNullOrEmpty(lastPresetRead)) return;
+
+        var tempVariable = currentPreset;
+        currentPreset = lastPresetRead;
+        LoadPreset();
+        currentPreset = tempVariable;
     }
 
     public void ReadFileList()
@@ -98,6 +118,8 @@ public class Controllable : MonoBehaviour
         foreach (var t in Directory.GetFiles(targetDirectory))
         {
             var onlyFileName = t.Split('/').Last();
+            //Don't put temp file in list
+            if (onlyFileName == tempFileName) continue;
             presetList.Add(onlyFileName);
         }
 
@@ -124,6 +146,8 @@ public class Controllable : MonoBehaviour
         if (debug)
             Debug.Log("Saved in " + targetDirectory + fileName);
 
+        LastUsedPreset = fileName;
+
         ReadFileList();
     }
 
@@ -139,6 +163,8 @@ public class Controllable : MonoBehaviour
         loadData(cData);
         DataLoaded();
 
+        LastUsedPreset = currentPreset;
+
         if (debug)
             Debug.Log("Done.");
     }
@@ -153,6 +179,21 @@ public class Controllable : MonoBehaviour
 
     void OnDestroy()
     {
+        if (debug)
+            Debug.Log("Saving temp file before destruction");
+
+        if (!string.IsNullOrEmpty(LastUsedPreset))
+        {
+            //Create temp file
+            var tempFile = File.OpenWrite(targetDirectory + tempFileName);
+            tempFile.Close();
+            //write last loaded preset
+            File.WriteAllText(targetDirectory + tempFileName, LastUsedPreset);
+        }
+
+        if (debug)
+            Debug.Log("Done");
+
         ControllableMaster.UnRegister(this);
     }
 

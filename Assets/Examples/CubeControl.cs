@@ -45,6 +45,7 @@ public class CubeControl : Controllable
         setColor(Color.white);//col;
     }
 
+    //public override void Awake() {base.Awake(); }
     // Use this for initialization
     void Start ()
     {

@@ -33,7 +33,9 @@ public class UIMaster : MonoBehaviour
 
     public void RemoveUI(Controllable dyingControllable)
     {
-        if(showDebug)
+        if (!dyingControllable.usePanel) return;
+
+        if (showDebug)
             Debug.Log("Removing UI for " + dyingControllable.name + "|" + dyingControllable.id);
         Destroy(_panels[dyingControllable.id]);
         _panels.Remove(dyingControllable.name);
@@ -41,6 +43,8 @@ public class UIMaster : MonoBehaviour
 
     public void CreateUI(Controllable newControllable)
     {
+        if (!newControllable.usePanel) return;
+
         //First we create a panel for the controllable
         var newPanel = Instantiate(PanelPrefab);
         newPanel.transform.SetParent(Panel.transform);
@@ -59,6 +63,11 @@ public class UIMaster : MonoBehaviour
         {
             var propertyType = property.Value.FieldType;
             OSCProperty attribute = Attribute.GetCustomAttribute(property.Value, typeof(OSCProperty)) as OSCProperty;
+
+            //Check if needs to be in UI
+            if (!attribute.ShowInUI) continue;
+
+            //Create list
             if (attribute.TargetList != "" && attribute.TargetList != null)
             {
                 var associatedListFieldInfo = newControllable.getFieldInfoByName(attribute.TargetList);

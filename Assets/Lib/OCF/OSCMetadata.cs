@@ -9,6 +9,7 @@ public class OSCProperty : OSCMetadata
 {
     public string TargetList;
     public bool IncludeInPresets = true;
+    public bool ShowInUI = true;
 }
 
 [AttributeUsage(AttributeTargets.Method)]
