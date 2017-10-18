@@ -31,6 +31,12 @@ public class UIMaster : MonoBehaviour
         ControllableMaster.controllableRemoved += RemoveUI;
     }
 
+    void Update()
+    {
+        if(Input.GetKeyDown("h"))
+            transform.GetChild(0).gameObject.SetActive(!transform.GetChild(0).gameObject.activeSelf);
+    }
+
     public void RemoveUI(Controllable dyingControllable)
     {
         if (!dyingControllable.usePanel) return;
@@ -43,6 +49,8 @@ public class UIMaster : MonoBehaviour
 
     public void CreateUI(Controllable newControllable)
     {
+        Debug.Log("Adding " + newControllable.id + ", use panel : " + newControllable.usePanel);
+
         if (!newControllable.usePanel) return;
 
         //First we create a panel for the controllable
