@@ -48,6 +48,7 @@ public class CubeControl : Controllable
     public override void Awake()
     {
         usePanel = true;
+        debug = false;
         base.Awake();
     }
 

@@ -29,11 +29,13 @@ public class Controllable : MonoBehaviour
 {
     public string id;
     public string folder = "";
-    public bool debug;
+    public bool debug = false;
     public string targetDirectory;
     public bool usePanel;
 
     public Dictionary<string, FieldInfo> Properties;
+    public List<object> PreviousPropertiesValues;
+
     public Dictionary<string, MethodInfo> Methods;
 
     public delegate void ValueChangedEvent(string name);
@@ -51,6 +53,7 @@ public class Controllable : MonoBehaviour
     {
         //PROPERTIES
         Properties = new Dictionary<string, FieldInfo>();
+        PreviousPropertiesValues = new List<object>();
 
         Type t = GetType();
         FieldInfo[] objectFields = t.GetFields(BindingFlags.Instance | BindingFlags.Public);
@@ -62,6 +65,7 @@ public class Controllable : MonoBehaviour
             if (attribute != null)
             {
                 Properties.Add(info.Name, info);
+                PreviousPropertiesValues.Add(info.GetValue(this));
             }
         }
 
@@ -92,6 +96,29 @@ public class Controllable : MonoBehaviour
         LoadLatestUsedPreset();
         if (presetList.Count > 1)
             currentPreset = presetList[1];
+    }
+
+    void FixedUpdate() //Warn UI if attribut change
+    {
+        
+        //foreach (var value in Properties.Values)
+        //{
+        //    value.
+        //}
+        var propertiesArray = Properties.Values.ToArray();
+        //var previousPropertiesArray = PreviousProperties.Values.ToArray();
+
+        for (var i=0 ; i<Properties.Count ; i++)
+        {
+            var value = propertiesArray[i].GetValue(this);
+            if (value.ToString() != PreviousPropertiesValues[i].ToString())
+            {
+
+               // Debug.Log("Difference between " + propertiesArray[i].GetValue(this) + " and " + PreviousPropertiesValues[i].ToString());
+                RaiseEventValueChanged(propertiesArray[i].Name);
+                PreviousPropertiesValues[i] = value;
+            }
+        }
     }
 
     private void LoadLatestUsedPreset()

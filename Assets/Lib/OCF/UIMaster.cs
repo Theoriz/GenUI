@@ -147,28 +147,11 @@ public class UIMaster : MonoBehaviour
         
         target.valueChanged += (name) =>
         {
-            ////Not proud of this code ..;
-            //var toAdd = new List<string>();
-            //var listInControllable = (List<string>) listProperty.GetValue(target);
-            //foreach (var actualItem in listInControllable)
-            //{
-            //    var isInList = false;
-            //    var tempList = newDropdown.GetComponent<Dropdown>().options;
-            //    foreach (var t in tempList)
-            //    {
-            //        if (t.text == actualItem)
-            //            isInList = true;
-            //    }
-            //    if (!isInList)
-            //        toAdd.Add(actualItem);
-            //}
-            
             //Debug.Log(target.id + " UI has been updated");
             newDropdown.GetComponent<Dropdown>().ClearOptions();
             newDropdown.GetComponent<Dropdown>().AddOptions((List<string>) listProperty.GetValue(target));
 
             //switch string order to match index
-
             var options = newDropdown.GetComponent<Dropdown>().options;
             var actualIndex = newDropdown.GetComponent<Dropdown>().value;
             if (options.Count > 1)
@@ -198,6 +181,7 @@ public class UIMaster : MonoBehaviour
         var newSlider = Instantiate(SliderPrefab);
         newSlider.GetComponentInChildren<Text>().text = property.Name;
         newSlider.transform.SetParent(parent);
+        newSlider.GetComponent<SliderValue>().name = property.Name;
         newSlider.GetComponent<Slider>().maxValue = rangeAttribut.max;
         newSlider.GetComponent<Slider>().minValue = rangeAttribut.min;
         newSlider.GetComponent<Slider>().onValueChanged.AddListener((value) =>
@@ -226,9 +210,9 @@ public class UIMaster : MonoBehaviour
             list.Add(value);
             target.setFieldProp(property, property.Name, list);
         });
+        
         target.valueChanged += (name) =>
         {
-           // Debug.Log("Fired value changed : " + name);
             if (name == property.Name)
             {
                 //Specific to the prefab architecture

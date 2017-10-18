@@ -102,16 +102,16 @@ namespace UnityOSC
 		{
 			if(this._udpClient != null) Close();
 			
-			try
-			{
+			//try
+			///{
 				_udpClient = new UdpClient(_localPort);
 				_receiverThread = new Thread(new ThreadStart(this.ReceivePool));
 				_receiverThread.Start();
-			}
-			catch(Exception e)
-			{
-				throw e;
-			}
+			//}
+			//catch(Exception e)
+			//{
+			//	throw e;
+			///}
 		}
 		public void Update(){
 			int i = 0;

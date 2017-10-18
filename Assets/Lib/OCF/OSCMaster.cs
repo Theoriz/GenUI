@@ -3,13 +3,19 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Security;
+using NUnit.Framework.Constraints;
 using UnityOSC;
 
 
-public class OSCMaster : MonoBehaviour
+public class OSCMaster : Controllable
 {
     OSCServer server;
+
+    [OSCProperty]
     public int port = 6000;
+
+    [OSCProperty] public bool isConnected;
+
     public bool debugMessage;
 
     Controllable[] controllables;
@@ -18,12 +24,37 @@ public class OSCMaster : MonoBehaviour
     public event ValueUpdateReadyEvent valueUpdateReady;
 
     // Use this for initialization
-    void Awake()
+    public override void Awake()
     {
-        server = new OSCServer(port);
-        server.PacketReceivedEvent += packetReceived;
-        server.Connect();
+        usePanel = true;
+        base.Awake();
+
+        Connect();
     }
+
+    public void Connect()
+    {
+        Debug.Log("Connecting to port " + port);
+        var oldPort = 2000;
+
+        if (isConnected)
+            oldPort = server.LocalPort;
+        try
+        {
+            server = new OSCServer(port);
+            server.PacketReceivedEvent += packetReceived;
+        
+            server.Connect();
+            isConnected = true;
+        }
+        catch (Exception e)
+        {
+            Debug.Log("Error with port " + port + " reverting to port " + oldPort);
+            port = oldPort;
+            isConnected = false;
+        }
+    }
+
     void packetReceived(OSCPacket p)
     {
 
@@ -59,7 +90,9 @@ public class OSCMaster : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-      //  Debug.Log("update");
+        if (port != server.LocalPort)
+            Connect();
+
         server.Update();
     }
 
