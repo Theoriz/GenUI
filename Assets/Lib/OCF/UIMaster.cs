@@ -105,6 +105,14 @@ public class UIMaster : MonoBehaviour
             //Debug.Log("Property type : " + propertyType + " of " + property.Key);
         }
 
+        //Order Save and Load preset buttons
+        var allText = newPanel.GetComponentsInChildren<Text>();
+        foreach (var text in allText)
+        {
+            if (text.text == "SavePreset" || text.text == "LoadPreset")
+                text.transform.parent.SetSiblingIndex(newPanel.transform.childCount-2); //last index being the preset list
+        }
+
     }
 
     private void CreateDropDown(Transform parent, Controllable target, FieldInfo listProperty, FieldInfo activeElement)

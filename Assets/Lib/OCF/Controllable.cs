@@ -107,7 +107,6 @@ public class Controllable : MonoBehaviour
             var value = propertiesArray[i].GetValue(this);
             if (value.ToString() != PreviousPropertiesValues[i].ToString())
             {
-                Debug.Log("Raised !! ");
                // Debug.Log("Difference between " + propertiesArray[i].GetValue(this) + " and " + PreviousPropertiesValues[i].ToString());
                 RaiseEventValueChanged(propertiesArray[i].Name);
                 PreviousPropertiesValues[i] = value;
