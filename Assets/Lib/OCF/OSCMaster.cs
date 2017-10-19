@@ -14,7 +14,7 @@ public class OSCMaster : Controllable
     [OSCProperty]
     public int port = 6000;
 
-    [OSCProperty] public bool isConnected;
+    [OSCProperty(isInteractible = false)] public bool isConnected;
 
     public bool debugMessage;
 
@@ -35,10 +35,6 @@ public class OSCMaster : Controllable
     public void Connect()
     {
         Debug.Log("Connecting to port " + port);
-        var oldPort = 2000;
-
-        if (isConnected)
-            oldPort = server.LocalPort;
         try
         {
             server = new OSCServer(port);
@@ -49,8 +45,7 @@ public class OSCMaster : Controllable
         }
         catch (Exception e)
         {
-            Debug.Log("Error with port " + port + " reverting to port " + oldPort);
-            port = oldPort;
+            Debug.Log("Error with port " + port);
             isConnected = false;
         }
     }
@@ -88,16 +83,20 @@ public class OSCMaster : Controllable
     }
 
     // Update is called once per frame
-    void Update()
+    public override void Update()
     {
+        base.Update();
+
         if (port != server.LocalPort)
+        {
             Connect();
+        }
 
         server.Update();
     }
 
 
-    void OnDestroy()
+    void OnApplicationQuit()
     {
         server.Close();
     }

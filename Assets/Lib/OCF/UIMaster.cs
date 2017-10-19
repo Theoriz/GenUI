@@ -86,20 +86,20 @@ public class UIMaster : MonoBehaviour
             if (propertyType.ToString() == "System.Single")
             {
                 var rangeAttribut = (RangeAttribute[]) property.Value.GetCustomAttributes(typeof(RangeAttribute), false);
-                if(rangeAttribut.Length == 0)
-                    CreateInput(newPanel.transform, newControllable, property.Value);
+                if (rangeAttribut.Length == 0)
+                    CreateInput(newPanel.transform, newControllable, property.Value, attribute.isInteractible);
                 else
-                    CreateSlider(newPanel.transform, newControllable, property.Value, rangeAttribut[0]);
+                    CreateSlider(newPanel.transform, newControllable, property.Value, rangeAttribut[0], attribute.isInteractible);
                 continue;
             }
             if (propertyType.ToString() == "System.Boolean")
             {
-                CreateCheckbox(newPanel.transform, newControllable, property.Value);
+                CreateCheckbox(newPanel.transform, newControllable, property.Value, attribute.isInteractible);
                 continue;
             }
             if (propertyType.ToString() == "System.Int32" || propertyType.ToString() == "System.Float" || propertyType.ToString() == "System.String")
             {
-                CreateInput(newPanel.transform, newControllable, property.Value);
+                CreateInput(newPanel.transform, newControllable, property.Value, attribute.isInteractible);
                 continue;
             }
             //Debug.Log("Property type : " + propertyType + " of " + property.Key);
@@ -175,7 +175,7 @@ public class UIMaster : MonoBehaviour
         newDropdown.GetComponent<RectTransform>().localScale = new Vector3(1.0f, 1.0f, 1.0f);
     }
 
-    private void CreateSlider(Transform parent, Controllable target, FieldInfo property, RangeAttribute rangeAttribut)
+    private void CreateSlider(Transform parent, Controllable target, FieldInfo property, RangeAttribute rangeAttribut, bool isInteractible)
     {
         //Debug.Log("Range : " + rangeAttribut.min + ";" + rangeAttribut.max);
         var newSlider = Instantiate(SliderPrefab);
@@ -184,6 +184,7 @@ public class UIMaster : MonoBehaviour
         newSlider.GetComponent<SliderValue>().name = property.Name;
         newSlider.GetComponent<Slider>().maxValue = rangeAttribut.max;
         newSlider.GetComponent<Slider>().minValue = rangeAttribut.min;
+        newSlider.GetComponent<Slider>().interactable = isInteractible; 
         newSlider.GetComponent<Slider>().onValueChanged.AddListener((value) =>
         {
             var list = new List<object>();
@@ -199,11 +200,12 @@ public class UIMaster : MonoBehaviour
         newSlider.GetComponent<RectTransform>().localScale = new Vector3(1.0f, 1.0f, 1.0f);
     }
 
-    private void CreateInput(Transform parent, Controllable target, FieldInfo property)
+    private void CreateInput(Transform parent, Controllable target, FieldInfo property, bool isInteractible)
     {
         var newInput = Instantiate(InputPrefab);
         newInput.GetComponent<Text>().text = property.Name;
         newInput.transform.SetParent(parent);
+        newInput.transform.GetComponentInChildren<InputField>().interactable = isInteractible;
         newInput.GetComponentInChildren<InputField>().onEndEdit.AddListener((value) =>
         {
             var list = new List<object>();
@@ -224,11 +226,12 @@ public class UIMaster : MonoBehaviour
         newInput.GetComponent<RectTransform>().localScale = new Vector3(1.0f, 1.0f, 1.0f);
     }
 
-    private void CreateCheckbox(Transform parent, Controllable target, FieldInfo property)
+    private void CreateCheckbox(Transform parent, Controllable target, FieldInfo property, bool isInteractible)
     {
         var newCheckbox = Instantiate(CheckboxPrefab);
         newCheckbox.GetComponentInChildren<Text>().text = property.Name;
         newCheckbox.transform.SetParent(parent);
+        newCheckbox.GetComponent<Toggle>().interactable = isInteractible;
         newCheckbox.GetComponent<Toggle>().onValueChanged.AddListener((value) =>
         {
             var list = new List<object>();

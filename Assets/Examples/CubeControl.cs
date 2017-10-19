@@ -59,8 +59,9 @@ public class CubeControl : Controllable
     }
 
     // Update is called once per frame
-    void Update ()
+    public override void Update ()
     {
+         base.Update();
          pos = transform.position;
          if(rotate)
             transform.Rotate(Vector3.up, Time.deltaTime * speed);

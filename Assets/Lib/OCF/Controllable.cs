@@ -98,22 +98,16 @@ public class Controllable : MonoBehaviour
             currentPreset = presetList[1];
     }
 
-    void FixedUpdate() //Warn UI if attribut change
+    public virtual void Update() //Warn UI if attribut change
     {
-        
-        //foreach (var value in Properties.Values)
-        //{
-        //    value.
-        //}
         var propertiesArray = Properties.Values.ToArray();
-        //var previousPropertiesArray = PreviousProperties.Values.ToArray();
 
         for (var i=0 ; i<Properties.Count ; i++)
         {
             var value = propertiesArray[i].GetValue(this);
             if (value.ToString() != PreviousPropertiesValues[i].ToString())
             {
-
+                Debug.Log("Raised !! ");
                // Debug.Log("Difference between " + propertiesArray[i].GetValue(this) + " and " + PreviousPropertiesValues[i].ToString());
                 RaiseEventValueChanged(propertiesArray[i].Name);
                 PreviousPropertiesValues[i] = value;
@@ -204,7 +198,7 @@ public class Controllable : MonoBehaviour
 
     }
 
-    void OnDestroy()
+    void OnApplicationQuit()
     {
         if (debug)
             Debug.Log("Saving temp file before destruction");
