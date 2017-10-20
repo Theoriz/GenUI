@@ -230,6 +230,8 @@ public class UIMaster : MonoBehaviour
                     Convert.ChangeType(target.getPropInfoForAddress(name).GetValue(target), property.FieldType);
             }
         };
+        newInput.transform.GetChild(0).Find("Placeholder").gameObject.GetComponent<Text>().color = Color.white;
+        newInput.transform.GetChild(0).Find("Text").gameObject.GetComponent<Text>().color = Color.white;
         newInput.transform.GetChild(0).Find("Placeholder").gameObject.GetComponent<Text>().text = target.getPropInfoForAddress(property.Name).GetValue(target).ToString();
         newInput.GetComponent<RectTransform>().localScale = new Vector3(1.0f, 1.0f, 1.0f);
     }
