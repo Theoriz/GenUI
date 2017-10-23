@@ -49,7 +49,8 @@ public class UIMaster : MonoBehaviour
 
     public void CreateUI(Controllable newControllable)
     {
-        Debug.Log("Adding " + newControllable.id + ", use panel : " + newControllable.usePanel);
+        if(showDebug)
+            Debug.Log("Adding " + newControllable.id + ", use panel : " + newControllable.usePanel);
 
         if (!newControllable.usePanel) return;
 

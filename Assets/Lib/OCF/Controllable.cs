@@ -86,12 +86,11 @@ public class Controllable : MonoBehaviour
             }
         }
 
-        presetList = new List<string>();
-        ReadFileList();
-
-
         if (string.IsNullOrEmpty(id)) id = gameObject.name;
         ControllableMaster.Register(this);
+
+        presetList = new List<string>();
+        ReadFileList();
 
         LoadLatestUsedPreset();
         if (presetList.Count > 1)
