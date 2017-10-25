@@ -31,7 +31,7 @@ public class Controllable : MonoBehaviour
     public string folder = "";
     public bool debug = false;
     public string targetDirectory;
-    public bool usePanel;
+    public bool usePanel = true, usePresets = true;
 
     public Dictionary<string, FieldInfo> Properties;
     public List<object> PreviousPropertiesValues;
@@ -64,6 +64,8 @@ public class Controllable : MonoBehaviour
             OSCProperty attribute = Attribute.GetCustomAttribute(info, typeof(OSCProperty)) as OSCProperty;
             if (attribute != null)
             {
+                if (info.Name == "currentPreset" && !usePresets) continue;
+
                 Properties.Add(info.Name, info);
                 PreviousPropertiesValues.Add(info.GetValue(this));
             }
@@ -81,7 +83,8 @@ public class Controllable : MonoBehaviour
             OSCMethod attribute = Attribute.GetCustomAttribute(info, typeof(OSCMethod)) as OSCMethod;
             if (attribute != null)
             {
-                // Debug.Log("Added a new method : " + attribute.address);
+                if((info.Name == "SavePreset" || info.Name == "LoadPreset") && !usePresets) continue;
+
                 Methods.Add(info.Name, info);
             }
         }
@@ -196,18 +199,21 @@ public class Controllable : MonoBehaviour
 
     }
 
-    void OnApplicationQuit()
+    void OnDestroy()
     {
         if (debug)
             Debug.Log("Saving temp file before destruction");
 
-        if (!string.IsNullOrEmpty(LastUsedPreset))
+        if (usePresets)
         {
-            //Create temp file
-            var tempFile = File.OpenWrite(targetDirectory + tempFileName);
-            tempFile.Close();
-            //write last loaded preset
-            File.WriteAllText(targetDirectory + tempFileName, LastUsedPreset);
+            if (!string.IsNullOrEmpty(LastUsedPreset))
+            {
+                //Create temp file
+                var tempFile = File.OpenWrite(targetDirectory + tempFileName);
+                tempFile.Close();
+                //write last loaded preset
+                File.WriteAllText(targetDirectory + tempFileName, LastUsedPreset);
+            }
         }
 
         if (debug)
