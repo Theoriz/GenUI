@@ -31,6 +31,7 @@ public class Controllable : MonoBehaviour
     public string folder = "";
     public bool debug = false;
     public string targetDirectory;
+    public string sourceScene;
     public bool usePanel = true, usePresets = true;
 
     public Dictionary<string, FieldInfo> Properties;
@@ -47,7 +48,7 @@ public class Controllable : MonoBehaviour
     public List<string> presetList;
     
     private string LastUsedPreset;
-    private string tempFileName = "temp.mr";
+    private string tempFileName = "_temp.pst";
 
     public virtual void Awake()
     {
@@ -90,12 +91,13 @@ public class Controllable : MonoBehaviour
         }
 
         if (string.IsNullOrEmpty(id)) id = gameObject.name;
+        sourceScene = SceneManager.GetActiveScene().name;
+
         ControllableMaster.Register(this);
 
         presetList = new List<string>();
         ReadFileList();
 
-        LoadLatestUsedPreset();
         if (presetList.Count > 1)
             currentPreset = presetList[1];
     }
@@ -116,26 +118,28 @@ public class Controllable : MonoBehaviour
         }
     }
 
-    private void LoadLatestUsedPreset()
+    public void LoadLatestUsedPreset()
     {
+        //Check if the temp preset containing the last used preset exists
         if (!File.Exists(targetDirectory + tempFileName)) return;
 
         var file = new StreamReader(targetDirectory + tempFileName);
         
         var lastPresetRead =  file.ReadLine();
-
+        file.Close();
+        Debug.Log("LastUsedPreset for "+id+" : " + lastPresetRead);
         if (string.IsNullOrEmpty(lastPresetRead)) return;
 
-        var tempVariable = currentPreset;
         currentPreset = lastPresetRead;
         LoadPreset();
-        currentPreset = tempVariable;
+
+        RaiseEventValueChanged("currentPreset");
     }
 
     public void ReadFileList()
     {
         presetList.Clear();
-        targetDirectory = "Presets/" + (folder.Length > 0?folder:SceneManager.GetActiveScene().name) + "/" + id + "/";
+        targetDirectory = "Presets/" + (folder.Length > 0?folder:sourceScene) + "/" + id + "/";
         Directory.CreateDirectory(targetDirectory);
         foreach (var t in Directory.GetFiles(targetDirectory))
         {
@@ -145,7 +149,7 @@ public class Controllable : MonoBehaviour
             presetList.Add(onlyFileName);
         }
 
-        RaiseEventValueChanged("presetList");
+        RaiseEventValueChanged("currentPreset");
     }
 
     [OSCMethod]
@@ -155,7 +159,8 @@ public class Controllable : MonoBehaviour
         var date = DateTime.Today.Day + "-" + DateTime.Today.Month + "-" + DateTime.Today.Year + "_" +
                    DateTime.Now.Hour + "-" + DateTime.Now.Minute + "-" + DateTime.Now.Second;
         var fileName = date + ".pst";
-        targetDirectory = "Presets/" + (folder.Length > 0 ? folder : SceneManager.GetActiveScene().name) + "/" + id + "/";
+
+        targetDirectory = "Presets/" + (folder.Length > 0 ? folder : sourceScene) + "/" + id + "/";
         Debug.Log("Saving in " + targetDirectory + fileName + "...");
         //create file
         if (!Directory.Exists(targetDirectory)) Directory.CreateDirectory(targetDirectory);
@@ -169,7 +174,7 @@ public class Controllable : MonoBehaviour
             Debug.Log("Saved in " + targetDirectory + fileName);
 
         LastUsedPreset = fileName;
-
+        currentPreset = LastUsedPreset;
         ReadFileList();
     }
 
@@ -177,7 +182,7 @@ public class Controllable : MonoBehaviour
     public void LoadPreset()
     {
         //if (debug)
-            Debug.Log("Loading " + currentPreset);
+            Debug.Log("Loading " + currentPreset +" preset for "+ id);
 
         var file = new StreamReader(targetDirectory + currentPreset);
         ControllableData cData = JsonUtility.FromJson<ControllableData>(file.ReadLine());
@@ -186,7 +191,7 @@ public class Controllable : MonoBehaviour
         DataLoaded();
 
         LastUsedPreset = currentPreset;
-
+        file.Close();
         if (debug)
             Debug.Log("Done.");
     }
@@ -194,10 +199,7 @@ public class Controllable : MonoBehaviour
     //Override it if you want to do things after a load 
     public virtual void DataLoaded() { }
     //Override it if you want to do things before a preset save
-    public virtual void CallMeBeforeSave()
-    {
-
-    }
+    public virtual void CallMeBeforeSave() { }
 
     void OnDestroy()
     {

@@ -10,7 +10,7 @@ public class SliderValue : MonoBehaviour
 
     private Text text;
 
-    public string name;
+    public string propertyName;
     // Use this for initialization
     void Start()
     {
@@ -21,7 +21,7 @@ public class SliderValue : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        text.text = name + " : " + slider.value.ToString("F2");
+        text.text = propertyName + " : " + slider.value.ToString("F2");
 
     }
 }

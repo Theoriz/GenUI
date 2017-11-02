@@ -34,6 +34,9 @@ public class OSCMaster : Controllable
         Debug.Log("Connecting to port " + port);
         try
         {
+            if(server != null)
+                server.Close();
+
             server = new OSCServer(port);
             server.PacketReceivedEvent += packetReceived;
         

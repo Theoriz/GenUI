@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
@@ -22,6 +23,7 @@ public class UIMaster : MonoBehaviour
     private GameObject _rootCanvas;
     private Dictionary<string, GameObject> _panels;
 
+
     // Use this for initialization
     void Awake()
     {
@@ -31,10 +33,9 @@ public class UIMaster : MonoBehaviour
         ControllableMaster.controllableRemoved += RemoveUI;
     }
 
-    void Update()
+    public void ToggleUI()
     {
-        if(Input.GetKeyDown("h"))
-            transform.GetChild(0).gameObject.SetActive(!transform.GetChild(0).gameObject.activeSelf);
+        transform.GetChild(0).gameObject.SetActive(!transform.GetChild(0).gameObject.activeSelf);
     }
 
     public void RemoveUI(Controllable dyingControllable)
@@ -120,65 +121,82 @@ public class UIMaster : MonoBehaviour
     {
         var newDropdown = Instantiate(DropdownPrefab);
         newDropdown.transform.SetParent(parent);
-        var listToDisplay = new List<string>();
 
         //TODO remove string
         var listInObject = (List<string>) listProperty.GetValue(target);
-
-        foreach (var item in listInObject)
+        var activeElementInObject = activeElement.GetValue(target).ToString();
+        var activeElementIndex = -1;
+        for (var i = 0; i < listInObject.Count; i++)
         {
-            listToDisplay.Add(item.ToString());
+            if (activeElementInObject == listInObject[i].ToString())
+                activeElementIndex = i;
+        }
+        //Switch active element in list to be the first one, so the displayed one in dropdown
+        if (activeElementIndex != -1 && listInObject.Count > 1)
+        {
+            var tmp = listInObject[0];
+            listInObject[0] = listInObject[activeElementIndex];
+            listInObject[activeElementIndex] = tmp;
         }
 
-        //Set value if element in list
-        var linkedList = (List<string>) listProperty.GetValue(target);
-        if (linkedList.Count > 0) { 
-            string startValue = linkedList[newDropdown.GetComponent<Dropdown>().value-1];
-            target.setFieldProp(activeElement, activeElement.Name, new List<object> {startValue});
-        }
-
-    newDropdown.GetComponent<Dropdown>().AddOptions(listToDisplay);
+        newDropdown.GetComponent<Dropdown>().value = 0;
+        
+        newDropdown.GetComponent<Dropdown>().AddOptions(listInObject);
         newDropdown.GetComponent<Dropdown>().onValueChanged.AddListener((value) =>
         {
-            //var currentList = (List<string>) target.getPropInfoForAddress(property.Name).GetValue(target);
-            //var selected = currentList[value];
-            //currentList.Add(selected);
-            //currentList.RemoveAt(value);
-            //newDropdown.GetComponent<Dropdown>().value = currentList.Count - 1;
-            //Debug.Log("UI value changed  :" + value);
             var associatedList = (List<string>)listProperty.GetValue(target);
             string activeItem = associatedList[value];
 
             List<object> objParams = new List<object> { activeItem };
-
             target.setFieldProp(activeElement, activeElement.Name, objParams);
         });
         
         target.valueChanged += (name) =>
         {
-            //Debug.Log(target.id + " UI has been updated");
-            newDropdown.GetComponent<Dropdown>().ClearOptions();
-            newDropdown.GetComponent<Dropdown>().AddOptions((List<string>) listProperty.GetValue(target));
+            //Debug.Log(name+ " UI has been updated with value " + activeElement.GetValue(target).ToString());
+            
+            activeElementIndex = -1;
+            activeElementInObject = activeElement.GetValue(target).ToString();
+            listInObject = (List<string>)listProperty.GetValue(target);
 
-            //switch string order to match index
-            var options = newDropdown.GetComponent<Dropdown>().options;
-            var actualIndex = newDropdown.GetComponent<Dropdown>().value;
-            if (options.Count > 1)
+            for (var i = 0; i < listInObject.Count; i++)
             {
-                var selectedElementInControllable = activeElement.GetValue(target);
-                var temp = options[actualIndex];
-                var replacementIndex = 0;
-
-                for (var i = 0 ; i < options.Count ; i++)
-                {
-                    if (options[i].text == options[actualIndex].text)
-                        replacementIndex = i;
-                }
-
-                options[actualIndex].text = (string)selectedElementInControllable;
-                options[replacementIndex].text = temp.text;
+                if (activeElementInObject == listInObject[i].ToString())
+                    activeElementIndex = i;
             }
+            //Switch active element in list to be the first one, so the displayed one in dropdown
+            if (activeElementIndex != -1 && listInObject.Count > 1)
+            {
+                //Debug.Log("Switching " + listInObject[newDropdown.GetComponent<Dropdown>().value].ToString() + " with " + listInObject[activeElementIndex].ToString());
+                var tmp = listInObject[newDropdown.GetComponent<Dropdown>().value];
+                listInObject[newDropdown.GetComponent<Dropdown>().value] = listInObject[activeElementIndex];
+                listInObject[activeElementIndex] = tmp;
+                //Debug.Log("Now dropdown value corresponds to " +
+                //          listInObject[newDropdown.GetComponent<Dropdown>().value].ToString() + " instead of " +
+                //          listInObject[activeElementIndex].ToString());
+            }
+            newDropdown.GetComponent<Dropdown>().ClearOptions();
+            newDropdown.GetComponent<Dropdown>().AddOptions(listInObject);
 
+            ////switch string order to match index
+            //var options = newDropdown.GetComponent<Dropdown>().options;
+            //var actualIndex = newDropdown.GetComponent<Dropdown>().value;
+            //if (options.Count > 1)
+            //{
+            //    var selectedElementInControllable = activeElement.GetValue(target);
+            //    var temp = options[actualIndex];
+            //    var replacementIndex = 0;
+
+            //    for (var i = 0 ; i < options.Count ; i++)
+            //    {
+            //        if (options[i].text == options[actualIndex].text)
+            //            replacementIndex = i;
+            //    }
+
+            //    options[actualIndex].text = (string)selectedElementInControllable;
+            //    options[replacementIndex].text = temp.text;
+            //}
+            //newDropdown.GetComponent<Dropdown>().options = options;// newDropdown.GetComponent<Dropdown>().AddOptions((List<string>)listProperty.GetValue(target));
             //newDropdown.GetComponent<Dropdown>().value = listInControllable.IndexOf((string)activeElement.GetValue(target))-1;
         };
         newDropdown.GetComponent<RectTransform>().localScale = new Vector3(1.0f, 1.0f, 1.0f);

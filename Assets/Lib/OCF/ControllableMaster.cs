@@ -46,4 +46,12 @@ public static class ControllableMaster
         else
             Debug.LogWarning("Target : \"" + target + "\" is unknown !");
     }
+
+    public static void LoadEveryPresets()
+    {
+        foreach (var controllable in RegisteredControllables)
+        {
+            controllable.Value.LoadLatestUsedPreset();
+        }
+    }
 }
