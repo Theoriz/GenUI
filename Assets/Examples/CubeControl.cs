@@ -17,6 +17,10 @@ public class CubeControl : Controllable
     public bool rotate;
 
     [OSCProperty]
+    [Range(0, 100)]
+    public int IntSlider;
+
+    [OSCProperty]
     [Range(0,100)]
     public float speed;
 

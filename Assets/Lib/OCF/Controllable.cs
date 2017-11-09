@@ -68,6 +68,7 @@ public class Controllable : MonoBehaviour
                 if (info.Name == "currentPreset" && !usePresets) continue;
 
                 Properties.Add(info.Name, info);
+                Debug.Log("Intializing " + info.Name + " with " + info.GetValue(this));
                 PreviousPropertiesValues.Add(info.GetValue(this));
             }
         }
@@ -99,7 +100,7 @@ public class Controllable : MonoBehaviour
         ReadFileList();
 
         if (presetList.Count > 1)
-            currentPreset = presetList[1];
+            currentPreset = presetList[0];
     }
 
     public virtual void Update() //Warn UI if attribut change

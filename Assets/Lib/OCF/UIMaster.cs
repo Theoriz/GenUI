@@ -85,13 +85,16 @@ public class UIMaster : MonoBehaviour
                 continue;
             }
             //property.Value.Attributes O
-            if (propertyType.ToString() == "System.Single")
+            if (propertyType.ToString() == "System.Single" || propertyType.ToString() == "System.Int32")
             {
                 var rangeAttribut = (RangeAttribute[]) property.Value.GetCustomAttributes(typeof(RangeAttribute), false);
+
+                bool isFloat = propertyType.ToString() != "System.Int32";
+
                 if (rangeAttribut.Length == 0)
                     CreateInput(newPanel.transform, newControllable, property.Value, attribute.isInteractible);
                 else
-                    CreateSlider(newPanel.transform, newControllable, property.Value, rangeAttribut[0], attribute.isInteractible);
+                    CreateSlider(newPanel.transform, newControllable, property.Value, rangeAttribut[0], attribute.isInteractible, isFloat);
                 continue;
             }
             if (propertyType.ToString() == "System.Boolean")
@@ -202,16 +205,22 @@ public class UIMaster : MonoBehaviour
         newDropdown.GetComponent<RectTransform>().localScale = new Vector3(1.0f, 1.0f, 1.0f);
     }
 
-    private void CreateSlider(Transform parent, Controllable target, FieldInfo property, RangeAttribute rangeAttribut, bool isInteractible)
+    private void CreateSlider(Transform parent, Controllable target, FieldInfo property, RangeAttribute rangeAttribut, bool isInteractible, bool isFloat = true)
     {
         //Debug.Log("Range : " + rangeAttribut.min + ";" + rangeAttribut.max);
         var newSlider = Instantiate(SliderPrefab);
         newSlider.GetComponentInChildren<Text>().text = property.Name;
         newSlider.transform.SetParent(parent);
         newSlider.GetComponent<SliderValue>().name = property.Name;
+        Debug.Log("Value of " + property.Name + " is " + float.Parse(property.GetValue(target).ToString()));
+
         newSlider.GetComponent<Slider>().maxValue = rangeAttribut.max;
         newSlider.GetComponent<Slider>().minValue = rangeAttribut.min;
-        newSlider.GetComponent<Slider>().interactable = isInteractible; 
+        newSlider.GetComponent<Slider>().interactable = isInteractible;
+
+        if (!isFloat)
+            newSlider.GetComponent<Slider>().wholeNumbers = true;
+
         newSlider.GetComponent<Slider>().onValueChanged.AddListener((value) =>
         {
             var list = new List<object>();
@@ -222,8 +231,17 @@ public class UIMaster : MonoBehaviour
         {
            // Debug.Log("Fired value changed : " + name);
             if (name == property.Name)
-                newSlider.GetComponent<Slider>().value = (float)target.getPropInfoForAddress(name).GetValue(target);
+            {
+                if(isFloat)
+                    newSlider.GetComponent<Slider>().value = (float) target.getPropInfoForAddress(name).GetValue(target);
+                else
+                    newSlider.GetComponent<Slider>().value = (int)target.getPropInfoForAddress(name).GetValue(target);
+            }
         };
+        if (isFloat)
+            newSlider.GetComponent<Slider>().value = float.Parse(property.GetValue(target).ToString());
+        else
+            newSlider.GetComponent<Slider>().value = (int)property.GetValue(target);
         newSlider.GetComponent<RectTransform>().localScale = new Vector3(1.0f, 1.0f, 1.0f);
     }
 
@@ -233,6 +251,7 @@ public class UIMaster : MonoBehaviour
         newInput.GetComponent<Text>().text = property.Name;
         newInput.transform.SetParent(parent);
         newInput.transform.GetComponentInChildren<InputField>().interactable = isInteractible;
+        newInput.GetComponentInChildren<InputField>().text = property.GetValue(target).ToString();
         newInput.GetComponentInChildren<InputField>().onEndEdit.AddListener((value) =>
         {
             var list = new List<object>();
@@ -260,6 +279,7 @@ public class UIMaster : MonoBehaviour
         var newCheckbox = Instantiate(CheckboxPrefab);
         newCheckbox.GetComponentInChildren<Text>().text = property.Name;
         newCheckbox.transform.SetParent(parent);
+        newCheckbox.GetComponent<Toggle>().isOn = (bool) property.GetValue(target);
         newCheckbox.GetComponent<Toggle>().interactable = isInteractible;
         newCheckbox.GetComponent<Toggle>().onValueChanged.AddListener((value) =>
         {
