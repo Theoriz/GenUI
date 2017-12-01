@@ -6,15 +6,21 @@ using UnityOSC;
 
 public class OSCMaster : Controllable
 {
+    public static OSCMaster instance;
+
     OSCServer server;
 
     [OSCProperty]
-    public int port = 6000;
+    public int localPort = 6000;
+
 
     [OSCProperty(isInteractible = false)] public bool isConnected;
 
-    public bool debugMessage;
+    public bool logIncoming;
+    public bool logOutgoing;
 
+    OSCClient client;
+   
     Controllable[] controllables;
 
     public delegate void ValueUpdateReadyEvent(string target, string property, List<object> objects);
@@ -23,21 +29,26 @@ public class OSCMaster : Controllable
     // Use this for initialization
     public override void Awake()
     {
+        instance = this;
+
         usePanel = true;
         base.Awake();
 
         Connect();
+
+        client = new OSCClient(System.Net.IPAddress.Loopback, 0, false);
+
     }
 
     public void Connect()
     {
-        Debug.Log("Connecting to port " + port);
+        Debug.Log("Connecting to port " + localPort);
         try
         {
             if(server != null)
                 server.Close();
 
-            server = new OSCServer(port);
+            server = new OSCServer(localPort);
             server.PacketReceivedEvent += packetReceived;
         
             server.Connect();
@@ -45,7 +56,7 @@ public class OSCMaster : Controllable
         }
         catch (Exception e)
         {
-            Debug.Log("Error with port " + port);
+            Debug.Log("Error with port " + localPort);
             isConnected = false;
         }
     }
@@ -70,15 +81,14 @@ public class OSCMaster : Controllable
 
         if (addSplit.Length != 3)
         {
-            if (debugMessage) Debug.LogWarning("Message " + m.Address + " is not a valid control address.");
+            if (logIncoming) Debug.LogWarning("Message " + m.Address + " is not a valid control address.");
             return;
         }
 
         string target = addSplit[1];
         string property = addSplit[2];
 
-        if (debugMessage) Debug.Log("Message received for Target : " + target + ", property = " + property);
-
+        if (logIncoming) Debug.Log("Message received for Target : " + target + ", property = " + property);
         ControllableMaster.UpdateValue(target, property, m.Data);
     }
 
@@ -87,12 +97,24 @@ public class OSCMaster : Controllable
     {
         base.Update();
 
-        if (port != server.LocalPort)
+        if (localPort != server.LocalPort)
         {
             Connect();
         }
 
         server.Update();
+    }
+
+    public static void sendMessage(OSCMessage m, string host, int port)
+    {
+        if (instance.logOutgoing)
+        {
+            string args = "";
+            for (int i = 0; i < m.Data.Count; i++) args += (i > 0 ? ", " : "") + m.Data[i].ToString();
+            Debug.Log("Sending " + m.Address + " : "+args);
+        }
+
+        instance.client.SendTo(m, host, port);
     }
 
 
