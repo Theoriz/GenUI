@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
@@ -209,20 +210,22 @@ public class UIMaster : MonoBehaviour
     {
         //Debug.Log("Range : " + rangeAttribut.min + ";" + rangeAttribut.max);
         var newSlider = Instantiate(SliderPrefab);
-        newSlider.GetComponentInChildren<Text>().text = property.Name;
+        newSlider.GetComponentInChildren<Text>().text = property.Name + " : " + 0;
         newSlider.transform.SetParent(parent);
-        newSlider.GetComponent<SliderValue>().name = property.Name;
-        Debug.Log("Value of " + property.Name + " is " + float.Parse(property.GetValue(target).ToString()));
+
+       // Debug.Log("Value of " + property.Name + " is " + float.Parse(property.GetValue(target).ToString()));
 
         newSlider.GetComponent<Slider>().maxValue = rangeAttribut.max;
         newSlider.GetComponent<Slider>().minValue = rangeAttribut.min;
         newSlider.GetComponent<Slider>().interactable = isInteractible;
-
-        if (!isFloat)
-            newSlider.GetComponent<Slider>().wholeNumbers = true;
+        newSlider.GetComponent<Slider>().wholeNumbers = !isFloat;
 
         newSlider.GetComponent<Slider>().onValueChanged.AddListener((value) =>
         {
+            if (isFloat)
+                newSlider.GetComponentInChildren<Text>().text = property.Name + " : " + value.ToString("F2");
+            else
+                newSlider.GetComponentInChildren<Text>().text = property.Name + " : " + value;
             var list = new List<object>();
             list.Add(value);
             target.setFieldProp(property, property.Name, list);
@@ -232,10 +235,19 @@ public class UIMaster : MonoBehaviour
            // Debug.Log("Fired value changed : " + name);
             if (name == property.Name)
             {
-                if(isFloat)
-                    newSlider.GetComponent<Slider>().value = (float) target.getPropInfoForAddress(name).GetValue(target);
+                if (isFloat)
+                {
+                    newSlider.GetComponent<Slider>().value =
+                        (float) target.getPropInfoForAddress(name).GetValue(target);
+                    newSlider.GetComponentInChildren<Text>().text =
+                        property.Name + " : " + newSlider.GetComponent<Slider>().value.ToString("F2");
+                }
                 else
-                    newSlider.GetComponent<Slider>().value = (int)target.getPropInfoForAddress(name).GetValue(target);
+                {
+                    newSlider.GetComponent<Slider>().value = (int) target.getPropInfoForAddress(name).GetValue(target);
+                    newSlider.GetComponentInChildren<Text>().text =
+                        property.Name + " : " + newSlider.GetComponent<Slider>().value;
+                }
             }
         };
         if (isFloat)
@@ -255,17 +267,30 @@ public class UIMaster : MonoBehaviour
         newInput.GetComponentInChildren<InputField>().onEndEdit.AddListener((value) =>
         {
             var list = new List<object>();
-            list.Add(value);
+
+            var propertyType = property.FieldType;
+            if (propertyType.ToString() == "System.Int32")
+                list.Add(int.Parse(value));
+            if (propertyType.ToString() == "System.Single")
+            {
+                value = value.Replace(".", ",");
+                list.Add(float.Parse(value));
+            }
+            if (propertyType.ToString() == "System.String")
+                list.Add(value);
+
+
             target.setFieldProp(property, property.Name, list);
         });
         
         target.valueChanged += (name) =>
         {
+            
             if (name == property.Name)
             {
+               // Debug.Log("Value " + name + " changed ");
                 //Specific to the prefab architecture
-                    newInput.transform.GetChild(0).Find("Placeholder").gameObject.GetComponent<Text>().text = "" + 
-                    Convert.ChangeType(target.getPropInfoForAddress(name).GetValue(target), property.FieldType);
+                newInput.transform.GetChild(0).GetComponent<InputField>().text = "" + property.GetValue(target);//Convert.ChangeType(target.getPropInfoForAddress(name).GetValue(target), property.FieldType))ype);
             }
         };
         newInput.transform.GetChild(0).Find("Placeholder").gameObject.GetComponent<Text>().color = Color.white;

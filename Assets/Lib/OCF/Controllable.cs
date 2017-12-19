@@ -68,7 +68,7 @@ public class Controllable : MonoBehaviour
                 if (info.Name == "currentPreset" && !usePresets) continue;
 
                 Properties.Add(info.Name, info);
-                Debug.Log("Intializing " + info.Name + " with " + info.GetValue(this));
+                //Debug.Log("Intializing " + info.Name + " with " + info.GetValue(this));
                 PreviousPropertiesValues.Add(info.GetValue(this));
             }
         }
@@ -100,10 +100,13 @@ public class Controllable : MonoBehaviour
         ReadFileList();
 
         if (presetList.Count > 1)
+        {
             currentPreset = presetList[0];
+        }
+        LoadLatestUsedPreset();
     }
 
-    public virtual void Update() //Warn UI if attribut change
+    public virtual void Update() //Warn UI if attribut changes
     {
         var propertiesArray = Properties.Values.ToArray();
 
@@ -515,57 +518,6 @@ public class Controllable : MonoBehaviour
             index++;
         }
     }
-
-    /*
-    Int32 fieldOffset = 0;(
-    var assemblyName
-        = new AssemblyName("MyDynamicAssembly");
-    var assemblyBuilder
-        = AppDomain.CurrentDomain.DefineDynamicAssembly(
-            assemblyName,
-            AssemblyBuilderAccess.Run);
-    var moduleBuilder
-        = assemblyBuilder.DefineDynamicModule("MyDynamicModule");
-
-    var myTypeBuilder = moduleBuilder.DefineType("data", TypeAttributes.Public);
-
-    // add public fields to match the source object
-    foreach (FieldInfo sourceField in Properties.Values)
-    {
-        FieldBuilder fieldBuilder
-            = myTypeBuilder.DefineField(
-                sourceField.Name,
-                sourceField.FieldType,
-                FieldAttributes.Public);
-        fieldBuilder.SetOffset(fieldOffset);
-        fieldOffset++;
-    }
-
-    // create the dynamic class
-    Type dynamicType = myTypeBuilder.CreateType();
-
-    // create an instance of the class
-    newData = Activator.CreateInstance(dynamicType);
-
-    // copy the values of the public fields of the
-    // source object to the dynamic object
-    foreach (FieldInfo sourceField in Properties.Values)
-    {
-        FieldInfo destField
-            = newData.GetType().GetField(sourceField.Name);
-        destField.SetValue(
-            newData,
-            sourceField.GetValue(this));
-    }
-
-    // give the new class to the caller for casting purposes
-    outType = dynamicType;
-
-    return newData;
-    */
-
-
-
 
     object getObjectForValue(string typeString, string value)
     {
