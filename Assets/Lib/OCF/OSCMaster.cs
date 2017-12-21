@@ -85,7 +85,8 @@ public class OSCMaster : Controllable
         //First addSplit is null because of /OCF/...
         if (addSplit[1] != "OCF") //.Length != 3)
         {
-            messageAvailable(m); //propagate the message
+            if(messageAvailable != null)
+                messageAvailable(m); //propagate the message
              //if (logIncoming) Debug.LogWarning("Message " + m.Address + " is not a valid control address.");
             //return;
         }
