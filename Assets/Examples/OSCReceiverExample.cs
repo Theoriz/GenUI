@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class OSCReceiver : MonoBehaviour
+public class OSCReceiverExample : MonoBehaviour
 {
 
     private OSCMaster oscMaster;
