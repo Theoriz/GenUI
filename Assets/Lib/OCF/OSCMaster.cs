@@ -26,6 +26,9 @@ public class OSCMaster : Controllable
     public delegate void ValueUpdateReadyEvent(string target, string property, List<object> objects);
     public event ValueUpdateReadyEvent valueUpdateReady;
 
+    public delegate void MessageAvailable(OSCMessage message);
+    public event MessageAvailable messageAvailable;
+
     // Use this for initialization
     public override void Awake()
     {
@@ -79,17 +82,21 @@ public class OSCMaster : Controllable
 
         string[] addSplit = m.Address.Split(new char[] { '/' });
 
-        if (addSplit.Length != 3)
+        //First addSplit is null because of /OCF/...
+        if (addSplit[1] != "OCF") //.Length != 3)
         {
-            if (logIncoming) Debug.LogWarning("Message " + m.Address + " is not a valid control address.");
-            return;
+            messageAvailable(m); //propagate the message
+             //if (logIncoming) Debug.LogWarning("Message " + m.Address + " is not a valid control address.");
+            //return;
         }
+        else //Starts with /OCF/ so it's control
+        {
+            string target = addSplit[2];
+            string property = addSplit[3];
 
-        string target = addSplit[1];
-        string property = addSplit[2];
-
-        if (logIncoming) Debug.Log("Message received for Target : " + target + ", property = " + property);
-        ControllableMaster.UpdateValue(target, property, m.Data);
+            if (logIncoming) Debug.Log("Message received for Target : " + target + ", property = " + property);
+            ControllableMaster.UpdateValue(target, property, m.Data);
+        }
     }
 
     // Update is called once per frame
