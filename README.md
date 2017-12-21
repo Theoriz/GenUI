@@ -20,7 +20,9 @@ To expose a string list you have to create a index variable which will be used b
 
 ## OSC Control
 To access a property or launch a method you have to use its address.
-For example : "/id/method" or "/id/floatProperty/ 1.5" by default the id corresponds to the gameObject name but this can be changed by setting the public variable ID in your script extending "Controllable".
+For example : "/OCF/id/method" or "/OCF/id/floatProperty/ 1.5" by default the id corresponds to the gameObject name but this can be changed by setting the public variable ID in your script extending "Controllable".
+
+You can also get your own OSC messages by connecting to MessageAvailable event in OSCMaster. This event will be triggered for every OSC message which doesn't start by /OCF/.
 
 ## Issues
 Sometimes UI won't show up or will be destroy if you load a new scene while playing. To prevent this you have to change the script execution order and set UIMaster as the first script to be executed.
