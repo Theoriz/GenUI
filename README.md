@@ -3,7 +3,7 @@ Automatic OSC Control Framework for Unity
 This plugins allows you to simply create a UI for your application, exposing script sliders, inputfield and method. This UI is also fully controllable via OSC.
 
 ## What works ?
-You can expose bool, int, float and string property. It is possible to define a range for int and float in order to get a slider in the UI otherwise you would get an inputfield. Method appear as button in UI so you can't give it arguments but this is possible using OSC. Finally you can expose string list which will be displayed with a dropdown menu.
+You can expose bool, int, float and string property. It is possible to define a range for int and float in order to get a slider in the UI by adding the Range metadata, otherwise you would get an inputfield. Method appear as button in UI so you can't give it arguments but this is possible using OSC. Finally you can expose string list which will be displayed with a dropdown menu.
 
 ## Presets
 This plugin comes with a preset system, you can save the state of a "'Controllable" script. It saves each property to a file that can be loaded later so that you can create differents settings for your script. To use it, simply click on "Save preset" then select the wanted preset inside the dropdown menu and press "Load Preset".
