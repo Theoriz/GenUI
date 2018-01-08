@@ -39,6 +39,14 @@ public class UIMaster : MonoBehaviour
         transform.GetChild(0).gameObject.SetActive(!transform.GetChild(0).gameObject.activeSelf);
     }
 
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            ToggleUI();
+        }
+    }
+
     public void RemoveUI(Controllable dyingControllable)
     {
         if (!dyingControllable.usePanel) return;
@@ -269,11 +277,12 @@ public class UIMaster : MonoBehaviour
             var list = new List<object>();
 
             var propertyType = property.FieldType;
+            Debug.Log("Property type : " + propertyType.ToString());
             if (propertyType.ToString() == "System.Int32")
                 list.Add(int.Parse(value));
             if (propertyType.ToString() == "System.Single")
             {
-                value = value.Replace(".", ",");
+                value = value.Replace(",", ".");
                 list.Add(float.Parse(value));
             }
             if (propertyType.ToString() == "System.String")
