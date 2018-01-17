@@ -77,7 +77,7 @@ public class OSCMaster : Controllable
                 processMessage(m);
             }
         }else processMessage((OSCMessage)p);
-        Debug.Log("Packet processed");
+       // Debug.Log("Packet processed");
     }
 
     void processMessage(OSCMessage m)
