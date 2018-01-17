@@ -12,6 +12,7 @@ public class OSCMaster : Controllable
 
     [OSCProperty]
     public int localPort = 6000;
+    private int oldLocalPort;
 
 
     [OSCProperty(isInteractible = false)] public bool isConnected;
@@ -37,6 +38,7 @@ public class OSCMaster : Controllable
         usePanel = true;
         base.Awake();
 
+        oldLocalPort = localPort;
         Connect();
 
         client = new OSCClient(System.Net.IPAddress.Loopback, 0, false);
@@ -56,10 +58,11 @@ public class OSCMaster : Controllable
         
             server.Connect();
             isConnected = true;
+            oldLocalPort = localPort;
         }
         catch (Exception e)
         {
-            Debug.Log("Error with port " + localPort);
+            Debug.LogError("Error with port " + localPort);
             isConnected = false;
         }
     }
@@ -105,12 +108,18 @@ public class OSCMaster : Controllable
     {
         base.Update();
 
-        if (localPort != server.LocalPort)
+        if ((!isConnected && localPort != oldLocalPort && server == null))
         {
             Connect();
         }
 
-        server.Update();
+        if (isConnected && localPort != server.LocalPort)
+        {
+            Connect();
+        }
+
+        if(isConnected)
+            server.Update();
     }
 
     public static void sendMessage(OSCMessage m, string host, int port)

@@ -277,7 +277,7 @@ public class UIMaster : MonoBehaviour
             var list = new List<object>();
 
             var propertyType = property.FieldType;
-            Debug.Log("Property type : " + propertyType.ToString());
+            //Debug.Log("Property type : " + propertyType.ToString());
             if (propertyType.ToString() == "System.Int32")
                 list.Add(int.Parse(value));
             if (propertyType.ToString() == "System.Single")
