@@ -32,6 +32,8 @@ public class UIMaster : MonoBehaviour
 
         ControllableMaster.controllableAdded += CreateUI;
         ControllableMaster.controllableRemoved += RemoveUI;
+
+        ToggleUI();
     }
 
     public void ToggleUI()
