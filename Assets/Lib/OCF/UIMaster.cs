@@ -18,12 +18,14 @@ public class UIMaster : MonoBehaviour
     public GameObject InputPrefab;
     public GameObject DropdownPrefab;
 
+    public bool AutoHideCursor;
     public bool showDebug;
 
     private GameObject _camera;
     private GameObject _rootCanvas;
     private Dictionary<string, GameObject> _panels;
 
+    private bool displayUI;
 
     // Use this for initialization
     void Awake()
@@ -38,8 +40,10 @@ public class UIMaster : MonoBehaviour
 
     public void ToggleUI()
     {
-        Cursor.visible = !Cursor.visible;
-        transform.GetChild(0).gameObject.SetActive(!transform.GetChild(0).gameObject.activeSelf);
+        displayUI = !displayUI;
+        if (AutoHideCursor)
+            Cursor.visible = displayUI;
+        transform.GetChild(0).gameObject.SetActive(displayUI);
     }
 
     void Update()
