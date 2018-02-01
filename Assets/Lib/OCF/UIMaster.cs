@@ -38,6 +38,7 @@ public class UIMaster : MonoBehaviour
 
     public void ToggleUI()
     {
+        Cursor.visible = !Cursor.visible;
         transform.GetChild(0).gameObject.SetActive(!transform.GetChild(0).gameObject.activeSelf);
     }
 
