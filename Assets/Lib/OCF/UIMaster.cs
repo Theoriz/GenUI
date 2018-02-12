@@ -225,22 +225,25 @@ public class UIMaster : MonoBehaviour
     {
         //Debug.Log("Range : " + rangeAttribut.min + ";" + rangeAttribut.max);
         var newSlider = Instantiate(SliderPrefab);
-        newSlider.GetComponentInChildren<Text>().text = property.Name + " : " + 0;
+        var textComponent = newSlider.transform.Find("Text").gameObject.GetComponent<Text>();
+        var sliderComponent = newSlider.GetComponentInChildren<Slider>();
+
+        textComponent.text = property.Name + " : " + 0;
         newSlider.transform.SetParent(parent);
 
-       // Debug.Log("Value of " + property.Name + " is " + float.Parse(property.GetValue(target).ToString()));
+        // Debug.Log("Value of " + property.Name + " is " + float.Parse(property.GetValue(target).ToString()));
 
-        newSlider.GetComponent<Slider>().maxValue = rangeAttribut.max;
-        newSlider.GetComponent<Slider>().minValue = rangeAttribut.min;
-        newSlider.GetComponent<Slider>().interactable = isInteractible;
-        newSlider.GetComponent<Slider>().wholeNumbers = !isFloat;
+        sliderComponent.maxValue = rangeAttribut.max;
+        sliderComponent.minValue = rangeAttribut.min;
+        sliderComponent.interactable = isInteractible;
+        sliderComponent.wholeNumbers = !isFloat;
 
-        newSlider.GetComponent<Slider>().onValueChanged.AddListener((value) =>
+        sliderComponent.onValueChanged.AddListener((value) =>
         {
             if (isFloat)
-                newSlider.GetComponentInChildren<Text>().text = property.Name + " : " + value.ToString("F2");
+                textComponent.text = property.Name + " : " + value.ToString("F2");
             else
-                newSlider.GetComponentInChildren<Text>().text = property.Name + " : " + value;
+                textComponent.text = property.Name + " : " + value;
             var list = new List<object>();
             list.Add(value);
             target.setFieldProp(property, property.Name, list);
@@ -252,30 +255,32 @@ public class UIMaster : MonoBehaviour
             {
                 if (isFloat)
                 {
-                    newSlider.GetComponent<Slider>().value =
+                    sliderComponent.value =
                         (float) target.getPropInfoForAddress(name).GetValue(target);
-                    newSlider.GetComponentInChildren<Text>().text =
-                        property.Name + " : " + newSlider.GetComponent<Slider>().value.ToString("F2");
+                    textComponent.text =
+                        property.Name + " : " + sliderComponent.value.ToString("F2");
                 }
                 else
                 {
-                    newSlider.GetComponent<Slider>().value = (int) target.getPropInfoForAddress(name).GetValue(target);
-                    newSlider.GetComponentInChildren<Text>().text =
-                        property.Name + " : " + newSlider.GetComponent<Slider>().value;
+                    sliderComponent.value = (int) target.getPropInfoForAddress(name).GetValue(target);
+                    textComponent.text =
+                        property.Name + " : " + sliderComponent.value;
                 }
             }
         };
         if (isFloat)
-            newSlider.GetComponent<Slider>().value = float.Parse(property.GetValue(target).ToString());
+            sliderComponent.value = float.Parse(property.GetValue(target).ToString());
         else
-            newSlider.GetComponent<Slider>().value = (int)property.GetValue(target);
+            sliderComponent.value = (int)property.GetValue(target);
         newSlider.GetComponent<RectTransform>().localScale = new Vector3(1.0f, 1.0f, 1.0f);
     }
 
     private void CreateInput(Transform parent, Controllable target, FieldInfo property, bool isInteractible)
     {
         var newInput = Instantiate(InputPrefab);
-        newInput.GetComponent<Text>().text = property.Name;
+        var textComponent = newInput.transform.GetChild(1).gameObject.GetComponent<Text>();
+
+        textComponent.text = property.Name;
         newInput.transform.SetParent(parent);
         newInput.transform.GetComponentInChildren<InputField>().interactable = isInteractible;
         newInput.GetComponentInChildren<InputField>().text = property.GetValue(target).ToString();
