@@ -31,7 +31,6 @@ public class UIMaster : MonoBehaviour
     // Use this for initialization
     void Awake()
     {
-        Debug.Log("Submodule !!!");
         _panels = new Dictionary<string, GameObject>();
 
         ControllableMaster.controllableAdded += CreateUI;
