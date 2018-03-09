@@ -9,7 +9,7 @@ You can expose bool, int, float and string property. It is possible to define a 
 This plugin comes with a preset system, you can save the state of a "'Controllable" script. It saves each property to a file that can be loaded later so that you can create differents settings for your script. To use it, simply click on "Save preset" then select the wanted preset inside the dropdown menu and press "Load Preset".
 It is also possible to load a specific file via the OSC method "LoadPresetWithName" giving it as argument :
   - fileName (string) : case sensitive;
-  - duration (float) : tween duration;
+  - duration (float) : tween duration in seconds;
   - tweenType (string) : "EaseInOut" or "Linear" if you want to tween the current value to preset's one;
 
 ## How to use ?
