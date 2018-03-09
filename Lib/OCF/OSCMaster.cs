@@ -63,6 +63,7 @@ public class OSCMaster : Controllable
         catch (Exception e)
         {
             Debug.LogError("Error with port " + localPort);
+            Debug.LogWarning(e.StackTrace);
             isConnected = false;
         }
     }

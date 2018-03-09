@@ -192,20 +192,20 @@ public class Controllable : MonoBehaviour
     }
 
     [OSCMethod]
-    public void LoadPresetWithName(string fileName)
+    public void LoadPresetWithName(string fileName, float duration = 0, string tweenStyle = null)
     {
         if (!fileName.EndsWith(".pst"))
             fileName += ".pst";
 
         if (debug)
-            Debug.Log("Loading " + fileName + " preset for " + id);
+            Debug.Log("Loading " + fileName + " preset for " + id + " with " + (tweenStyle==null ? " no tween " : tweenStyle));
 
         StreamReader file;
         try
         {
             file = new StreamReader(targetDirectory + fileName);
             ControllableData cData = JsonUtility.FromJson<ControllableData>(file.ReadLine());
-            loadData(cData);
+            loadData(cData, duration, tweenStyle);
             file.Close();
         }
         catch(Exception e)
@@ -214,13 +214,9 @@ public class Controllable : MonoBehaviour
             return;
         }
 
-        DataLoaded();
 
         currentPreset = fileName;
         LastUsedPreset = fileName;
-        
-        if (debug)
-            Debug.Log("Done.");
     }
 
     //Override it if you want to do things after a load 
@@ -251,6 +247,135 @@ public class Controllable : MonoBehaviour
         ControllableMaster.UnRegister(this);
     }
 
+
+    public void loadData(ControllableData data, float duration = 0, string tweenStyle = null)
+    {
+        if (tweenStyle != null)
+        {
+            tweenStyle = tweenStyle.ToLower();
+            if (tweenStyle != "easeinout" && tweenStyle != "linear")
+            {
+                Debug.LogWarning("Unknow tween style !");
+                tweenStyle = null;
+            }
+        }
+
+        int index = 0;
+        foreach (string dn in data.nameList)
+        {
+            FieldInfo info;
+            if (Properties.TryGetValue(dn, out info))
+            {
+                if (tweenStyle != null)
+                { 
+                    var curve = new AnimationCurve();
+                    if (tweenStyle == "easeinout")
+                    {
+                        curve = AnimationCurve.EaseInOut(0.0f, 0.0f, 1.0f, 1.0f);
+                    }
+                    else if (tweenStyle == "linear")
+                    {
+                        curve = AnimationCurve.Linear(0.0f, 0.0f, 1.0f, 1.0f);
+                    }
+
+                    StartCoroutine(
+                            TweenValue(Properties[dn],
+                                getObjectForValue(Properties[dn].FieldType.ToString(), data.valueList[index]),
+                                duration,
+                                curve)
+                            );
+                }
+                else
+                {
+                    List<object> values = new List<object>();
+                    values.Add(getObjectForValue(Properties[dn].FieldType.ToString(), data.valueList[index]));
+                    setFieldProp(Properties[dn], values);
+                }
+            }
+
+            index++;
+        }
+        StartCoroutine(WaitForTweenEnd(duration));
+    }
+    
+    IEnumerator WaitForTweenEnd(float duration)
+    {
+        var currentTime = 0.0f;
+        while(currentTime < duration)
+        {
+            currentTime += Time.deltaTime;
+            yield return new WaitForEndOfFrame();
+        }
+
+        DataLoaded();
+        if (debug)
+            Debug.Log("Done.");
+
+        yield return null;
+    }
+    IEnumerator TweenValue(FieldInfo fieldInfo, object end, float duration, AnimationCurve curve) 
+    {
+        var currentTime = 0f;
+        var startValue = fieldInfo.GetValue(this);
+        while(currentTime < duration)
+        {
+            List<object> values = new List<object>();
+//            Debug.Log(fieldInfo.FieldType.ToString() );
+            if (fieldInfo.FieldType.ToString() == "System.Single")
+            {
+                values.Add(Mathf.Lerp((float)startValue, (float)end, curve.Evaluate(currentTime / duration)));
+            }
+
+            else if (fieldInfo.FieldType.ToString() == "System.Int32")
+            {
+                values.Add((int)Mathf.Lerp((int)startValue, (int)end, curve.Evaluate(currentTime / duration)));
+            }
+
+            else if (fieldInfo.FieldType.ToString() == "UnityEngine.Vector2")
+            {
+                values.Add(Vector2.Lerp((Vector2)startValue, (Vector2)end, curve.Evaluate(currentTime / duration)));
+            }
+
+            else if (fieldInfo.FieldType.ToString() == "UnityEngine.Vector3")
+            {
+                values.Add(Vector3.Lerp((Vector3)startValue, (Vector3)end, curve.Evaluate(currentTime / duration)));
+            }
+
+            else if (fieldInfo.FieldType.ToString() == "UnityEngine.Color")
+            {
+                values.Add(Color.Lerp((Color)startValue, (Color)end, curve.Evaluate(currentTime / duration)));
+            }
+            else
+            {
+                break;
+            }
+            setFieldProp(fieldInfo, values);
+            currentTime += Time.deltaTime;
+
+            yield return new WaitForFixedUpdate();
+        }
+
+        List<object> finalValue = new List<object>();
+        finalValue.Add(end);
+        setFieldProp(fieldInfo, finalValue);
+
+        yield return 0;
+    }
+
+    object getObjectForValue(string typeString, string value)
+    {
+        if (typeString == "System.Single") return getFloat(value);
+        if (typeString == "System.Boolean") return getBool(value);
+        if (typeString == "System.Int32") return getInt(value);
+        if (typeString == "UnityEngine.Vector2") return StringToVector2(value);
+        if (typeString == "UnityEngine.Vector3") return StringToVector3(value);
+        if (typeString == "UnityEngine.Color") return StringToColor(value);
+        if (typeString == "System.String") return value;
+
+        return null;
+    }
+
+
     public FieldInfo getFieldInfoByName(string requestedName)
     {
         var objectFields = GetType().GetFields(BindingFlags.Instance | BindingFlags.Public);
@@ -278,7 +403,7 @@ public class Controllable : MonoBehaviour
         FieldInfo info = getPropInfoForAddress(property);
         if (info != null)
         {
-            setFieldProp(info, property, values);
+            setFieldProp(info, values);
             return;
         }
 
@@ -290,12 +415,12 @@ public class Controllable : MonoBehaviour
         }
     }
 
-    public void setFieldProp(FieldInfo info, string property, List<object> values, bool silent = false)
+    public void setFieldProp(FieldInfo info, List<object> values, bool silent = false)
    {
         string typeString = info.FieldType.ToString();
 
         if(debug)
-            Debug.Log("Setting attribut  " + property + " of type " + typeString +" with " + values.Count+" value(s) // "+values[0].ToString());
+            Debug.Log("Setting attribut  " + info.Name + " of type " + typeString +" with " + values.Count+" value(s) // "+values[0].ToString());
     
         // if we detect any attribute print out the data.
 
@@ -331,7 +456,7 @@ public class Controllable : MonoBehaviour
            // Debug.Log("String received : " + values.ToString());
             info.SetValue(this, values[0].ToString());
         }
-       if (valueChanged != null && !silent) valueChanged(property);
+       if (valueChanged != null && !silent) valueChanged(info.Name);
     }
 
     public void setMethodProp(MethodInfo info, string property, List<object> values)
@@ -525,37 +650,6 @@ public class Controllable : MonoBehaviour
 
         return data;
     }
-
-    public void loadData(ControllableData data)
-    {
-       int index = 0;
-       foreach (string dn in data.nameList)
-        {
-            List<object> values = new List<object>();
-            FieldInfo info;
-            if(Properties.TryGetValue(dn,out info))
-            {
-                values.Add(getObjectForValue(Properties[dn].FieldType.ToString(), data.valueList[index]));
-                setFieldProp(Properties[dn], dn, values);
-            }
-
-            index++;
-        }
-    }
-
-    object getObjectForValue(string typeString, string value)
-    {
-        if (typeString == "System.Single") return getFloat(value);
-        if (typeString == "System.Boolean") return getBool(value);
-        if (typeString == "System.Int32") return getInt(value);
-        if (typeString == "UnityEngine.Vector2") return StringToVector2(value);
-        if( typeString == "UnityEngine.Vector3") return StringToVector3(value);
-        if (typeString == "UnityEngine.Color") return StringToColor(value);
-        if (typeString == "System.String") return value;
-
-        return null;
-    }
-
 
     public static Color StringToColor(string sColor)
     {
