@@ -10,7 +10,7 @@ This plugin comes with a preset system, you can save the state of a "'Controllab
 It is also possible to load a specific file via the OSC method "LoadPresetWithName" giving it as argument :
   - fileName (string) : case sensitive;
   - duration (float) : tween duration in seconds;
-  - tweenType (string) : "EaseInOut" or "Linear" if you want to tween the current value to preset's one;
+  - tweenType (string) : "EaseInOut", "EaseIn", "EaseOut" or "Linear" if you want to tween the current value to preset's one;
 
 ## How to use ?
 1. Drop the prefab "OSCControlFramework" in your game.
