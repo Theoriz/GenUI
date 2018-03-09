@@ -253,7 +253,7 @@ public class Controllable : MonoBehaviour
         if (tweenStyle != null)
         {
             tweenStyle = tweenStyle.ToLower();
-            if (tweenStyle != "easeinout" && tweenStyle != "linear")
+            if (tweenStyle != "easeout" && tweenStyle != "easein" && tweenStyle != "easeinout" && tweenStyle != "linear")
             {
                 Debug.LogWarning("Unknow tween style !");
                 tweenStyle = null;
@@ -269,14 +269,18 @@ public class Controllable : MonoBehaviour
                 if (tweenStyle != null)
                 { 
                     var curve = new AnimationCurve();
+
                     if (tweenStyle == "easeinout")
-                    {
-                        curve = AnimationCurve.EaseInOut(0.0f, 0.0f, 1.0f, 1.0f);
-                    }
+                        curve = TweenCurves.Instance.EaseInOutCurve;
+
+                    else if(tweenStyle == "easein")
+                        curve = TweenCurves.Instance.EaseInCurve;
+
+                    else if(tweenStyle == "easeout")
+                        curve = TweenCurves.Instance.EaseOutCurve;
+
                     else if (tweenStyle == "linear")
-                    {
-                        curve = AnimationCurve.Linear(0.0f, 0.0f, 1.0f, 1.0f);
-                    }
+                        curve = TweenCurves.Instance.LinearCurve;
 
                     StartCoroutine(
                             TweenValue(Properties[dn],
