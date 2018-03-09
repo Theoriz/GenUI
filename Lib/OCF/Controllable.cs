@@ -131,7 +131,10 @@ public class Controllable : MonoBehaviour
         
         var lastPresetRead =  file.ReadLine();
         file.Close();
-        Debug.Log("LastUsedPreset for "+id+" : " + lastPresetRead);
+
+        if(debug)
+            Debug.Log("LastUsedPreset for "+id+" : " + lastPresetRead);
+
         if (string.IsNullOrEmpty(lastPresetRead)) return;
 
         currentPreset = lastPresetRead;
@@ -185,17 +188,37 @@ public class Controllable : MonoBehaviour
     [OSCMethod]
     public void LoadPreset()
     {
-        //if (debug)
-            Debug.Log("Loading " + currentPreset +" preset for "+ id);
+        LoadPresetWithName(currentPreset);
+    }
 
-        var file = new StreamReader(targetDirectory + currentPreset);
-        ControllableData cData = JsonUtility.FromJson<ControllableData>(file.ReadLine());
+    [OSCMethod]
+    public void LoadPresetWithName(string fileName)
+    {
+        if (!fileName.EndsWith(".pst"))
+            fileName += ".pst";
 
-        loadData(cData);
+        if (debug)
+            Debug.Log("Loading " + fileName + " preset for " + id);
+
+        StreamReader file;
+        try
+        {
+            file = new StreamReader(targetDirectory + fileName);
+            ControllableData cData = JsonUtility.FromJson<ControllableData>(file.ReadLine());
+            loadData(cData);
+            file.Close();
+        }
+        catch(Exception e)
+        {
+            Debug.LogError("Error while loading preset : " + e.StackTrace);
+            return;
+        }
+
         DataLoaded();
 
-        LastUsedPreset = currentPreset;
-        file.Close();
+        currentPreset = fileName;
+        LastUsedPreset = fileName;
+        
         if (debug)
             Debug.Log("Done.");
     }
@@ -482,7 +505,8 @@ public class Controllable : MonoBehaviour
             OSCProperty attribute = Attribute.GetCustomAttribute(p, typeof(OSCProperty)) as OSCProperty;
             if (attribute.IncludeInPresets)
             {
-                Debug.Log("Attribute : " + p.Name + " of type " + p.FieldType + " is saved.");
+                if(debug)
+                    Debug.Log("Attribute : " + p.Name + " of type " + p.FieldType + " is saved.");
                 data.nameList.Add(p.Name);
                 
                 //Because a simple "toString" doesn't give the full value
