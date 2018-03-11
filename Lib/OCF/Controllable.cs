@@ -203,19 +203,35 @@ public class Controllable : MonoBehaviour
     [OSCMethod]
     public void LoadPreset()
     {
-        //if (debug)
-            Debug.Log("Loading " + currentPreset +" preset for "+ id);
+        LoadPresetWithName(currentPreset);
+    }
 
-        var file = new StreamReader(targetDirectory + currentPreset);
-        ControllableData cData = JsonUtility.FromJson<ControllableData>(file.ReadLine());
+    [OSCMethod]
+    public void LoadPresetWithName(string fileName, float duration = 0, string tweenStyle = null)
+    {
+        if (!fileName.EndsWith(".pst"))
+            fileName += ".pst";
 
-        loadData(cData);
-        DataLoaded();
-
-        LastUsedPreset = currentPreset;
-        file.Close();
         if (debug)
-            Debug.Log("Done.");
+            Debug.Log("Loading " + fileName + " preset for " + id + " with " + (tweenStyle == null ? " no tween " : tweenStyle));
+
+        StreamReader file;
+        try
+        {
+            file = new StreamReader(targetDirectory + fileName);
+            ControllableData cData = JsonUtility.FromJson<ControllableData>(file.ReadLine());
+            loadData(cData, duration, tweenStyle);
+            file.Close();
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("Error while loading preset : " + e.StackTrace);
+            return;
+        }
+
+
+        currentPreset = fileName;
+        LastUsedPreset = fileName;
     }
 
     //Override it if you want to do things after a load
@@ -520,21 +536,123 @@ public class Controllable : MonoBehaviour
         return data;
     }
 
-    public void loadData(ControllableData data)
+    public void loadData(ControllableData data, float duration = 0, string tweenStyle = null)
     {
-       int index = 0;
-       foreach (string dn in data.nameList)
+        if (tweenStyle != null)
         {
-            List<object> values = new List<object>();
-            FieldInfo info;
-            if(Properties.TryGetValue(dn,out info))
+            tweenStyle = tweenStyle.ToLower();
+            if (tweenStyle != "easeout" && tweenStyle != "easein" && tweenStyle != "easeinout" && tweenStyle != "linear")
             {
-                values.Add(getObjectForValue(Properties[dn].FieldType.ToString(), data.valueList[index]));
-                setFieldProp(Properties[dn], values);
+                Debug.LogWarning("Unknow tween style !");
+                tweenStyle = null;
+            }
+        }
+
+        int index = 0;
+        foreach (string dn in data.nameList)
+        {
+            FieldInfo info;
+            if (Properties.TryGetValue(dn, out info))
+            {
+                if (tweenStyle != null)
+                {
+                    var curve = new AnimationCurve();
+
+                    if (tweenStyle == "easeinout")
+                        curve = TweenCurves.Instance.EaseInOutCurve;
+
+                    else if (tweenStyle == "easein")
+                        curve = TweenCurves.Instance.EaseInCurve;
+
+                    else if (tweenStyle == "easeout")
+                        curve = TweenCurves.Instance.EaseOutCurve;
+
+                    else if (tweenStyle == "linear")
+                        curve = TweenCurves.Instance.LinearCurve;
+
+                    StartCoroutine(
+                            TweenValue(Properties[dn],
+                                getObjectForValue(Properties[dn].FieldType.ToString(), data.valueList[index]),
+                                duration,
+                                curve)
+                            );
+                }
+                else
+                {
+                    List<object> values = new List<object>();
+                    values.Add(getObjectForValue(Properties[dn].FieldType.ToString(), data.valueList[index]));
+                    setFieldProp(Properties[dn], values);
+                }
             }
 
             index++;
         }
+        StartCoroutine(WaitForTweenEnd(duration));
+    }
+
+    IEnumerator WaitForTweenEnd(float duration)
+    {
+        var currentTime = 0.0f;
+        while (currentTime < duration)
+        {
+            currentTime += Time.deltaTime;
+            yield return new WaitForEndOfFrame();
+        }
+
+        DataLoaded();
+        if (debug)
+            Debug.Log("Done.");
+
+        yield return null;
+    }
+
+    IEnumerator TweenValue(FieldInfo fieldInfo, object end, float duration, AnimationCurve curve)
+    {
+        var currentTime = 0f;
+        var startValue = fieldInfo.GetValue(this);
+        while (currentTime < duration)
+        {
+            List<object> values = new List<object>();
+            //            Debug.Log(fieldInfo.FieldType.ToString() );
+            if (fieldInfo.FieldType.ToString() == "System.Single")
+            {
+                values.Add(Mathf.Lerp((float)startValue, (float)end, curve.Evaluate(currentTime / duration)));
+            }
+
+            else if (fieldInfo.FieldType.ToString() == "System.Int32")
+            {
+                values.Add((int)Mathf.Lerp((int)startValue, (int)end, curve.Evaluate(currentTime / duration)));
+            }
+
+            else if (fieldInfo.FieldType.ToString() == "UnityEngine.Vector2")
+            {
+                values.Add(Vector2.Lerp((Vector2)startValue, (Vector2)end, curve.Evaluate(currentTime / duration)));
+            }
+
+            else if (fieldInfo.FieldType.ToString() == "UnityEngine.Vector3")
+            {
+                values.Add(Vector3.Lerp((Vector3)startValue, (Vector3)end, curve.Evaluate(currentTime / duration)));
+            }
+
+            else if (fieldInfo.FieldType.ToString() == "UnityEngine.Color")
+            {
+                values.Add(Color.Lerp((Color)startValue, (Color)end, curve.Evaluate(currentTime / duration)));
+            }
+            else
+            {
+                break;
+            }
+            setFieldProp(fieldInfo, values);
+            currentTime += Time.deltaTime;
+
+            yield return new WaitForFixedUpdate();
+        }
+
+        List<object> finalValue = new List<object>();
+        finalValue.Add(end);
+        setFieldProp(fieldInfo, finalValue);
+
+        yield return 0;
     }
 
     object getObjectForValue(string typeString, string value)
