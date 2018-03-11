@@ -134,7 +134,7 @@ public class UIMaster : MonoBehaviour
         var allText = newPanel.GetComponentsInChildren<Text>();
         foreach (var text in allText)
         {
-            if (text.text == "SavePreset" || text.text == "LoadPreset")
+            if (text.text == "OverwritePreset" || text.text == "SavePresetAs" || text.text == "LoadPreset")
                 text.transform.parent.SetSiblingIndex(newPanel.transform.childCount-2); //last index being the preset list
         }
 

@@ -157,7 +157,7 @@ public class Controllable : MonoBehaviour
     }
 
     [OSCMethod]
-    public void SaveNewPreset()
+    public void SavePresetAs()
     {
 
         var date = DateTime.Today.Day + "-" + DateTime.Today.Month + "-" + DateTime.Today.Year + "_" +
@@ -170,7 +170,7 @@ public class Controllable : MonoBehaviour
     [OSCMethod]
     public void OverwritePreset()
     {
-        if (currentPreset == null)
+        if (string.IsNullOrEmpty(currentPreset))
         {
             Debug.LogWarning("No preset loaded ! Aborting save ...");
             return;
@@ -273,7 +273,7 @@ public class Controllable : MonoBehaviour
         FieldInfo info = getPropInfoForAddress(property);
         if (info != null)
         {
-            setFieldProp(info, property, values);
+            setFieldProp(info, values);
             return;
         }
 
@@ -285,12 +285,12 @@ public class Controllable : MonoBehaviour
         }
     }
 
-    public void setFieldProp(FieldInfo info, string property, List<object> values, bool silent = false)
+    public void setFieldProp(FieldInfo info, List<object> values, bool silent = false)
    {
         string typeString = info.FieldType.ToString();
 
         if(debug)
-            Debug.Log("Setting attribut  " + property + " of type " + typeString +" with " + values.Count+" value(s) // "+values[0].ToString());
+            Debug.Log("Setting attribut  " + info.Name + " of type " + typeString +" with " + values.Count+" value(s) // "+values[0].ToString());
 
         // if we detect any attribute print out the data.
 
@@ -326,7 +326,7 @@ public class Controllable : MonoBehaviour
            // Debug.Log("String received : " + values.ToString());
             info.SetValue(this, values[0].ToString());
         }
-       if (valueChanged != null && !silent) valueChanged(property);
+       if (valueChanged != null && !silent) valueChanged(info.Name);
     }
 
     public void setMethodProp(MethodInfo info, string property, List<object> values)
@@ -530,7 +530,7 @@ public class Controllable : MonoBehaviour
             if(Properties.TryGetValue(dn,out info))
             {
                 values.Add(getObjectForValue(Properties[dn].FieldType.ToString(), data.valueList[index]));
-                setFieldProp(Properties[dn], dn, values);
+                setFieldProp(Properties[dn], values);
             }
 
             index++;
