@@ -46,7 +46,7 @@ public class Controllable : MonoBehaviour
     [OSCProperty(TargetList = "presetList", IncludeInPresets = false)] public string currentPreset;
 
     public List<string> presetList;
-    
+
     private string LastUsedPreset;
     private string tempFileName = "_temp.pst";
 
@@ -128,7 +128,7 @@ public class Controllable : MonoBehaviour
         if (!File.Exists(targetDirectory + tempFileName)) return;
 
         var file = new StreamReader(targetDirectory + tempFileName);
-        
+
         var lastPresetRead =  file.ReadLine();
         file.Close();
         Debug.Log("LastUsedPreset for "+id+" : " + lastPresetRead);
@@ -218,7 +218,7 @@ public class Controllable : MonoBehaviour
             Debug.Log("Done.");
     }
 
-    //Override it if you want to do things after a load 
+    //Override it if you want to do things after a load
     public virtual void DataLoaded() { }
     //Override it if you want to do things before a preset save
     public virtual void CallMeBeforeSave() { }
@@ -250,7 +250,7 @@ public class Controllable : MonoBehaviour
     {
         var objectFields = GetType().GetFields(BindingFlags.Instance | BindingFlags.Public);
         FieldInfo requestedField = null;
-   
+
         foreach (var item in objectFields)
         {
             if(item.Name == requestedName)
@@ -291,7 +291,7 @@ public class Controllable : MonoBehaviour
 
         if(debug)
             Debug.Log("Setting attribut  " + property + " of type " + typeString +" with " + values.Count+" value(s) // "+values[0].ToString());
-    
+
         // if we detect any attribute print out the data.
 
         if (typeString == "System.Single")
@@ -502,7 +502,7 @@ public class Controllable : MonoBehaviour
             {
                 Debug.Log("Attribute : " + p.Name + " of type " + p.FieldType + " is saved.");
                 data.nameList.Add(p.Name);
-                
+
                 //Because a simple "toString" doesn't give the full value
                 if (p.FieldType.ToString() == "UnityEngine.Vector3")
                 {
@@ -512,7 +512,7 @@ public class Controllable : MonoBehaviour
                 {
                     data.valueList.Add(((float)p.GetValue(this)).ToString("F8"));
                 }
-                else 
+                else
                     data.valueList.Add(p.GetValue(this).ToString());
             }
         }

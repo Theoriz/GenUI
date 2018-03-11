@@ -171,7 +171,7 @@ public class UIMaster : MonoBehaviour
             string activeItem = associatedList[value];
 
             List<object> objParams = new List<object> { activeItem };
-            target.setFieldProp(activeElement, activeElement.Name, objParams);
+            target.setFieldProp(activeElement, objParams);
         });
         
         target.valueChanged += (name) =>
@@ -225,7 +225,7 @@ public class UIMaster : MonoBehaviour
                 textComponent.text = property.Name + " : " + value;
             var list = new List<object>();
             list.Add(value);
-            target.setFieldProp(property, property.Name, list);
+            target.setFieldProp(property, list);
         });
         target.valueChanged += (name) =>
         {
@@ -280,7 +280,7 @@ public class UIMaster : MonoBehaviour
                 list.Add(value);
 
 
-            target.setFieldProp(property, property.Name, list);
+            target.setFieldProp(property, list);
         });
         
         target.valueChanged += (name) =>
@@ -310,7 +310,7 @@ public class UIMaster : MonoBehaviour
         {
             var list = new List<object>();
             list.Add(value);
-            target.setFieldProp(property, property.Name, list);
+            target.setFieldProp(property, list);
         });
         target.valueChanged += (name) =>
         {
