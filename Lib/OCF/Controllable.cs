@@ -157,15 +157,33 @@ public class Controllable : MonoBehaviour
     }
 
     [OSCMethod]
-    public void SavePreset()
+    public void SaveNewPreset()
     {
 
         var date = DateTime.Today.Day + "-" + DateTime.Today.Month + "-" + DateTime.Today.Year + "_" +
                    DateTime.Now.Hour + "-" + DateTime.Now.Minute + "-" + DateTime.Now.Second;
         var fileName = date + ".pst";
 
+        SavePreset(fileName);
+    }
+
+    [OSCMethod]
+    public void OverwritePreset()
+    {
+        if (currentPreset == null)
+        {
+            Debug.LogWarning("No preset loaded ! Aborting save ...");
+            return;
+        }
+
+        SavePreset(currentPreset);
+    }
+
+    private void SavePreset(string fileName)
+    {
         targetDirectory = "Presets/" + (folder.Length > 0 ? folder : sourceScene) + "/" + id + "/";
-        Debug.Log("Saving in " + targetDirectory + fileName + "...");
+        if (debug)
+            Debug.Log("Saving in " + targetDirectory + fileName + "...");
         //create file
         if (!Directory.Exists(targetDirectory)) Directory.CreateDirectory(targetDirectory);
         var file = File.OpenWrite(targetDirectory + fileName);
