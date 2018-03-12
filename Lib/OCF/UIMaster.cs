@@ -262,6 +262,14 @@ public class UIMaster : MonoBehaviour
         textComponent.text = property.Name;
         newInput.transform.SetParent(parent);
         newInput.transform.GetComponentInChildren<InputField>().interactable = isInteractible;
+
+        if (property.FieldType.ToString() == "System.Int32")
+            newInput.transform.GetComponentInChildren<InputField>().contentType = InputField.ContentType.IntegerNumber;
+        if (property.FieldType.ToString() == "System.Single")
+            newInput.transform.GetComponentInChildren<InputField>().contentType = InputField.ContentType.DecimalNumber;
+        if (property.FieldType.ToString() == "System.String")
+            newInput.transform.GetComponentInChildren<InputField>().contentType = InputField.ContentType.Standard;
+
         newInput.GetComponentInChildren<InputField>().text = property.GetValue(target).ToString();
         newInput.GetComponentInChildren<InputField>().onEndEdit.AddListener((value) =>
         {
