@@ -274,19 +274,18 @@ public class UIMaster : MonoBehaviour
         newInput.GetComponentInChildren<InputField>().onEndEdit.AddListener((value) =>
         {
             var list = new List<object>();
-
+            var setVal = value;
             var propertyType = property.FieldType;
             //Debug.Log("Property type : " + propertyType.ToString());
             if (propertyType.ToString() == "System.Int32")
                 list.Add(int.Parse(value));
             if (propertyType.ToString() == "System.Single")
             {
-                value = value.Replace(",", ".");
-                list.Add(float.Parse(value));
+                Debug.Log("Value : " + value + " size : " + value.Length);
+                list.Add(float.Parse(value, CultureInfo.InvariantCulture.NumberFormat));
             }
             if (propertyType.ToString() == "System.String")
                 list.Add(value);
-
 
             target.setFieldProp(property, list);
         });
@@ -296,9 +295,12 @@ public class UIMaster : MonoBehaviour
             
             if (name == property.Name)
             {
-               // Debug.Log("Value " + name + " changed ");
+                // Debug.Log("Value " + name + " changed ");
                 //Specific to the prefab architecture
-                newInput.transform.GetChild(0).GetComponent<InputField>().text = "" + property.GetValue(target);//Convert.ChangeType(target.getPropInfoForAddress(name).GetValue(target), property.FieldType))ype);
+                var str = "" + property.GetValue(target);
+                str = str.Replace(",", ".");
+                newInput.transform.GetChild(0).GetComponent<InputField>().text =
+                    "" + str; //Convert.ChangeType(target.getPropInfoForAddress(name).GetValue(target), property.FieldType))ype);
             }
         };
         newInput.transform.GetChild(0).Find("Placeholder").gameObject.GetComponent<Text>().color = Color.white;
