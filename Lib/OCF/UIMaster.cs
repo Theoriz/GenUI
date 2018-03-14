@@ -28,9 +28,11 @@ public class UIMaster : MonoBehaviour
 
     private bool displayUI;
 
+    public static UIMaster Instance;
     // Use this for initialization
     void Awake()
     {
+        Instance = this;
         _panels = new Dictionary<string, GameObject>();
 
         ControllableMaster.controllableAdded += CreateUI;
@@ -65,7 +67,7 @@ public class UIMaster : MonoBehaviour
         if (showDebug)
             Debug.Log("Removing UI for " + dyingControllable.name + "|" + dyingControllable.id);
         Destroy(_panels[dyingControllable.id]);
-        _panels.Remove(dyingControllable.name);
+        _panels.Remove(dyingControllable.id);
     }
 
     public void CreateUI(Controllable newControllable)

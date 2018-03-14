@@ -94,6 +94,7 @@ public class Controllable : MonoBehaviour
         if (string.IsNullOrEmpty(id)) id = gameObject.name;
         sourceScene = SceneManager.GetActiveScene().name;
 
+        Debug.Log("Registering " + id);
         ControllableMaster.Register(this);
 
         presetList = new List<string>();
@@ -260,6 +261,8 @@ public class Controllable : MonoBehaviour
             Debug.Log("Done");
 
         ControllableMaster.UnRegister(this);
+        
+        Debug.Log("Unregistering " + id);
     }
 
     public FieldInfo getFieldInfoByName(string requestedName)
