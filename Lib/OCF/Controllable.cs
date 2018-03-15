@@ -85,8 +85,7 @@ public class Controllable : MonoBehaviour
             OSCMethod attribute = Attribute.GetCustomAttribute(info, typeof(OSCMethod)) as OSCMethod;
             if (attribute != null)
             {
-                if((info.Name == "SavePreset" || info.Name == "LoadPreset") && !usePresets) continue;
-
+                if((info.Name == "OverwritePreset" || info.Name == "SavePresetAs" || info.Name == "LoadPreset") && !usePresets) continue;
                 Methods.Add(info.Name, info);
             }
         }
@@ -94,7 +93,6 @@ public class Controllable : MonoBehaviour
         if (string.IsNullOrEmpty(id)) id = gameObject.name;
         sourceScene = SceneManager.GetActiveScene().name;
 
-        Debug.Log("Registering " + id);
         ControllableMaster.Register(this);
 
         presetList = new List<string>();
@@ -261,8 +259,6 @@ public class Controllable : MonoBehaviour
             Debug.Log("Done");
 
         ControllableMaster.UnRegister(this);
-        
-        Debug.Log("Unregistering " + id);
     }
 
     public FieldInfo getFieldInfoByName(string requestedName)
