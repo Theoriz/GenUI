@@ -47,7 +47,7 @@ public class OSCMaster : Controllable
 
     public void Connect()
     {
-        Debug.Log("Connecting to port " + localPort);
+        Debug.Log("[OCF] Connecting to port " + localPort);
         try
         {
             if(server != null)

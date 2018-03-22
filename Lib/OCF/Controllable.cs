@@ -29,7 +29,7 @@ public class Controllable : MonoBehaviour
 {
     public string id;
     public string folder = "";
-    public bool debug = false;
+    public bool debug = true;
     public string targetDirectory;
     public string sourceScene;
     public bool usePanel = true, usePresets = true;
@@ -47,7 +47,6 @@ public class Controllable : MonoBehaviour
 
     public List<string> presetList;
 
-    private string LastUsedPreset;
     private string tempFileName = "_temp.pst";
 
     public virtual void Awake()
@@ -98,11 +97,11 @@ public class Controllable : MonoBehaviour
         presetList = new List<string>();
         ReadFileList();
 
-        if (presetList.Count > 1)
+        if (presetList.Count >= 1)
         {
             currentPreset = presetList[0];
+            LoadLatestUsedPreset();
         }
-        LoadLatestUsedPreset();
     }
 
     public virtual void Update() //Warn UI if attribut changes
@@ -130,7 +129,10 @@ public class Controllable : MonoBehaviour
 
         var lastPresetRead =  file.ReadLine();
         file.Close();
-        Debug.Log("LastUsedPreset for "+id+" : " + lastPresetRead);
+
+        if (debug)
+            Debug.Log("LastUsedPreset for "+id+" : " + lastPresetRead);
+
         if (string.IsNullOrEmpty(lastPresetRead)) return;
 
         currentPreset = lastPresetRead;
@@ -171,7 +173,7 @@ public class Controllable : MonoBehaviour
     {
         if (string.IsNullOrEmpty(currentPreset))
         {
-            Debug.LogWarning("No preset loaded ! Aborting save ...");
+            SavePresetAs();
             return;
         }
 
@@ -194,8 +196,7 @@ public class Controllable : MonoBehaviour
         if (debug)
             Debug.Log("Saved in " + targetDirectory + fileName);
 
-        LastUsedPreset = fileName;
-        currentPreset = LastUsedPreset;
+        currentPreset = fileName;
         ReadFileList();
     }
 
@@ -227,10 +228,7 @@ public class Controllable : MonoBehaviour
             Debug.LogError("Error while loading preset : " + e.StackTrace);
             return;
         }
-
-
         currentPreset = fileName;
-        LastUsedPreset = fileName;
     }
 
     //Override it if you want to do things after a load
@@ -238,20 +236,20 @@ public class Controllable : MonoBehaviour
     //Override it if you want to do things before a preset save
     public virtual void CallMeBeforeSave() { }
 
-    void OnDestroy()
+    void OnApplicationQuit()
     {
         if (debug)
             Debug.Log("Saving temp file before destruction");
 
         if (usePresets)
         {
-            if (!string.IsNullOrEmpty(LastUsedPreset))
+            if (!string.IsNullOrEmpty(currentPreset))
             {
                 //Create temp file
                 var tempFile = File.OpenWrite(targetDirectory + tempFileName);
                 tempFile.Close();
                 //write last loaded preset
-                File.WriteAllText(targetDirectory + tempFileName, LastUsedPreset);
+                File.WriteAllText(targetDirectory + tempFileName, currentPreset);
             }
         }
 
@@ -515,7 +513,9 @@ public class Controllable : MonoBehaviour
             OSCProperty attribute = Attribute.GetCustomAttribute(p, typeof(OSCProperty)) as OSCProperty;
             if (attribute.IncludeInPresets)
             {
-                Debug.Log("Attribute : " + p.Name + " of type " + p.FieldType + " is saved.");
+                if(debug)
+                    Debug.Log("Attribute : " + p.Name + " of type " + p.FieldType + " is saved.");
+
                 data.nameList.Add(p.Name);
 
                 //Because a simple "toString" doesn't give the full value
