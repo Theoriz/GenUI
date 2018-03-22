@@ -68,6 +68,12 @@ public class OSCMaster : Controllable
         }
     }
 
+    [OSCMethod]
+    public void SaveAllPresets()
+    {
+        ControllableMaster.SaveAllPresets();
+    }
+
     void packetReceived(OSCPacket p)
     {
 

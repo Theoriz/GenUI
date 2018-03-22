@@ -54,4 +54,12 @@ public static class ControllableMaster
             controllable.Value.LoadLatestUsedPreset();
         }
     }
+
+    public static void SaveAllPresets()
+    {
+        foreach (var controllable in RegisteredControllables)
+        {
+            controllable.Value.SavePresetAs();
+        }
+    }
 }
