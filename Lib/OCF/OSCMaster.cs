@@ -31,12 +31,12 @@ public class OSCMaster : Controllable
     public event MessageAvailable messageAvailable;
 
     // Use this for initialization
-    public override void Awake()
+    public override void OnEnable()
     {
         instance = this;
 
         usePanel = true;
-        base.Awake();
+        base.OnEnable();
 
         oldLocalPort = localPort;
         Connect();

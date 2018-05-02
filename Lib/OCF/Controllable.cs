@@ -91,16 +91,22 @@ public class Controllable : MonoBehaviour
 
         if (string.IsNullOrEmpty(id)) id = gameObject.name;
         sourceScene = SceneManager.GetActiveScene().name;
+    }
 
+    public virtual void OnEnable()
+    {
         ControllableMaster.Register(this);
 
-        presetList = new List<string>();
-        ReadFileList();
-
-        if (presetList.Count >= 1)
+        if (usePresets)
         {
-            currentPreset = presetList[0];
-            LoadLatestUsedPreset();
+            presetList = new List<string>();
+            ReadFileList();
+
+            if (presetList.Count >= 1)
+            {
+                currentPreset = presetList[0];
+                LoadLatestUsedPreset();
+            }
         }
     }
 
@@ -236,7 +242,7 @@ public class Controllable : MonoBehaviour
     //Override it if you want to do things before a preset save
     public virtual void CallMeBeforeSave() { }
 
-    void OnApplicationQuit()
+    void OnDisable()
     {
         if (debug)
             Debug.Log("Saving temp file before destruction");

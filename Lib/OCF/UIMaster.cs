@@ -276,7 +276,6 @@ public class UIMaster : MonoBehaviour
         newInput.GetComponentInChildren<InputField>().onEndEdit.AddListener((value) =>
         {
             var list = new List<object>();
-            var setVal = value;
             var propertyType = property.FieldType;
             //Debug.Log("Property type : " + propertyType.ToString());
             if (propertyType.ToString() == "System.Int32")
