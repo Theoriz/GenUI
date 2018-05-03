@@ -28,10 +28,14 @@ public class ControllableData
 public class Controllable : MonoBehaviour
 {
     public string id;
+    [HideInInspector]
     public string folder = "";
     public bool debug = true;
+    [HideInInspector]
     public string targetDirectory;
+    [HideInInspector]
     public string sourceScene;
+    [HideInInspector]
     public bool usePanel = true, usePresets = true;
 
     public Dictionary<string, FieldInfo> Properties;
@@ -605,8 +609,8 @@ public class Controllable : MonoBehaviour
         }
 
         DataLoaded();
-        if (debug)
-            Debug.Log("Done.");
+       // if (debug)
+            Debug.Log("Done loading.");
 
         yield return null;
     }
