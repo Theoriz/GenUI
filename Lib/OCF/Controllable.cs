@@ -605,7 +605,7 @@ public class Controllable : MonoBehaviour
         while (currentTime < duration)
         {
             currentTime += Time.deltaTime;
-            yield return new WaitForEndOfFrame();
+            yield return new WaitForFixedUpdate();
         }
 
         DataLoaded();

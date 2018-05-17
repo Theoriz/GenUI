@@ -195,7 +195,7 @@ namespace UnityOSC
 			while( true )
 			{
 				Receive();
-                Thread.Sleep(1);
+                //Thread.Sleep(1);    //Causes slow response time when there are a lot of message
 			}
 		}
 		#endregion
