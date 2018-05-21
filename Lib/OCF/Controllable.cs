@@ -27,6 +27,8 @@ public class ControllableData
 
 public class Controllable : MonoBehaviour
 {
+    public object TargetScript; 
+
     public string id;
     [HideInInspector]
     public string folder = "";
@@ -40,12 +42,21 @@ public class Controllable : MonoBehaviour
 
     public Dictionary<string, FieldInfo> Properties;
     public List<object> PreviousPropertiesValues;
+    public Dictionary<string, FieldInfo> TargetProperties;
 
     public Dictionary<string, MethodInfo> Methods;
 
-    public delegate void ValueChangedEvent(string name);
+    public delegate void UIValueChangedEvent(string name);
 
-    public event ValueChangedEvent valueChanged;
+    public event UIValueChangedEvent uiValueChanged;
+
+    public delegate void ControllableValueChangedEvent(string name);
+
+    public event ControllableValueChangedEvent controllableValueChanged;
+
+    public delegate void ScriptValueChangedEvent(string name);
+
+    public event ScriptValueChangedEvent scriptValueChanged;
 
     [OSCProperty(TargetList = "presetList", IncludeInPresets = false)] public string currentPreset;
 
@@ -55,12 +66,19 @@ public class Controllable : MonoBehaviour
 
     public virtual void Awake()
     {
+        this.scriptValueChanged += OnScriptValueChanged;
+        this.uiValueChanged += OnUiValueChanged;
+
         //PROPERTIES
         Properties = new Dictionary<string, FieldInfo>();
+        TargetProperties = new Dictionary<string, FieldInfo>();
         PreviousPropertiesValues = new List<object>();
 
         Type t = GetType();
         FieldInfo[] objectFields = t.GetFields(BindingFlags.Instance | BindingFlags.Public);
+        FieldInfo[] scriptFields = objectFields;
+        if (TargetScript != null)
+            scriptFields = TargetScript.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public);
 
         for (int i = 0; i < objectFields.Length; i++)
         {
@@ -71,6 +89,17 @@ public class Controllable : MonoBehaviour
                 if (info.Name == "currentPreset" && !usePresets) continue;
 
                 Properties.Add(info.Name, info);
+                if (TargetScript != null)
+                {
+                    for (int j = 0; j < scriptFields.Length; j++)
+                    {
+                        if (scriptFields[j].Name == info.Name)
+                        {
+                            TargetProperties.Add(scriptFields[j].Name, scriptFields[j]);
+                            break;
+                        }
+                    }
+                }
                 //Debug.Log("Intializing " + info.Name + " with " + info.GetValue(this));
                 PreviousPropertiesValues.Add(info.GetValue(this));
             }
@@ -97,6 +126,14 @@ public class Controllable : MonoBehaviour
         sourceScene = SceneManager.GetActiveScene().name;
     }
 
+    public virtual void OnScriptValueChanged(string name)
+    {
+    }
+
+    public virtual void OnUiValueChanged(string name)
+    {
+    }
+
     public virtual void OnEnable()
     {
         ControllableMaster.Register(this);
@@ -116,15 +153,16 @@ public class Controllable : MonoBehaviour
 
     public virtual void Update() //Warn UI if attribut changes
     {
-        var propertiesArray = Properties.Values.ToArray();
+        var propertiesArray = TargetProperties.Values.ToArray();
 
-        for (var i=0 ; i<Properties.Count ; i++)
+        for (var i=0 ; i< TargetProperties.Count ; i++)
         {
-            var value = propertiesArray[i].GetValue(this);
+            var value = propertiesArray[i].GetValue(TargetScript);
             if (value.ToString() != PreviousPropertiesValues[i].ToString())
             {
                // Debug.Log("Difference between " + propertiesArray[i].GetValue(this) + " and " + PreviousPropertiesValues[i].ToString());
-                RaiseEventValueChanged(propertiesArray[i].Name);
+                    if (scriptValueChanged != null) scriptValueChanged(propertiesArray[i].Name);
+              //  RaiseEventValueChanged(propertiesArray[i].Name);
                 PreviousPropertiesValues[i] = value;
             }
         }
@@ -148,7 +186,9 @@ public class Controllable : MonoBehaviour
         currentPreset = lastPresetRead;
         LoadPreset();
 
-        RaiseEventValueChanged("currentPreset");
+        if (scriptValueChanged != null) scriptValueChanged("currentPreset");
+        if (uiValueChanged != null) uiValueChanged("currentPreset");
+        //        RaiseEventValueChanged("currentPreset");
     }
 
     public void ReadFileList()
@@ -164,7 +204,8 @@ public class Controllable : MonoBehaviour
             presetList.Add(onlyFileName);
         }
 
-        RaiseEventValueChanged("currentPreset");
+        if (scriptValueChanged != null) scriptValueChanged("currentPreset");
+        if (uiValueChanged != null) uiValueChanged("currentPreset");
     }
 
     [OSCMethod]
@@ -285,7 +326,7 @@ public class Controllable : MonoBehaviour
 
     protected void RaiseEventValueChanged(string property)
     {
-        if (valueChanged != null) valueChanged(property);
+         if (controllableValueChanged != null) controllableValueChanged(property);
     }
 
     public void setProp(string property, List<object> values)
@@ -349,7 +390,9 @@ public class Controllable : MonoBehaviour
            // Debug.Log("String received : " + values.ToString());
             info.SetValue(this, values[0].ToString());
         }
-       if (valueChanged != null && !silent) valueChanged(info.Name);
+
+        if (uiValueChanged != null) uiValueChanged(info.Name);
+        //if (valueChanged != null && !silent) valueChanged(info.Name);
     }
 
     public void setMethodProp(MethodInfo info, string property, List<object> values)

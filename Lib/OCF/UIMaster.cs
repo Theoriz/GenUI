@@ -176,7 +176,7 @@ public class UIMaster : MonoBehaviour
             target.setFieldProp(activeElement, objParams);
         });
         
-        target.valueChanged += (name) =>
+        target.controllableValueChanged += (name) =>
         {
             //Debug.Log(name+ " UI has been updated with value " + activeElement.GetValue(target).ToString());
             
@@ -229,7 +229,7 @@ public class UIMaster : MonoBehaviour
             list.Add(value);
             target.setFieldProp(property, list);
         });
-        target.valueChanged += (name) =>
+        target.controllableValueChanged += (name) =>
         {
            // Debug.Log("Fired value changed : " + name);
             if (name == property.Name)
@@ -297,7 +297,7 @@ public class UIMaster : MonoBehaviour
             target.setFieldProp(property, list);
         });
         
-        target.valueChanged += (name) =>
+        target.controllableValueChanged += (name) =>
         {
             
             if (name == property.Name)
@@ -329,7 +329,7 @@ public class UIMaster : MonoBehaviour
             list.Add(value);
             target.setFieldProp(property, list);
         });
-        target.valueChanged += (name) =>
+        target.controllableValueChanged += (name) =>
         {
             //Debug.Log("Fired value changed : " + name);
             if (name == property.Name)
