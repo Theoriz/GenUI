@@ -4,18 +4,17 @@ using System.Collections.Generic;
 using UnityOSC;
 
 
-public class OSCMaster : Controllable
+public class OSCMaster : MonoBehaviour
 {
     public static OSCMaster instance;
 
     OSCServer server;
 
-    [OSCProperty]
-    public int localPort = 6000;
+    public int localPort;
     private int oldLocalPort;
 
 
-    [OSCProperty(isInteractible = false)] public bool isConnected;
+    public bool isConnected;
 
     public bool logIncoming;
     public bool logOutgoing;
@@ -31,18 +30,10 @@ public class OSCMaster : Controllable
     public event MessageAvailable messageAvailable;
 
     // Use this for initialization
-    public override void OnEnable()
+    void Awake()
     {
         instance = this;
-
-        usePanel = true;
-        base.OnEnable();
-
-        oldLocalPort = localPort;
-        Connect();
-
         client = new OSCClient(System.Net.IPAddress.Loopback, 0, false);
-
     }
 
     public void Connect()
@@ -66,12 +57,6 @@ public class OSCMaster : Controllable
             Debug.LogWarning(e.StackTrace);
             isConnected = false;
         }
-    }
-
-    [OSCMethod]
-    public void SaveAllPresets()
-    {
-        ControllableMaster.SaveAllPresets();
     }
 
     void packetReceived(OSCPacket p)
@@ -111,20 +96,8 @@ public class OSCMaster : Controllable
     }
 
     // Update is called once per frame
-    public override void Update()
+    void Update()
     {
-        base.Update();
-
-        if ((!isConnected && localPort != oldLocalPort && server == null))
-        {
-            Connect();
-        }
-
-        if (isConnected && localPort != server.LocalPort)
-        {
-            Connect();
-        }
-
         if(isConnected)
             server.Update();
     }
