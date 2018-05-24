@@ -15,9 +15,10 @@ It is also possible to load a specific file via the OSC method "LoadPresetWithNa
 ## How to use ?
 1. Drop the prefab "OSCControlFramework" in your game.
 2. Create a new script inheriting from "Controllable".
-3. Add the metadata "[OSCProperty] above attributs you want to expose. You can use booleans to use or no the UI, presets, etc.
+3. Add to this script every attributes you want to control with UI/OSC and the metadata "[OSCProperty]. You can use booleans to use or not the UI, presets, etc. Just be sure that your attributs have the same name as the one in the script you want to control.
 4. Add the metadata "[OSCMethod] above methods you want to expose.
-5. Run !
+5. Override the Awake method to set the TargetScript with the script you want to control before calling base.Awake()
+6. Run !
 
 ## Expose a List
 To expose a string list you have to create a index variable which will be used by the dropdown mennu as an index. It will allows you to know which element of the list is selected. Simply specify [OSCProperty(TargetList=yourListName)].
