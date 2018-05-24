@@ -38,18 +38,9 @@ public class OSCMasterControllable : Controllable {
         oscmaster.Connect();
     }
 
-    public override void OnScriptValueChanged(string name)
-    {
-        localPort = oscmaster.localPort;
-        isConnected = oscmaster.isConnected;
-
-        RaiseEventValueChanged(name);
-    }
-
     public override void OnUiValueChanged(string name)
     {
-        oscmaster.localPort = localPort;
-        oscmaster.isConnected = isConnected;
+        base.OnUiValueChanged(name);
         oscmaster.Connect();
     }
 }

@@ -128,10 +128,15 @@ public class Controllable : MonoBehaviour
 
     public virtual void OnScriptValueChanged(string name)
     {
+        if (TargetScript.GetType().GetField(name) == null) return;
+        this.GetType().GetField(name).SetValue(this, TargetScript.GetType().GetField(name).GetValue(TargetScript));
+        RaiseEventValueChanged(name);
     }
 
     public virtual void OnUiValueChanged(string name)
     {
+        if (TargetScript.GetType().GetField(name) == null) { Debug.Log("Name : " + name + " is null in target");  return; }
+        TargetScript.GetType().GetField(name).SetValue(TargetScript, this.GetType().GetField(name).GetValue(this));
     }
 
     public virtual void OnEnable()
@@ -162,7 +167,7 @@ public class Controllable : MonoBehaviour
             {
                // Debug.Log("Difference between " + propertiesArray[i].GetValue(this) + " and " + PreviousPropertiesValues[i].ToString());
                     if (scriptValueChanged != null) scriptValueChanged(propertiesArray[i].Name);
-              //  RaiseEventValueChanged(propertiesArray[i].Name);
+                RaiseEventValueChanged(propertiesArray[i].Name);
                 PreviousPropertiesValues[i] = value;
             }
         }
@@ -187,8 +192,8 @@ public class Controllable : MonoBehaviour
         LoadPreset();
 
         if (scriptValueChanged != null) scriptValueChanged("currentPreset");
-        if (uiValueChanged != null) uiValueChanged("currentPreset");
-        //        RaiseEventValueChanged("currentPreset");
+        //if (uiValueChanged != null) uiValueChanged("currentPreset");
+        RaiseEventValueChanged("currentPreset");
     }
 
     public void ReadFileList()
@@ -205,7 +210,7 @@ public class Controllable : MonoBehaviour
         }
 
         if (scriptValueChanged != null) scriptValueChanged("currentPreset");
-        if (uiValueChanged != null) uiValueChanged("currentPreset");
+        RaiseEventValueChanged("currentPreset");
     }
 
     [OSCMethod]
