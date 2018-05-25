@@ -11,8 +11,6 @@ public class OSCMaster : MonoBehaviour
     OSCServer server;
 
     public int localPort;
-    private int oldLocalPort;
-
 
     public bool isConnected;
 
@@ -49,7 +47,6 @@ public class OSCMaster : MonoBehaviour
         
             server.Connect();
             isConnected = true;
-            oldLocalPort = localPort;
         }
         catch (Exception e)
         {

@@ -32,11 +32,6 @@ public class OSCMasterControllable : Controllable {
         ControllableMaster.SaveAllPresets();
     }
 
-    public override void DataLoaded()
-    {
-        base.DataLoaded();
-        oscmaster.Connect();
-    }
 
     public override void OnUiValueChanged(string name)
     {

@@ -657,7 +657,7 @@ public class Controllable : MonoBehaviour
         }
 
         DataLoaded();
-       // if (debug)
+        if (debug)
             Debug.Log("Done loading.");
 
         yield return null;
