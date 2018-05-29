@@ -136,10 +136,12 @@ public class UIMaster : MonoBehaviour
         var allText = newPanel.GetComponentsInChildren<Text>();
         foreach (var text in allText)
         {
-            if (text.text == "OverwritePreset" || text.text == "SavePresetAs" || text.text == "LoadPreset")
-                text.transform.parent.SetSiblingIndex(newPanel.transform.childCount-2); //last index being the preset list
+            if (text.text == "Save" || text.text == "SaveAs" || text.text == "Load")
+            {
+                text.transform.parent.SetParent(newPanel.transform.Find("PresetHolder"));
+            }
         }
-
+        newPanel.transform.Find("PresetHolder").SetSiblingIndex(newPanel.transform.childCount - 2); //last index being the preset list
     }
 
     private void CreateDropDown(Transform parent, Controllable target, FieldInfo listProperty, FieldInfo activeElement)
