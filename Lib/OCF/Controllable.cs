@@ -117,7 +117,7 @@ public class Controllable : MonoBehaviour
             OSCMethod attribute = Attribute.GetCustomAttribute(info, typeof(OSCMethod)) as OSCMethod;
             if (attribute != null)
             {
-                if((info.Name == "OverwritePreset" || info.Name == "SaveAs" || info.Name == "Load") && !usePresets) continue;
+                if((info.Name == "Save" || info.Name == "SaveAs" || info.Name == "Load") && !usePresets) continue;
                 Methods.Add(info.Name, info);
             }
         }
@@ -268,6 +268,16 @@ public class Controllable : MonoBehaviour
     public void Load()
     {
         LoadWithName(currentPreset);
+    }
+
+    [OSCMethod]
+    public void Show() //Show preset file in explorer
+    {
+        if (currentPreset == "") return;
+
+        var itemPath = targetDirectory + currentPreset;
+        itemPath = itemPath.Replace(@"/", @"\");   // explorer doesn't like front slashes
+        System.Diagnostics.Process.Start("explorer.exe", "/select," + itemPath);
     }
 
     [OSCMethod]

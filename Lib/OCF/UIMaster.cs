@@ -136,7 +136,7 @@ public class UIMaster : MonoBehaviour
         var allText = newPanel.GetComponentsInChildren<Text>();
         foreach (var text in allText)
         {
-            if (text.text == "Save" || text.text == "SaveAs" || text.text == "Load")
+            if (text.text == "Save" || text.text == "SaveAs" || text.text == "Load" || text.text == "Show")
             {
                 text.transform.parent.SetParent(newPanel.transform.Find("PresetHolder"));
             }
