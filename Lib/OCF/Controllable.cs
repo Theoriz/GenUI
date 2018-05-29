@@ -117,7 +117,7 @@ public class Controllable : MonoBehaviour
             OSCMethod attribute = Attribute.GetCustomAttribute(info, typeof(OSCMethod)) as OSCMethod;
             if (attribute != null)
             {
-                if((info.Name == "OverwritePreset" || info.Name == "SavePresetAs" || info.Name == "LoadPreset") && !usePresets) continue;
+                if((info.Name == "OverwritePreset" || info.Name == "SaveAs" || info.Name == "Load") && !usePresets) continue;
                 Methods.Add(info.Name, info);
             }
         }
@@ -128,14 +128,22 @@ public class Controllable : MonoBehaviour
 
     public virtual void OnScriptValueChanged(string name)
     {
-        if (TargetScript.GetType().GetField(name) == null) return;
+        if (TargetScript.GetType().GetField(name) == null)
+        {
+            if (debug)
+                Debug.Log("Name : " + name + " is null in target");
+            return;
+        }
         this.GetType().GetField(name).SetValue(this, TargetScript.GetType().GetField(name).GetValue(TargetScript));
         RaiseEventValueChanged(name);
     }
 
     public virtual void OnUiValueChanged(string name)
     {
-        if (TargetScript.GetType().GetField(name) == null) { Debug.Log("Name : " + name + " is null in target");  return; }
+        if (TargetScript.GetType().GetField(name) == null) {
+            if(debug)
+                Debug.Log("Name : " + name + " is null in target");
+            return; }
         TargetScript.GetType().GetField(name).SetValue(TargetScript, this.GetType().GetField(name).GetValue(this));
     }
 
@@ -189,7 +197,7 @@ public class Controllable : MonoBehaviour
         if (string.IsNullOrEmpty(lastPresetRead)) return;
 
         currentPreset = lastPresetRead;
-        LoadPreset();
+        Load();
 
         if (scriptValueChanged != null) scriptValueChanged("currentPreset");
         //if (uiValueChanged != null) uiValueChanged("currentPreset");
@@ -214,29 +222,29 @@ public class Controllable : MonoBehaviour
     }
 
     [OSCMethod]
-    public void SavePresetAs()
+    public void Save()
+    {
+        if (string.IsNullOrEmpty(currentPreset))
+        {
+            SaveAs();
+            return;
+        }
+
+        Save(currentPreset);
+    }
+
+    [OSCMethod]
+    public void SaveAs()
     {
 
         var date = DateTime.Today.Day + "-" + DateTime.Today.Month + "-" + DateTime.Today.Year + "_" +
                    DateTime.Now.Hour + "-" + DateTime.Now.Minute + "-" + DateTime.Now.Second;
         var fileName = date + ".pst";
 
-        SavePreset(fileName);
+        Save(fileName);
     }
 
-    [OSCMethod]
-    public void OverwritePreset()
-    {
-        if (string.IsNullOrEmpty(currentPreset))
-        {
-            SavePresetAs();
-            return;
-        }
-
-        SavePreset(currentPreset);
-    }
-
-    private void SavePreset(string fileName)
+    private void Save(string fileName)
     {
         targetDirectory = "Presets/" + (folder.Length > 0 ? folder : sourceScene) + "/" + id + "/";
         if (debug)
@@ -257,13 +265,13 @@ public class Controllable : MonoBehaviour
     }
 
     [OSCMethod]
-    public void LoadPreset()
+    public void Load()
     {
-        LoadPresetWithName(currentPreset);
+        LoadWithName(currentPreset);
     }
 
     [OSCMethod]
-    public void LoadPresetWithName(string fileName, float duration = 0, string tweenStyle = null)
+    public void LoadWithName(string fileName, float duration = 0, string tweenStyle = null)
     {
         if (!fileName.EndsWith(".pst"))
             fileName += ".pst";

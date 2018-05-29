@@ -59,7 +59,7 @@ public static class ControllableMaster
     {
         foreach (var controllable in RegisteredControllables)
         {
-            controllable.Value.SavePresetAs();
+            controllable.Value.SaveAs();
         }
     }
 }
