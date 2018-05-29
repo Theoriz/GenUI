@@ -24,6 +24,7 @@ public class OSCMasterControllable : Controllable {
 
         TargetScript = oscmaster;
         base.Awake();
+        oscmaster.Connect();
     }
 
     [OSCMethod]
