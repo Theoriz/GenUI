@@ -117,7 +117,7 @@ public class Controllable : MonoBehaviour
             OSCMethod attribute = Attribute.GetCustomAttribute(info, typeof(OSCMethod)) as OSCMethod;
             if (attribute != null)
             {
-                if((info.Name == "Save" || info.Name == "SaveAs" || info.Name == "Load") && !usePresets) continue;
+                if((info.Name == "Save" || info.Name == "SaveAs" || info.Name == "Load" || info.Name == "Show") && !usePresets) continue;
                 Methods.Add(info.Name, info);
             }
         }
