@@ -53,6 +53,7 @@ public class OSCMaster : MonoBehaviour
             Debug.LogError("Error with port " + localPort);
             Debug.LogWarning(e.StackTrace);
             isConnected = false;
+            server = null;
         }
     }
 

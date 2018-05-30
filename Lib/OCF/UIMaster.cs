@@ -129,7 +129,6 @@ public class UIMaster : MonoBehaviour
                 CreateInput(newPanel.transform, newControllable, property.Value, attribute.isInteractible);
                 continue;
             }
-            //Debug.Log("Property type : " + propertyType + " of " + property.Key);
         }
 
         //Order Save and Load preset buttons
@@ -210,8 +209,33 @@ public class UIMaster : MonoBehaviour
         var newSlider = Instantiate(SliderPrefab);
         var textComponent = newSlider.transform.Find("Text").gameObject.GetComponent<Text>();
         var sliderComponent = newSlider.GetComponentInChildren<Slider>();
+        var inputComponent = newSlider.GetComponentInChildren<InputField>();
+        if (property.FieldType.ToString() == "System.Int32")
+            inputComponent.contentType = InputField.ContentType.IntegerNumber;
+        if (property.FieldType.ToString() == "System.Single")
+            inputComponent.contentType = InputField.ContentType.DecimalNumber;
 
-        textComponent.text = property.Name + " : " + 0;
+        inputComponent.onEndEdit.AddListener((value) =>
+        {
+            var list = new List<object>();
+            if (property.FieldType.ToString() == "System.Int32")
+            {
+                int result = 0;
+                int.TryParse(value, out result);
+                list.Add(result);
+            }
+            if (property.FieldType.ToString() == "System.Single")
+            {
+                //Debug.Log("Value : " + value + " size : " + value.Length);
+                float result = 0;
+                float.TryParse(value, out result);
+                list.Add(result);
+            }
+            target.setFieldProp(property, list);
+        });
+
+        textComponent.text = property.Name;
+        inputComponent.transform.Find("Text").gameObject.GetComponent<Text>().color = Color.white;
         newSlider.transform.SetParent(parent);
 
         // Debug.Log("Value of " + property.Name + " is " + float.Parse(property.GetValue(target).ToString()));
@@ -223,10 +247,10 @@ public class UIMaster : MonoBehaviour
 
         sliderComponent.onValueChanged.AddListener((value) =>
         {
-            if (isFloat)
-                textComponent.text = property.Name + " : " + value.ToString("F2");
-            else
-                textComponent.text = property.Name + " : " + value;
+            inputComponent.text = property.GetValue(target).ToString();
+            //if (isFloat)
+            //else
+            //    textComponent.text = property.Name;
             var list = new List<object>();
             list.Add(value);
             target.setFieldProp(property, list);
@@ -240,14 +264,12 @@ public class UIMaster : MonoBehaviour
                 {
                     sliderComponent.value =
                         (float) target.getPropInfoForAddress(name).GetValue(target);
-                    textComponent.text =
-                        property.Name + " : " + sliderComponent.value.ToString("F2");
+                    inputComponent.text = sliderComponent.value.ToString("F2");
                 }
                 else
                 {
                     sliderComponent.value = (int) target.getPropInfoForAddress(name).GetValue(target);
-                    textComponent.text =
-                        property.Name + " : " + sliderComponent.value;
+                    inputComponent.text = sliderComponent.value.ToString();
                 }
             }
         };
@@ -334,8 +356,21 @@ public class UIMaster : MonoBehaviour
         target.controllableValueChanged += (name) =>
         {
             //Debug.Log("Fired value changed : " + name);
-            if (name == property.Name)
-                newCheckbox.GetComponent<Toggle>().isOn = (bool)target.getPropInfoForAddress(name).GetValue(target);
+            if (name == property.Name) {
+                var newValue = (bool)target.getPropInfoForAddress(name).GetValue(target);
+                newCheckbox.GetComponent<Toggle>().isOn = newValue;
+                if (newValue) { //GREEN
+                    var blockColors = newCheckbox.GetComponent<Toggle>().colors;
+                    blockColors.disabledColor = new Color(0.43f, 0.9f, 0.47f, 0.75f);
+                    newCheckbox.GetComponent<Toggle>().colors = blockColors;
+                }
+                else //RED
+                {
+                    var blockColors = newCheckbox.GetComponent<Toggle>().colors;
+                    blockColors.disabledColor = new Color(0.9f, 0.4f, 0.4f, 0.8f);
+                    newCheckbox.GetComponent<Toggle>().colors = blockColors;
+                }
+            }
         };
         newCheckbox.GetComponent<RectTransform>().localScale = new Vector3(1.0f, 1.0f, 1.0f);
     }
