@@ -17,6 +17,7 @@ public class UIMaster : MonoBehaviour
     public GameObject CheckboxPrefab;
     public GameObject InputPrefab;
     public GameObject DropdownPrefab;
+    public GameObject HeaderTextPrefab;
 
     public bool AutoHideCursor;
     public bool HideUIAtStart;
@@ -99,6 +100,12 @@ public class UIMaster : MonoBehaviour
             //Check if needs to be in UI
             if (!attribute.ShowInUI) continue;
 
+            //Add header if it exists
+            var headerAttribut = (HeaderAttribute[])property.Value.GetCustomAttributes(typeof(HeaderAttribute), false);
+            if (headerAttribut.Length != 0)
+            {
+                CreateHeaderText(newPanel.transform, headerAttribut[0].header);
+            }
             //Create list
             if (attribute.TargetList != "" && attribute.TargetList != null)
             {
@@ -141,6 +148,13 @@ public class UIMaster : MonoBehaviour
             }
         }
         newPanel.transform.Find("PresetHolder").SetSiblingIndex(newPanel.transform.childCount - 2); //last index being the preset list
+    }
+
+    private void CreateHeaderText(Transform parent, string text)
+    {
+        var headerText = Instantiate(HeaderTextPrefab);
+        headerText.GetComponent<Text>().text = text;
+        headerText.transform.SetParent(parent);
     }
 
     private void CreateDropDown(Transform parent, Controllable target, FieldInfo listProperty, FieldInfo activeElement)
@@ -235,6 +249,7 @@ public class UIMaster : MonoBehaviour
         });
 
         textComponent.text = property.Name;
+        inputComponent.text = sliderComponent.value.ToString();
         inputComponent.transform.Find("Text").gameObject.GetComponent<Text>().color = Color.white;
         newSlider.transform.SetParent(parent);
 
