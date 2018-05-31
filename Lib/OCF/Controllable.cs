@@ -100,7 +100,6 @@ public class Controllable : MonoBehaviour
                         }
                     }
                 }
-                //Debug.Log("Intializing " + info.Name + " with " + info.GetValue(this));
                 PreviousPropertiesValues.Add(info.GetValue(this));
             }
         }
@@ -122,7 +121,7 @@ public class Controllable : MonoBehaviour
             }
         }
 
-        if (string.IsNullOrEmpty(id)) id = gameObject.name;
+        if (string.IsNullOrEmpty(id)) id = TargetScript.GetType().Name;
         sourceScene = SceneManager.GetActiveScene().name;
     }
 

@@ -140,14 +140,25 @@ public class UIMaster : MonoBehaviour
 
         //Order Save and Load preset buttons
         var allText = newPanel.GetComponentsInChildren<Text>();
+        var usePreset = false;
         foreach (var text in allText)
         {
             if (text.text == "Save" || text.text == "SaveAs" || text.text == "Load" || text.text == "Show")
             {
                 text.transform.parent.SetParent(newPanel.transform.Find("PresetHolder"));
+                usePreset = true;
             }
         }
-        newPanel.transform.Find("PresetHolder").SetSiblingIndex(newPanel.transform.childCount - 2); //last index being the preset list
+        if (usePreset)
+            newPanel.transform.Find("PresetHolder").SetSiblingIndex(newPanel.transform.childCount - 2); //last index being the preset list
+        else
+            newPanel.transform.Find("PresetHolder").gameObject.SetActive(false);
+
+        //Set OCF on top
+        if(_panels.ContainsKey("OCF"))
+        {
+            _panels["OCF"].transform.SetAsFirstSibling();
+        }
     }
 
     private void CreateHeaderText(Transform parent, string text)
