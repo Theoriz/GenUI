@@ -148,6 +148,8 @@ public class Controllable : MonoBehaviour
 
     public virtual void OnEnable()
     {
+		if (debug)
+			Debug.Log("Registering " + this.GetType().Name + " script on " + this.gameObject.name);
         ControllableMaster.Register(this);
 
         if (usePresets)
@@ -163,7 +165,8 @@ public class Controllable : MonoBehaviour
         }
     }
 
-    public virtual void Update() //Warn UI if attribut changes
+
+	public virtual void Update() //Warn UI if attribut changes
     {
         var propertiesArray = TargetProperties.Values.ToArray();
 
@@ -309,7 +312,7 @@ public class Controllable : MonoBehaviour
     //Override it if you want to do things before a preset save
     public virtual void CallMeBeforeSave() { }
 
-    void OnDisable()
+    public virtual void OnDisable()
     {
         if (debug)
             Debug.Log("Saving temp file before destruction");
@@ -327,9 +330,11 @@ public class Controllable : MonoBehaviour
         }
 
         if (debug)
-            Debug.Log("Done");
+            Debug.Log("Done saving");
 
-        ControllableMaster.UnRegister(this);
+		if (debug)
+			Debug.Log("Unregistering " + this.GetType().Name + " script on " + this.gameObject.name);
+		ControllableMaster.UnRegister(this);
     }
 
     public FieldInfo getFieldInfoByName(string requestedName)
