@@ -72,23 +72,29 @@ public class OSCMaster : MonoBehaviour
 
     void processMessage(OSCMessage m)
     {
+        string[] addressSplit = m.Address.Split(new char[] { '/' });
 
-        string[] addSplit = m.Address.Split(new char[] { '/' });
-
-        //First addSplit is null because of /OCF/...
-        if (addSplit[1] != "OCF") //.Length != 3)
+        //First addressSplit is null because of /OCF/...
+        if (addressSplit[1] != "OCF") //.Length != 3)
         {
-            if(messageAvailable != null)
+			if (messageAvailable != null)
                 messageAvailable(m); //propagate the message
              //if (logIncoming) Debug.LogWarning("Message " + m.Address + " is not a valid control address.");
             //return;
         }
         else //Starts with /OCF/ so it's control
         {
-            string target = addSplit[2];
-            string property = addSplit[3];
+			string target = "";
+			string property = "";
+			try {
+				target = addressSplit[2];
+				property = addressSplit[3];
+			}
+			catch(Exception e) {
+				Debug.LogWarning("Error parsing OCF command ! ");
+			}
 
-            if (logIncoming) Debug.Log("Message received for Target : " + target + ", property = " + property);
+			if (logIncoming) Debug.Log("Message received for Target : " + target + ", property = " + property);
             ControllableMaster.UpdateValue(target, property, m.Data);
         }
     }
