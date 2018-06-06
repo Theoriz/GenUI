@@ -20,28 +20,34 @@ It is also possible to load a specific file via the OSC method "LoadPresetWithNa
 5. Override the Awake method to set the TargetScript with the script you want to control before calling base.Awake()
 6. Run !
 
-<details><summary>Controllable Template Example</summary>
+<details><summary>CONTROLLABLE EXAMPLE</summary>
 <p>
 
 ```C++
 public class MyScriptControllable : Controllable {
 
+	// Reference to the script to control with this controllable
 	public MyScript myScript;
 
+	// Expose variables from myScript to OSC by creating OSCProperties with the name of those variables
 	[OSCProperty]
 	public int intParameterOfMyScript;
 
 	[OSCProperty]
 	public float floatParameterOfMyScript;
 
+	//Create OSC methods to call methods from myScript
 	[OSCMethod]
 	public void MyOSCMethod() {
 		myScript.MyScriptMethod();
 	}
 
+	//Override the Awake method
 	public override void Awake() {
 
+		//Set the controllable target script to myScript
 		TargetScript = myScript;
+
 		base.Awake();
 	}
 }
