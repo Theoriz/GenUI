@@ -20,6 +20,36 @@ It is also possible to load a specific file via the OSC method "LoadPresetWithNa
 5. Override the Awake method to set the TargetScript with the script you want to control before calling base.Awake()
 6. Run !
 
+<details><summary>Controllable Template Example</summary>
+<p>
+
+```C++
+public class MyScriptControllable : Controllable {
+
+	public MyScript myScript;
+
+	[OSCProperty]
+	public int intParameterOfMyScript;
+
+	[OSCProperty]
+	public float floatParameterOfMyScript;
+
+	[OSCMethod]
+	public void MyOSCMethod() {
+		myScript.MyScriptMethod();
+	}
+
+	public override void Awake() {
+
+		TargetScript = myScript;
+		base.Awake();
+	}
+}
+```
+
+</p>
+</details>
+
 ## Expose a List
 To expose a string list you have to create a index variable which will be used by the dropdown mennu as an index. It will allows you to know which element of the list is selected. Simply specify [OSCProperty(TargetList=yourListName)].
 
