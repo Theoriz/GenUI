@@ -20,7 +20,7 @@ It is also possible to load a specific file via the OSC method "LoadPresetWithNa
 5. Override the Awake method to set the TargetScript with the script you want to control before calling base.Awake()
 6. Run !
 
-<details><summary>CONTROLLABLE EXAMPLE</summary>
+<details><summary>**CONTROLLABLE EXAMPLE**</summary>
 <p>
 
 ```C++
