@@ -245,17 +245,15 @@ public class UIMaster : MonoBehaviour
             var list = new List<object>();
             if (property.FieldType.ToString() == "System.Int32")
             {
-                int result = 0;
-                int.TryParse(value, out result);
+                var result = int.Parse(value, CultureInfo.InvariantCulture);
                 list.Add(result);
             }
             if (property.FieldType.ToString() == "System.Single")
             {
-                //Debug.Log("Value : " + value + " size : " + value.Length);
-                float result = 0;
-                float.TryParse(value, out result);
+                var result = float.Parse(value.ToString(), CultureInfo.InvariantCulture);
                 list.Add(result);
             }
+
             target.setFieldProp(property, list);
         });
 
@@ -273,24 +271,26 @@ public class UIMaster : MonoBehaviour
 
         sliderComponent.onValueChanged.AddListener((value) =>
         {
-            inputComponent.text = property.GetValue(target).ToString();
             //if (isFloat)
             //else
             //    textComponent.text = property.Name;
             var list = new List<object>();
             list.Add(value);
             target.setFieldProp(property, list);
+            inputComponent.text = property.GetValue(target).ToString();
         });
         target.controllableValueChanged += (name) =>
         {
-           // Debug.Log("Fired value changed : " + name);
+            //Debug.Log("Fired value changed : " + name + " slider value : " + (float)target.getPropInfoForAddress(name).GetValue(target));
             if (name == property.Name)
             {
                 if (isFloat)
                 {
                     sliderComponent.value =
                         (float) target.getPropInfoForAddress(name).GetValue(target);
-                    inputComponent.text = sliderComponent.value.ToString("F2");
+                    var str = "" + property.GetValue(target);
+                    str = str.Replace(",", ".");
+                    inputComponent.text = "" + str;
                 }
                 else
                 {
@@ -327,8 +327,11 @@ public class UIMaster : MonoBehaviour
         {
             var list = new List<object>();
             var propertyType = property.FieldType;
-            Debug.Log("Property type : " + propertyType.ToString());
-            Debug.Log("Value : " + value + " size : " + value.Length);
+            if (showDebug)
+            {
+                Debug.Log("Property type : " + propertyType.ToString());
+                Debug.Log("Value : " + value + " size : " + value.Length);
+            }
             if (propertyType.ToString() == "System.Int32")
             {
                 var result = int.Parse(value, CultureInfo.InvariantCulture);
