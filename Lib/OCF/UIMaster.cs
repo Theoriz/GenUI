@@ -327,18 +327,16 @@ public class UIMaster : MonoBehaviour
         {
             var list = new List<object>();
             var propertyType = property.FieldType;
-            //Debug.Log("Property type : " + propertyType.ToString());
+            Debug.Log("Property type : " + propertyType.ToString());
+            Debug.Log("Value : " + value + " size : " + value.Length);
             if (propertyType.ToString() == "System.Int32")
             {
-                int result = 0;
-                int.TryParse(value, out result);
+                var result = int.Parse(value, CultureInfo.InvariantCulture);
                 list.Add(result);
             }
             if (propertyType.ToString() == "System.Single")
             {
-                //Debug.Log("Value : " + value + " size : " + value.Length);
-                float result = 0;
-                float.TryParse(value, out result);
+                var result = float.Parse(value.ToString(), CultureInfo.InvariantCulture);
                 list.Add(result);
             }
             if (propertyType.ToString() == "System.String")
