@@ -258,7 +258,9 @@ public class UIMaster : MonoBehaviour
         });
 
         textComponent.text = property.Name;
-        inputComponent.text = sliderComponent.value.ToString();
+        var tmp = "" + property.GetValue(target);
+        tmp = tmp.Replace(",", ".");
+        inputComponent.text = "" + tmp;
         inputComponent.transform.Find("Text").gameObject.GetComponent<Text>().color = Color.white;
         newSlider.transform.SetParent(parent);
 

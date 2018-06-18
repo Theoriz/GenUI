@@ -209,7 +209,7 @@ public class Controllable : MonoBehaviour
     public void ReadFileList()
     {
         presetList.Clear();
-        targetDirectory = "Presets/" + (folder.Length > 0?folder:sourceScene) + "/" + id + "/";
+        targetDirectory = Application.dataPath + "/../Presets/" + (folder.Length > 0?folder:sourceScene) + "/" + id + "/";
         Directory.CreateDirectory(targetDirectory);
         foreach (var t in Directory.GetFiles(targetDirectory))
         {
@@ -248,7 +248,7 @@ public class Controllable : MonoBehaviour
 
     private void Save(string fileName)
     {
-        targetDirectory = "Presets/" + (folder.Length > 0 ? folder : sourceScene) + "/" + id + "/";
+        targetDirectory = Application.dataPath + "/../Presets/" + (folder.Length > 0 ? folder : sourceScene) + "/" + id + "/";
         if (debug)
             Debug.Log("Saving in " + targetDirectory + fileName + "...");
         //create file
