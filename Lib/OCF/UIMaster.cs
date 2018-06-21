@@ -18,6 +18,7 @@ public class UIMaster : MonoBehaviour
     public GameObject InputPrefab;
     public GameObject DropdownPrefab;
     public GameObject HeaderTextPrefab;
+    public GameObject ColorPrefab;
 
     public bool AutoHideCursor;
     public bool HideUIAtStart;
@@ -137,6 +138,13 @@ public class UIMaster : MonoBehaviour
             if (propertyType.ToString() == "System.Int32" || propertyType.ToString() == "System.Float" || propertyType.ToString() == "System.String")
             {
                 CreateInput(newPanel.transform, newControllable, property.Value, attribute.isInteractible);
+                continue;
+            }
+            if (showDebug)
+                Debug.Log("Type : " + propertyType.ToString());
+            if (propertyType.ToString() == "UnityEngine.Color")
+            {
+                CreateColor(newPanel.transform, newControllable, property.Value, attribute.isInteractible);
                 continue;
             }
         }
@@ -429,5 +437,29 @@ public class UIMaster : MonoBehaviour
             }
         }
     }
-    
+
+    private void CreateColor(Transform parent, Controllable target, FieldInfo property, bool isInteractible)
+    {
+        var newColor = Instantiate(ColorPrefab);
+        newColor.GetComponentInChildren<Text>().text = property.Name;
+        newColor.transform.SetParent(parent);
+        newColor.GetComponentInChildren<Image>().color = (Color)property.GetValue(target);
+
+        //newColor.GetComponent<Toggle>().onValueChanged.AddListener((value) =>
+        //{
+        //    var list = new List<object>();
+        //    list.Add(value);
+        //    target.setFieldProp(property, list);
+        //});
+        target.controllableValueChanged += (name) =>
+        {
+            //Debug.Log("Fired value changed : " + name);
+            if (name == property.Name)
+            {
+                newColor.GetComponentInChildren<Image>().color = (Color)property.GetValue(target);
+            }
+        };
+        newColor.GetComponent<RectTransform>().localScale = new Vector3(1.0f, 1.0f, 1.0f);
+    }
+
 }
