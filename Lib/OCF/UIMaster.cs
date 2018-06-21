@@ -10,7 +10,7 @@ using UnityEngine.UI;
 
 public class UIMaster : MonoBehaviour
 {
-    public Transform Panel;
+    public Transform MainPanel;
     public GameObject PanelPrefab;
     public GameObject MethodButtonPrefab;
     public GameObject SliderPrefab;
@@ -79,11 +79,14 @@ public class UIMaster : MonoBehaviour
         if (!newControllable.usePanel) return;
 
         //First we create a panel for the controllable
-        var newPanel = Instantiate(PanelPrefab);
-        newPanel.transform.SetParent(Panel.transform);
+        var newControllableHolder = Instantiate(PanelPrefab);
+        newControllableHolder.transform.GetChild(0).GetComponent<Image>().color = newControllable.BarColor;
+        newControllableHolder.transform.SetParent(MainPanel.transform);
+
+        var newPanel = newControllableHolder.transform.GetChild(1).gameObject;
         newPanel.GetComponentInChildren<Text>().text = newControllable.id;
         newPanel.GetComponent<RectTransform>().localScale = new Vector3(1.0f, 1.0f, 1.0f);
-        _panels.Add(newControllable.id, newPanel);
+        _panels.Add(newControllable.id, newControllableHolder);
 
         //Read all methods and add button
         foreach (var method in newControllable.Methods)

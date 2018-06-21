@@ -29,6 +29,7 @@ public class Controllable : MonoBehaviour
 {
     public object TargetScript; 
 
+    public Color BarColor;
     public string id;
     [HideInInspector]
     public string folder = "";
