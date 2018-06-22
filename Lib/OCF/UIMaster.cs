@@ -19,6 +19,7 @@ public class UIMaster : MonoBehaviour
     public GameObject DropdownPrefab;
     public GameObject HeaderTextPrefab;
     public GameObject ColorPrefab;
+    public GameObject Vector3Prefab;
 
     public bool AutoHideCursor;
     public bool HideUIAtStart;
@@ -145,6 +146,12 @@ public class UIMaster : MonoBehaviour
             if (propertyType.ToString() == "UnityEngine.Color")
             {
                 CreateColor(newPanel.transform, newControllable, property.Value, attribute.isInteractible);
+                continue;
+            }
+
+            if(propertyType.ToString() == "UnityEngine.Vector3")
+            {
+                CreateVector3(newPanel.transform, newControllable, property.Value, attribute.isInteractible);
                 continue;
             }
         }
@@ -462,4 +469,57 @@ public class UIMaster : MonoBehaviour
         newColor.GetComponent<RectTransform>().localScale = new Vector3(1.0f, 1.0f, 1.0f);
     }
 
+    private void CreateVector3(Transform parent, Controllable target, FieldInfo property, bool isInteractible)
+    {
+        var newVector3 = Instantiate(Vector3Prefab);
+        newVector3.transform.SetParent(parent);
+        newVector3.transform.GetChild(1).GetComponent<Text>().text = property.Name;
+        var XInput = newVector3.transform.GetChild(0).Find("XInput").GetChild(0).GetComponent<InputField>();
+        var YInput = newVector3.transform.GetChild(0).Find("YInput").GetChild(0).GetComponent<InputField>();
+        var ZInput = newVector3.transform.GetChild(0).Find("ZInput").GetChild(0).GetComponent<InputField>();
+
+        var scriptValue = (Vector3)property.GetValue(target);
+        XInput.text = "" + scriptValue.x;
+        YInput.text = "" + scriptValue.y;
+        ZInput.text = "" + scriptValue.z;
+
+        XInput.onEndEdit.AddListener((value) =>
+        {
+            var list = new List<object>();
+            list.Add(value);
+            list.Add(YInput.text);
+            list.Add(ZInput.text);
+
+            target.setFieldProp(property, list);
+        });
+
+        YInput.onEndEdit.AddListener((value) =>
+        {
+            var list = new List<object>();
+            list.Add(XInput.text);
+            list.Add(value);
+            list.Add(ZInput.text);
+
+            target.setFieldProp(property, list);
+        });
+
+        ZInput.onEndEdit.AddListener((value) =>
+        {
+            var list = new List<object>();
+            list.Add(XInput.text);
+            list.Add(value);
+            list.Add(YInput.text);
+
+            target.setFieldProp(property, list);
+        });
+
+        target.controllableValueChanged += (name) =>
+        {
+            var vector = (Vector3)property.GetValue(target);
+
+            XInput.text = "" + vector.x;
+            YInput.text = "" + vector.y;
+            ZInput.text = "" + vector.z;
+        };
+    }
 }
