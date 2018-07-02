@@ -59,7 +59,31 @@ public static class ControllableMaster
     {
         foreach (var controllable in RegisteredControllables)
         {
+            controllable.Value.Save();
+        }
+    }
+
+    public static void SaveAsAllPresets()
+    {
+        foreach (var controllable in RegisteredControllables)
+        {
             controllable.Value.SaveAs();
+        }
+    }
+
+    public static void LoadAllPresets()
+    {
+        foreach (var controllable in RegisteredControllables)
+        {
+            controllable.Value.Load();
+        }
+    }
+
+    public static void RefreshAllPresets()
+    {
+        foreach (var controllable in RegisteredControllables)
+        {
+            controllable.Value.ReadFileList();
         }
     }
 }

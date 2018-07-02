@@ -1,12 +1,10 @@
 ﻿using System;
-using System.CodeDom;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public class UIMaster : MonoBehaviour
 {
@@ -93,6 +91,9 @@ public class UIMaster : MonoBehaviour
         //Read all methods and add button
         foreach (var method in newControllable.Methods)
         {
+            if (showDebug)
+                Debug.Log("[UI] Adding button for (" + newControllable.GetType() + ") : " + method.Value.Name);
+
             CreateButton(newPanel.transform, newControllable, method.Value);
         }
 
@@ -104,6 +105,9 @@ public class UIMaster : MonoBehaviour
 
             //Check if needs to be in UI
             if (!attribute.ShowInUI) continue;
+
+            if (showDebug)
+                Debug.Log("[UI] Adding control for (" + newControllable.GetType() + ") : " + property.Value.Name);
 
             //Add header if it exists
             var headerAttribut = (HeaderAttribute[])property.Value.GetCustomAttributes(typeof(HeaderAttribute), false);
@@ -166,16 +170,31 @@ public class UIMaster : MonoBehaviour
                 text.transform.parent.SetParent(newPanel.transform.Find("PresetHolder"));
                 usePreset = true;
             }
+
+            if (text.text == "SaveAll" || text.text == "SaveAsAll" || text.text == "LoadAll")
+            {
+                var globalPresetHolder = newPanel.transform.Find("AllPresetHolder");
+                if (globalPresetHolder == null)
+                {
+                    globalPresetHolder = Instantiate(newPanel.transform.Find("PresetHolder"));
+                    globalPresetHolder.name = "AllPresetHolder";
+                    globalPresetHolder.transform.SetParent(newPanel.transform);
+                    globalPresetHolder.transform.SetSiblingIndex(1); //Set first
+                }
+                text.transform.parent.SetParent(globalPresetHolder);
+            }
         }
         if (usePreset)
+        {
             newPanel.transform.Find("PresetHolder").SetSiblingIndex(newPanel.transform.childCount - 2); //last index being the preset list
+        }
         else
             newPanel.transform.Find("PresetHolder").gameObject.SetActive(false);
 
         //Set OCF on top
-        if(_panels.ContainsKey("OCF"))
+        if(_panels.ContainsKey("GenUI"))
         {
-            _panels["OCF"].transform.SetAsFirstSibling();
+            _panels["GenUI"].transform.SetAsFirstSibling();
         }
 
         newPanel.transform.localScale = Vector3.one;
@@ -192,6 +211,11 @@ public class UIMaster : MonoBehaviour
     {
         var newDropdown = Instantiate(DropdownPrefab);
         newDropdown.transform.SetParent(parent);
+        //var trigger = newDropdown.GetComponent<EventTrigger>();
+        //EventTrigger.Entry entry = new EventTrigger.Entry();
+        //entry.eventID = EventTriggerType.PointerClick;
+        //entry.callback.AddListener((eventData) => {  });
+        //trigger.triggers.Add(entry);
 
         //TODO remove string
         var listInObject = (List<string>) listProperty.GetValue(target);
@@ -267,7 +291,7 @@ public class UIMaster : MonoBehaviour
             {
                 var result = int.Parse(value, CultureInfo.InvariantCulture);
                 list.Add(result);
-            }
+            }   
             if (property.FieldType.ToString() == "System.Single")
             {
                 var result = float.Parse(value.ToString(), CultureInfo.InvariantCulture);
@@ -331,6 +355,7 @@ public class UIMaster : MonoBehaviour
     private void CreateInput(Transform parent, Controllable target, FieldInfo property, bool isInteractible)
     {
         var newInput = Instantiate(InputPrefab);
+
         var textComponent = newInput.transform.GetChild(1).gameObject.GetComponent<Text>();
 
         textComponent.text = property.Name;
@@ -356,12 +381,16 @@ public class UIMaster : MonoBehaviour
             }
             if (propertyType.ToString() == "System.Int32")
             {
-                var result = int.Parse(value, CultureInfo.InvariantCulture);
+                var result = 0;
+                try { result = int.Parse(value, CultureInfo.InvariantCulture); }
+                catch(Exception e) { result = 0; }
                 list.Add(result);
             }
             if (propertyType.ToString() == "System.Single")
             {
-                var result = float.Parse(value.ToString(), CultureInfo.InvariantCulture);
+                var result = 0.0f;
+                try { result = float.Parse(value.ToString(), CultureInfo.InvariantCulture); }
+                catch (Exception e) { result = 0.0f; }
                 list.Add(result);
             }
             if (propertyType.ToString() == "System.String")
@@ -383,7 +412,7 @@ public class UIMaster : MonoBehaviour
                     "" + str; //Convert.ChangeType(target.getPropInfoForAddress(name).GetValue(target), property.FieldType))ype);
             }
         };
-        newInput.transform.GetChild(0).Find("Placeholder").gameObject.GetComponent<Text>().color = Color.white;
+
         newInput.transform.GetChild(0).Find("Text").gameObject.GetComponent<Text>().color = Color.white;
         newInput.transform.GetChild(0).Find("Placeholder").gameObject.GetComponent<Text>().text = target.getPropInfoForAddress(property.Name).GetValue(target).ToString();
         newInput.GetComponent<RectTransform>().localScale = new Vector3(1.0f, 1.0f, 1.0f);
@@ -480,6 +509,10 @@ public class UIMaster : MonoBehaviour
         var YInput = newVector3.transform.GetChild(0).Find("YInput").GetChild(0).GetComponent<InputField>();
         var ZInput = newVector3.transform.GetChild(0).Find("ZInput").GetChild(0).GetComponent<InputField>();
 
+        XInput.contentType = InputField.ContentType.DecimalNumber;
+        YInput.contentType = InputField.ContentType.DecimalNumber;
+        ZInput.contentType = InputField.ContentType.DecimalNumber;
+
         var scriptValue = (Vector3)property.GetValue(target);
         XInput.text = "" + scriptValue.x;
         YInput.text = "" + scriptValue.y;
@@ -487,10 +520,13 @@ public class UIMaster : MonoBehaviour
 
         XInput.onEndEdit.AddListener((value) =>
         {
+            //if (showDebug)
+            //    Debug.Log("[GenUI] UI change X : " + float.Parse(value.ToString(), CultureInfo.InvariantCulture));
+
             var list = new List<object>();
-            list.Add(value);
-            list.Add(YInput.text);
-            list.Add(ZInput.text);
+            list.Add(float.Parse(value.ToString(), CultureInfo.InvariantCulture));
+            list.Add(float.Parse(YInput.text.ToString(), CultureInfo.InvariantCulture));
+            list.Add(float.Parse(ZInput.text.ToString(), CultureInfo.InvariantCulture));
 
             target.setFieldProp(property, list);
         });
@@ -498,9 +534,9 @@ public class UIMaster : MonoBehaviour
         YInput.onEndEdit.AddListener((value) =>
         {
             var list = new List<object>();
-            list.Add(XInput.text);
-            list.Add(value);
-            list.Add(ZInput.text);
+            list.Add(float.Parse(XInput.text.ToString(), CultureInfo.InvariantCulture));
+            list.Add(float.Parse(value.ToString(), CultureInfo.InvariantCulture));
+            list.Add(float.Parse(ZInput.text.ToString(), CultureInfo.InvariantCulture));
 
             target.setFieldProp(property, list);
         });
@@ -508,20 +544,31 @@ public class UIMaster : MonoBehaviour
         ZInput.onEndEdit.AddListener((value) =>
         {
             var list = new List<object>();
-            list.Add(XInput.text);
-            list.Add(value);
-            list.Add(YInput.text);
+            list.Add(float.Parse(XInput.text.ToString(), CultureInfo.InvariantCulture));
+            list.Add(float.Parse(YInput.text.ToString(), CultureInfo.InvariantCulture));
+            list.Add(float.Parse(value.ToString(), CultureInfo.InvariantCulture));
 
             target.setFieldProp(property, list);
         });
 
         target.controllableValueChanged += (name) =>
         {
-            var vector = (Vector3)property.GetValue(target);
+            if (name == property.Name)
+            {
+                //if (showDebug)
+                //    Debug.Log("[GenUI] Value changed X : " + ((Vector3)property.GetValue(target)).x);
 
-            XInput.text = "" + vector.x;
-            YInput.text = "" + vector.y;
-            ZInput.text = "" + vector.z;
+                var vector = (Vector3)property.GetValue(target);
+
+                XInput.text = "" + vector.x;
+                YInput.text = "" + vector.y;
+                ZInput.text = "" + vector.z;
+            }
         };
+    }
+
+    public void ClickOnDropdown()
+    {
+        ControllableMaster.RefreshAllPresets();
     }
 }

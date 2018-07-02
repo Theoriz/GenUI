@@ -122,7 +122,10 @@ public class Controllable : MonoBehaviour
             }
         }
 
-        if (string.IsNullOrEmpty(id)) id = TargetScript.GetType().Name;
+        if (string.IsNullOrEmpty(id))
+            id = TargetScript.GetType().Name;
+
+        id = id.Replace(' ', '_');
         sourceScene = SceneManager.GetActiveScene().name;
     }
 
