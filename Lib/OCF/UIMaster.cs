@@ -177,6 +177,8 @@ public class UIMaster : MonoBehaviour
         {
             _panels["OCF"].transform.SetAsFirstSibling();
         }
+
+        newPanel.transform.localScale = Vector3.one;
     }
 
     private void CreateHeaderText(Transform parent, string text)
