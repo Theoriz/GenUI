@@ -105,7 +105,7 @@ public class UIMaster : MonoBehaviour
         }
 
         //Read all properties and add associated UI
-        foreach (var property in newControllable.Properties)
+        foreach (var property in newControllable.Fields)
         {
             var propertyType = property.Value.FieldType;
             OSCProperty attribute = Attribute.GetCustomAttribute(property.Value, typeof(OSCProperty)) as OSCProperty;
