@@ -44,18 +44,18 @@ public class InputFieldUI : ControllableUI
             if (propertyType.ToString() == "System.Int32")
             {
                 var result = 0;
-                try { result = int.Parse(value, CultureInfo.InvariantCulture); }
+                try { result = int.Parse(value, CultureInfo.InvariantCulture);}
                 catch (Exception e) { result = 0; }
                 list.Add(result);
             }
-            if (propertyType.ToString() == "System.Single")
+            else if (propertyType.ToString() == "System.Single")
             {
                 var result = 0.0f;
                 try { result = float.Parse(value.ToString(), CultureInfo.InvariantCulture); }
                 catch (Exception e) { result = 0.0f; }
                 list.Add(result);
             }
-            if (propertyType.ToString() == "System.String")
+            else if (propertyType.ToString() == "System.String")
                 list.Add(value);
 
             target.setFieldProp(property, list);

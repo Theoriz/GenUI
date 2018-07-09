@@ -8,6 +8,15 @@ public class PanelUI : ControllableUI
 
     public bool IsExpanded = true;
 
+    public void Init(Controllable target)
+    {
+        LinkedControllable = target;
+        if(PlayerPrefs.HasKey(LinkedControllable.id)) {
+            IsExpanded = PlayerPrefs.GetInt(LinkedControllable.id) != 0;
+            HandleClickOnButton();
+        }
+    }
+
     public void AddUIElement(ControllableUI newElement)
     {
         if(_uiElements == null)
@@ -38,6 +47,7 @@ public class PanelUI : ControllableUI
         }
         
         this.transform.GetChild(0).GetChild(1).rotation = Quaternion.Euler(new Vector3(0, 0, IsExpanded ? -90 : 0));
+        PlayerPrefs.SetInt(LinkedControllable.id, IsExpanded ? 0 : 1);
     }
     //public override void CreateUI(Controllable target)
     //{

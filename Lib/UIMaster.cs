@@ -57,7 +57,7 @@ public class UIMaster : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Tab))
+        if (Input.GetKeyDown(KeyCode.H))
         {
             ToggleUI();
         }
@@ -105,7 +105,7 @@ public class UIMaster : MonoBehaviour
         }
 
         //Read all properties and add associated UI
-        foreach (var property in newControllable.Properties)
+        foreach (var property in newControllable.Fields)
         {
             var propertyType = property.Value.FieldType;
             OSCProperty attribute = Attribute.GetCustomAttribute(property.Value, typeof(OSCProperty)) as OSCProperty;
@@ -167,7 +167,10 @@ public class UIMaster : MonoBehaviour
             }
         }
 
+
         CleanGeneratedUI(newControllable.id);
+
+        newPanel.GetComponent<PanelUI>().Init(newControllable);
     }
 
     public void CleanGeneratedUI(string controllableId)
@@ -209,9 +212,6 @@ public class UIMaster : MonoBehaviour
         {
             _panels["GenUI"].transform.SetAsFirstSibling();
         }
-
-        //Close panel
-        lastPanel.GetComponent<PanelUI>().HandleClickOnButton();
     }
 
     private void CreateHeaderText(Transform parent, Controllable target, string text)

@@ -34,11 +34,15 @@ public class SliderUI : ControllableUI
             if (property.FieldType.ToString() == "System.Int32")
             {
                 var result = int.Parse(value, CultureInfo.InvariantCulture);
+                result = (int)Mathf.Clamp(result, rangeAttribut.min, rangeAttribut.max);
+                HandleTargetChange("");
                 list.Add(result);
             }
             if (property.FieldType.ToString() == "System.Single")
             {
                 var result = float.Parse(value.ToString(), CultureInfo.InvariantCulture);
+                result = Mathf.Clamp(result, rangeAttribut.min, rangeAttribut.max);
+                HandleTargetChange("");
                 list.Add(result);
             }
 
