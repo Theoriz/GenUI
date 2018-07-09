@@ -71,7 +71,6 @@ public class InputFieldUI : ControllableUI
         if (name != Property.Name && !String.IsNullOrEmpty(name))
             return;
         
-        // Debug.Log("Value " + name + " changed ");
         var str = "" + Property.GetValue(LinkedControllable);
         str = str.Replace(",", ".");
         this.transform.GetComponentInChildren<InputField>().text = "" + str;
