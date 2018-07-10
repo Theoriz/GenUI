@@ -17,13 +17,6 @@ public class DropdownUI : ControllableUI
             if (activeElementInObject == listInObject[i].ToString())
                 activeElementIndex = i;
         }
-        //Switch active element in list to be the first one, so the displayed one in dropdown
-        if (activeElementIndex != -1 && listInObject.Count > 1)
-        {
-            var tmp = listInObject[0];
-            listInObject[0] = listInObject[activeElementIndex];
-            listInObject[activeElementIndex] = tmp;
-        }
 
         return activeElementIndex;
     }
@@ -54,9 +47,8 @@ public class DropdownUI : ControllableUI
 
     public override void HandleTargetChange(string name)
     {
-        OrderDropDown((List<string>)ListProperty.GetValue(LinkedControllable), ActiveElement.GetValue(LinkedControllable).ToString());
-
         this.GetComponent<Dropdown>().ClearOptions();
         this.GetComponent<Dropdown>().AddOptions((List<string>)ListProperty.GetValue(LinkedControllable));
+        this.GetComponent<Dropdown>().value = OrderDropDown((List<string>)ListProperty.GetValue(LinkedControllable), ActiveElement.GetValue(LinkedControllable).ToString());
     }
 }
