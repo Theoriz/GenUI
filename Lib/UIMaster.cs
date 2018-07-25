@@ -95,15 +95,6 @@ public class UIMaster : MonoBehaviour
 
         _panels.Add(newControllable.id, newControllableHolder);
 
-        //Read all methods and add button
-        foreach (var method in newControllable.Methods)
-        {
-            if (showDebug)
-                Debug.Log("[UI] Adding button for (" + newControllable.GetType() + ") : " + method.Value.Name);
-
-            CreateButton(newPanel.transform, newControllable, method.Value);
-        }
-
         //Read all properties and add associated UI
         foreach (var property in newControllable.Fields)
         {
@@ -167,6 +158,14 @@ public class UIMaster : MonoBehaviour
             }
         }
 
+        //Read all methods and add button
+        foreach (var method in newControllable.Methods)
+        {
+            if (showDebug)
+                Debug.Log("[UI] Adding button for (" + newControllable.GetType() + ") : " + method.Value.Name);
+
+            CreateButton(newPanel.transform, newControllable, method.Value);
+        }
 
         CleanGeneratedUI(newControllable.id);
 
@@ -207,7 +206,7 @@ public class UIMaster : MonoBehaviour
         else
             lastPanel.transform.Find("PresetHolder").gameObject.SetActive(false);
 
-        //Set OCF on top
+        //Set GenUI on top
         if (_panels.ContainsKey("GenUI"))
         {
             _panels["GenUI"].transform.SetAsFirstSibling();
@@ -261,6 +260,7 @@ public class UIMaster : MonoBehaviour
         {
             var newButton = Instantiate(MethodButtonPrefab);
             newButton.transform.SetParent(parent);
+            newButton.transform.SetSiblingIndex(parent.childCount-2);
             parent.gameObject.GetComponent<PanelUI>().AddUIElement(newButton.GetComponent<ButtonUI>());
             newButton.GetComponent<ButtonUI>().CreateUI(target, method);
         }
