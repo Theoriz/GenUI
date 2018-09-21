@@ -47,7 +47,7 @@ public class PanelUI : ControllableUI
         {
             transform.GetChild(i).gameObject.SetActive(IsExpanded);
         }
-        this.transform.GetChild(0).GetChild(1).rotation = Quaternion.Euler(new Vector3(0, 0, IsExpanded ? -90 : 0));
+        this.transform.GetChild(0).GetChild(0).rotation = Quaternion.Euler(new Vector3(0, 0, IsExpanded ? -90 : 0));
         PlayerPrefs.SetInt(LinkedControllable.id, IsExpanded ? 0 : 1);
     }
 
@@ -63,7 +63,7 @@ public class PanelUI : ControllableUI
             foreach (var element in _uiElements)
                 element.HandleTargetChange("");
         }
-        this.transform.GetChild(0).GetChild(1).rotation = Quaternion.Euler(new Vector3(0, 0, IsExpanded ? -90 : 0));
+        this.transform.GetChild(0).GetChild(0).rotation = Quaternion.Euler(new Vector3(0, 0, IsExpanded ? -90 : 0));
         PlayerPrefs.SetInt(LinkedControllable.id, IsExpanded ? 0 : 1);
     }
     //public override void CreateUI(Controllable target)

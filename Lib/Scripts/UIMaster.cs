@@ -92,7 +92,7 @@ public class UIMaster : MonoBehaviour
 
         var newPanel = newControllableHolder.transform.GetChild(1).gameObject;
         newPanel.GetComponentInChildren<Text>().text = newControllable.id;
-        newPanel.transform.GetChild(0).GetComponentInChildren<Image>().color = newControllable.BarColor;
+        newPanel.transform.GetChild(0).GetChild(0).GetComponentInChildren<Image>().color = newControllable.BarColor;
 
         _panels.Add(newControllable.id, newControllableHolder);
 
