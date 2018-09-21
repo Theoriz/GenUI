@@ -34,18 +34,35 @@ public class PanelUI : ControllableUI
 
     public void HandleClickOnButton()
     {
-        IsExpanded = !IsExpanded;
-        for(var i=1; i<transform.childCount; i++)
+        if (IsExpanded)
+            Close();
+        else
+            Open();
+    }
+
+    public void Close()
+    {
+        IsExpanded = false;
+        for (var i = 1; i < transform.childCount; i++)
         {
             transform.GetChild(i).gameObject.SetActive(IsExpanded);
         }
+        this.transform.GetChild(0).GetChild(1).rotation = Quaternion.Euler(new Vector3(0, 0, IsExpanded ? -90 : 0));
+        PlayerPrefs.SetInt(LinkedControllable.id, IsExpanded ? 0 : 1);
+    }
 
-        if(IsExpanded)
+    public void Open()
+    {
+        IsExpanded = true;
+        for (var i = 1; i < transform.childCount; i++)
         {
-            foreach(var element in _uiElements)
+            transform.GetChild(i).gameObject.SetActive(IsExpanded);
+        }
+        if (IsExpanded)
+        {
+            foreach (var element in _uiElements)
                 element.HandleTargetChange("");
         }
-        
         this.transform.GetChild(0).GetChild(1).rotation = Quaternion.Euler(new Vector3(0, 0, IsExpanded ? -90 : 0));
         PlayerPrefs.SetInt(LinkedControllable.id, IsExpanded ? 0 : 1);
     }

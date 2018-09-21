@@ -24,6 +24,7 @@ public class UIMaster : MonoBehaviour
     [Header("Global settings")]
     public bool AutoHideCursor;
     public bool HideUIAtStart;
+    public bool CloseGenUIPanelAtStart;
 
     private bool displayUI;
     private GameObject _camera;
@@ -167,12 +168,10 @@ public class UIMaster : MonoBehaviour
             CreateButton(newPanel.transform, newControllable, method.Value);
         }
 
-        CleanGeneratedUI(newControllable.id);
-
-        newPanel.GetComponent<PanelUI>().Init(newControllable);
+        CleanGeneratedUI(newControllable.id, newControllable);       
     }
 
-    public void CleanGeneratedUI(string controllableId)
+    public void CleanGeneratedUI(string controllableId, Controllable controllable)
     {
         //Order Save and Load preset buttons
         var lastPanel = _panels[controllableId].transform.GetChild(1);
@@ -199,6 +198,7 @@ public class UIMaster : MonoBehaviour
                 text.transform.parent.SetParent(globalPresetHolder);
             }
         }
+
         if (usePreset)
         {
             lastPanel.transform.Find("PresetHolder").SetSiblingIndex(lastPanel.transform.childCount - 2); //last index being the preset list
@@ -206,10 +206,16 @@ public class UIMaster : MonoBehaviour
         else
             lastPanel.transform.Find("PresetHolder").gameObject.SetActive(false);
 
+        lastPanel.GetComponent<PanelUI>().Init(controllable);
+
         //Set GenUI on top
         if (_panels.ContainsKey("GenUI"))
         {
             _panels["GenUI"].transform.SetAsFirstSibling();
+            if (CloseGenUIPanelAtStart)
+                _panels["GenUI"].GetComponentInChildren<PanelUI>().Close();
+            else
+                _panels["GenUI"].GetComponentInChildren<PanelUI>().Open();
         }
     }
 

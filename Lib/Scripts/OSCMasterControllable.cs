@@ -7,7 +7,7 @@ public class OSCMasterControllable : Controllable {
     public OSCMaster oscmaster;
     public UIMaster MyUIMaster;
 
-    [Header("OSC settings")]
+    [Header("OSC UI control")]
     [OSCProperty]
     public int localPort;
 
