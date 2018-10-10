@@ -23,25 +23,26 @@ public class SliderUI : ControllableUI
         var textComponent = this.transform.Find("Text").gameObject.GetComponent<Text>();
         var sliderComponent = this.GetComponentInChildren<Slider>();
         var inputComponent = this.GetComponentInChildren<InputField>();
-        if (property.FieldType.ToString() == "System.Int32")
-            inputComponent.contentType = InputField.ContentType.IntegerNumber;
-        if (property.FieldType.ToString() == "System.Single")
+
+        if (IsFloat)
             inputComponent.contentType = InputField.ContentType.DecimalNumber;
+        else
+            inputComponent.contentType = InputField.ContentType.IntegerNumber;
 
         inputComponent.onEndEdit.AddListener((value) =>
         {
             var list = new List<object>();
-            if (property.FieldType.ToString() == "System.Int32")
+            if (!IsFloat)
             {
-                var result = int.Parse(value, CultureInfo.InvariantCulture);
-                result = (int)Mathf.Clamp(result, rangeAttribut.min, rangeAttribut.max);
+                var result = int.Parse(value.ToString(), CultureInfo.InvariantCulture);
+                //result = (int)Mathf.Clamp(result, rangeAttribut.min, rangeAttribut.max);
                 HandleTargetChange("");
                 list.Add(result);
             }
-            if (property.FieldType.ToString() == "System.Single")
+            else
             {
                 var result = float.Parse(value.ToString(), CultureInfo.InvariantCulture);
-                result = Mathf.Clamp(result, rangeAttribut.min, rangeAttribut.max);
+                //result = Mathf.Clamp(result, rangeAttribut.min, rangeAttribut.max);
                 HandleTargetChange("");
                 list.Add(result);
             }
