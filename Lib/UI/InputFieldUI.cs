@@ -45,14 +45,14 @@ public class InputFieldUI : ControllableUI
             {
                 var result = 0;
                 try { result = int.Parse(value, CultureInfo.InvariantCulture);}
-                catch (Exception e) { result = 0; }
+                catch (Exception e) { Debug.Log(e.Message); result = 0; }
                 list.Add(result);
             }
             else if (propertyType.ToString() == "System.Single")
             {
                 var result = 0.0f;
                 try { result = float.Parse(value.ToString(), CultureInfo.InvariantCulture); }
-                catch (Exception e) { result = 0.0f; }
+                catch (Exception e) { Debug.Log(e.Message); result = 0.0f; }
                 list.Add(result);
             }
             else if (propertyType.ToString() == "System.String")
