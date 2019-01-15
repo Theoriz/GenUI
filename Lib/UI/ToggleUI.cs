@@ -16,6 +16,7 @@ public class ToggleUI : ControllableUI
         IsInteractible = isInteractible;
         LinkedControllable = target;
         target.controllableValueChanged += HandleTargetChange;
+        HandleTargetChange(property.Name); //To set color
 
         this.GetComponentInChildren<Text>().text = property.Name;
         this.GetComponent<Toggle>().isOn = (bool)property.GetValue(target);
