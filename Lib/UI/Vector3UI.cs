@@ -69,8 +69,8 @@ public class Vector3UI : ControllableUI
 
         var vector = (Vector3)Property.GetValue(LinkedControllable);
 
-        this.transform.GetChild(0).Find("XInput").GetChild(0).GetComponent<InputField>().text = "" + vector.x;
-        this.transform.GetChild(0).Find("YInput").GetChild(0).GetComponent<InputField>().text = "" + vector.y;
-        this.transform.GetChild(0).Find("ZInput").GetChild(0).GetComponent<InputField>().text = "" + vector.z;
-    }
+		this.transform.GetChild(0).Find("XInput").GetChild(0).GetComponent<InputField>().text = vector.x.ToString().Replace(",", ".");
+		this.transform.GetChild(0).Find("YInput").GetChild(0).GetComponent<InputField>().text = vector.y.ToString().Replace(",", ".");
+		this.transform.GetChild(0).Find("ZInput").GetChild(0).GetComponent<InputField>().text = vector.z.ToString().Replace(",", ".");
+	}
 }
