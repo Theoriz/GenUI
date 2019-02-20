@@ -106,7 +106,7 @@ public class UIMaster : MonoBehaviour
             if (!attribute.ShowInUI) continue;
 
             if (showDebug)
-                Debug.Log("[UI] Adding control for (" + newControllable.GetType() + ") : " + property.Value.Name);
+                Debug.Log("[UI] Adding control for (" + newControllable.GetType() + ") : " + property.Value.Name + " of type : " + propertyType.ToString());
 
             //Add header if it exists
             var headerAttribut = (HeaderAttribute[])property.Value.GetCustomAttributes(typeof(HeaderAttribute), false);
@@ -144,8 +144,7 @@ public class UIMaster : MonoBehaviour
                 CreateInput(newPanel.transform, newControllable, property.Value, attribute.isInteractible);
                 continue;
             }
-            if (showDebug)
-                Debug.Log("Type : " + propertyType.ToString());
+
             if (propertyType.ToString() == "UnityEngine.Color")
             {
                 CreateColor(newPanel.transform, newControllable, property.Value, attribute.isInteractible);

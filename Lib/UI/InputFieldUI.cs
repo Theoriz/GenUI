@@ -31,7 +31,10 @@ public class InputFieldUI : ControllableUI
         if (property.FieldType.ToString() == "System.String")
             inputFieldComponent.contentType = InputField.ContentType.Standard;
 
-        inputFieldComponent.text = property.GetValue(target).ToString();
+        var str = "" + property.GetValue(target).ToString();
+        str = str.Replace(",", ".");
+        inputFieldComponent.text = "" + str; 
+
         inputFieldComponent.onEndEdit.AddListener((value) =>
         {
             var list = new List<object>();

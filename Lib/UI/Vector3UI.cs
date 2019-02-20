@@ -27,9 +27,18 @@ public class Vector3UI : ControllableUI
         ZInput.contentType = InputField.ContentType.DecimalNumber;
 
         var scriptValue = (Vector3)property.GetValue(target);
-        XInput.text = "" + scriptValue.x;
-        YInput.text = "" + scriptValue.y;
-        ZInput.text = "" + scriptValue.z;
+
+        var str = scriptValue.x.ToString();
+        str = str.Replace(",", ".");
+        XInput.text = "" + str;
+
+        str = scriptValue.y.ToString();
+        str = str.Replace(",", ".");
+        YInput.text = "" + str;
+
+        str = scriptValue.z.ToString();
+        str = str.Replace(",", ".");
+        ZInput.text = "" + str;
 
         XInput.onEndEdit.AddListener((value) =>
         {
