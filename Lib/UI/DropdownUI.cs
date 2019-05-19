@@ -7,7 +7,6 @@ using System.Reflection;
 public class DropdownUI : ControllableUI
 {
     public FieldInfo ListProperty;
-    public FieldInfo ActiveElement;
 
     public int OrderDropDown(List<string> listInObject, string activeElementInObject)
     {
@@ -25,12 +24,12 @@ public class DropdownUI : ControllableUI
     public void CreateUI(Controllable target, FieldInfo listProperty, FieldInfo activeElement) {
 
         ListProperty = listProperty;
-        ActiveElement = activeElement;
+        Property = activeElement;
         LinkedControllable = target;
         target.controllableValueChanged += HandleTargetChange;
 
         var listInObject = (List<string>)ListProperty.GetValue(target);
-        var activeElementIndex = OrderDropDown(listInObject, ActiveElement.GetValue(target).ToString());
+        var activeElementIndex = OrderDropDown(listInObject, Property.GetValue(target).ToString());
 
         this.GetComponent<Dropdown>().value = 0;
 
@@ -41,7 +40,7 @@ public class DropdownUI : ControllableUI
             string activeItem = associatedList[value];
 
             List<object> objParams = new List<object> { activeItem };
-            target.setFieldProp(ActiveElement, objParams);
+            target.setFieldProp(Property, objParams);
         });
     }
 
@@ -49,6 +48,6 @@ public class DropdownUI : ControllableUI
     {
         this.GetComponent<Dropdown>().ClearOptions();
         this.GetComponent<Dropdown>().AddOptions((List<string>)ListProperty.GetValue(LinkedControllable));
-        this.GetComponent<Dropdown>().value = OrderDropDown((List<string>)ListProperty.GetValue(LinkedControllable), ActiveElement.GetValue(LinkedControllable).ToString());
+        this.GetComponent<Dropdown>().value = OrderDropDown((List<string>)ListProperty.GetValue(LinkedControllable), Property.GetValue(LinkedControllable).ToString());
     }
 }

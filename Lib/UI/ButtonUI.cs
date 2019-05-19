@@ -6,8 +6,6 @@ using System.Reflection;
 
 public class ButtonUI : ControllableUI
 {
-    public MethodInfo Method;
-
     public void CreateUI(Controllable target, MethodInfo method)
     {
         LinkedControllable = target;
