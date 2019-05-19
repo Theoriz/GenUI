@@ -19,6 +19,8 @@ public class UIMaster : MonoBehaviour
     public GameObject HeaderTextPrefab;
     public GameObject ColorPrefab;
     public GameObject Vector3Prefab;
+    public GameObject RightClickMenu;
+
     public bool showDebug;
 
     [Header("Global settings")]
@@ -31,6 +33,11 @@ public class UIMaster : MonoBehaviour
     private GameObject _rootCanvas;
     private Dictionary<string, GameObject> _panels;
 
+    private bool _rightClickMenuInstantiated;
+    private bool _skipNextButton;
+    private bool _destroyMenuOnNextFrame;
+    private GameObject _rightClickMenu;
+
     public static UIMaster Instance;
 
     // Use this for initialization
@@ -42,6 +49,7 @@ public class UIMaster : MonoBehaviour
         ControllableMaster.controllableAdded += CreateUI;
         ControllableMaster.controllableRemoved += RemoveUI;
 
+        _rootCanvas = transform.GetChild(0).gameObject;
         displayUI = true;
 
         if (HideUIAtStart)
@@ -61,6 +69,22 @@ public class UIMaster : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.H))
         {
             ToggleUI();
+        }
+
+        if(_destroyMenuOnNextFrame)
+        {
+            Destroy(_rightClickMenu);
+            _destroyMenuOnNextFrame = false;
+        }
+
+        if((Input.GetMouseButtonUp(0) || Input.GetMouseButtonUp(1)) && _rightClickMenuInstantiated && !_skipNextButton)
+        {
+            _destroyMenuOnNextFrame = true;
+        }
+
+        if(_skipNextButton)
+        {
+            _skipNextButton = false;
         }
     }
 
@@ -298,5 +322,34 @@ public class UIMaster : MonoBehaviour
     public void ClickOnDropdown()
     {
         ControllableMaster.RefreshAllPresets();
+    }
+    
+    public void CreateRightClickMenu(ControllableUI controllableUI)
+    {
+        if(_rightClickMenuInstantiated)
+        {
+            Destroy(_rightClickMenu);
+            _rightClickMenuInstantiated = false;
+        }
+
+        _rightClickMenu = Instantiate(RightClickMenu, _rootCanvas.transform);
+        
+        _rightClickMenu.transform.GetChild(0).GetComponent<Button>().onClick.AddListener(controllableUI.CopyAddressToClipboard);
+        _rightClickMenu.transform.GetChild(0).GetComponent<Button>().onClick.AddListener(() => { Destroy(_rightClickMenu); });
+
+        
+        var rectTransform = _rightClickMenu.GetComponent<RectTransform>();
+        rectTransform.pivot = new Vector2(0.0f, 0.5f);
+        rectTransform.anchorMin = new Vector2(0.0f, 0.5f);
+        rectTransform.anchorMax = new Vector2(0.0f, 0.5f);
+
+        _rightClickMenu.transform.position = Input.mousePosition;
+        /*
+        Debug.Log(rectTransform.anchoredPosition.x);
+        if (rectTransform.anchoredPosition.x < 0)
+            rectTransform.anchoredPosition = new Vector2(0.0f, rectTransform.anchoredPosition.y);
+            */
+        _rightClickMenuInstantiated = true;
+        _skipNextButton = true;
     }
 }

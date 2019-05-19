@@ -8,7 +8,6 @@ using System.Globalization;
 
 public class SliderUI : ControllableUI
 {
-    public FieldInfo Property;
     public bool IsFloat;
 
     // Use this for initialization
@@ -18,7 +17,7 @@ public class SliderUI : ControllableUI
         IsFloat = isFloat;
         IsInteractible = isInteractible;
         LinkedControllable = target;
-        target.controllableValueChanged += HandleTargetChange;
+        LinkedControllable.controllableValueChanged += HandleTargetChange;
 
         var textComponent = this.transform.Find("Text").gameObject.GetComponent<Text>();
         var sliderComponent = this.GetComponentInChildren<Slider>();
@@ -65,7 +64,7 @@ public class SliderUI : ControllableUI
         {
             var list = new List<object>();
             list.Add(value);
-            target.setFieldProp(property, list);
+            LinkedControllable.setFieldProp(property, list);
             inputComponent.text = property.GetValue(target).ToString();
         });
 

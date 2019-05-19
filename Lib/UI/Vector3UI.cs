@@ -7,8 +7,6 @@ using System.Globalization;
 
 public class Vector3UI : ControllableUI
 {
-    public FieldInfo Property;
-
     // Use this for initialization
     public void CreateUI(Controllable target, FieldInfo property, bool isInteractible)
     {

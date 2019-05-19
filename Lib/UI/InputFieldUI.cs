@@ -8,7 +8,7 @@ using System.Reflection;
 
 public class InputFieldUI : ControllableUI
 {
-    public FieldInfo Property;
+
 
     // Use this for initialization
     public void CreateUI(Controllable target, FieldInfo property, bool isInteractible) {
