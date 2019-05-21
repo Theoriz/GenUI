@@ -8,6 +8,12 @@ using UnityEngine.EventSystems;
 
 public class UIMaster : MonoBehaviour
 {
+    [Header("Global settings")]
+    public bool AutoHideCursor;
+    public bool HideUIAtStart;
+    public bool CloseGenUIPanelAtStart;
+    public KeyCode UIToggleKey;
+
     [Header("Prefabs")]
     public Transform MainPanel;
     public GameObject PanelPrefab;
@@ -23,10 +29,7 @@ public class UIMaster : MonoBehaviour
 
     public bool showDebug;
 
-    [Header("Global settings")]
-    public bool AutoHideCursor;
-    public bool HideUIAtStart;
-    public bool CloseGenUIPanelAtStart;
+    
 
     private bool displayUI;
     private GameObject _camera;
@@ -66,7 +69,7 @@ public class UIMaster : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.H))
+        if (Input.GetKeyDown(UIToggleKey))
         {
             ToggleUI();
         }
