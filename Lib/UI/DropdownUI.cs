@@ -8,7 +8,7 @@ public class DropdownUI : ControllableUI
 {
     public FieldInfo ListProperty;
 
-    public int OrderDropDown(List<string> listInObject, string activeElementInObject)
+    public int GetActiveElementIndex(List<string> listInObject, string activeElementInObject)
     {
         var activeElementIndex = -1;
         for (var i = 0; i < listInObject.Count; i++)
@@ -26,28 +26,29 @@ public class DropdownUI : ControllableUI
         ListProperty = listProperty;
         Property = activeElement;
         LinkedControllable = target;
-        target.controllableValueChanged += HandleTargetChange;
+        LinkedControllable.controllableValueChanged += HandleTargetChange;
 
-        var listInObject = (List<string>)ListProperty.GetValue(target);
-        var activeElementIndex = OrderDropDown(listInObject, Property.GetValue(target).ToString());
+        var listInObject = (List<string>)ListProperty.GetValue(LinkedControllable);
+        var activeElementIndex = GetActiveElementIndex(listInObject, Property.GetValue(LinkedControllable).ToString());
 
-        this.GetComponent<Dropdown>().value = 0;
-
-        this.GetComponent<Dropdown>().AddOptions(listInObject);
-        this.GetComponent<Dropdown>().onValueChanged.AddListener((value) =>
+        var dropdown = this.GetComponent<Dropdown>();
+        dropdown.value = 0;
+        dropdown.AddOptions(listInObject);
+        dropdown.onValueChanged.AddListener((value) =>
         {
-            var associatedList = (List<string>)ListProperty.GetValue(target);
+            var associatedList = (List<string>)ListProperty.GetValue(LinkedControllable);
             string activeItem = associatedList[value];
 
             List<object> objParams = new List<object> { activeItem };
-            target.setFieldProp(Property, objParams);
+            LinkedControllable.setFieldProp(Property, objParams);
         });
     }
 
     public override void HandleTargetChange(string name)
     {
-        this.GetComponent<Dropdown>().ClearOptions();
-        this.GetComponent<Dropdown>().AddOptions((List<string>)ListProperty.GetValue(LinkedControllable));
-        this.GetComponent<Dropdown>().value = OrderDropDown((List<string>)ListProperty.GetValue(LinkedControllable), Property.GetValue(LinkedControllable).ToString());
+        var dropdown = this.GetComponent<Dropdown>();
+        dropdown.ClearOptions();
+        dropdown.AddOptions((List<string>)ListProperty.GetValue(LinkedControllable));
+        dropdown.value = GetActiveElementIndex((List<string>)ListProperty.GetValue(LinkedControllable), Property.GetValue(LinkedControllable).ToString());
     }
 }
