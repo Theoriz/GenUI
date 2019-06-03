@@ -23,6 +23,7 @@ public class UIMaster : MonoBehaviour
     public GameObject InputPrefab;
     public GameObject DropdownPrefab;
     public GameObject HeaderTextPrefab;
+	public GameObject TooltipTextPrefab;
     public GameObject ColorPrefab;
     public GameObject Vector3Prefab;
     public GameObject RightClickMenu;
@@ -71,6 +72,12 @@ public class UIMaster : MonoBehaviour
     {
         if (Input.GetKeyDown(UIToggleKey))
         {
+			//Avoid toggling the UI if currently writing in an input field
+			if (EventSystem.current.currentSelectedGameObject) {
+				if (EventSystem.current.currentSelectedGameObject.GetComponent<InputField>()) {
+					return;
+				}
+			}
             ToggleUI();
         }
 
@@ -135,21 +142,26 @@ public class UIMaster : MonoBehaviour
             if (showDebug)
                 Debug.Log("[UI] Adding control for (" + newControllable.GetType() + ") : " + property.Value.Name + " of type : " + propertyType.ToString());
 
+			bool propertyDrawn = false;
+
             //Add header if it exists
             var headerAttribut = (HeaderAttribute[])property.Value.GetCustomAttributes(typeof(HeaderAttribute), false);
             if (headerAttribut.Length != 0)
             {
                 CreateHeaderText(newPanel.transform, newControllable, headerAttribut[0].header);
             }
-            //Create list
-            if (attribute.TargetList != "" && attribute.TargetList != null)
+
+			//Create list
+			if (attribute.TargetList != "" && attribute.TargetList != null && !propertyDrawn)
             {
                 var associatedListFieldInfo = newControllable.getFieldInfoByName(attribute.TargetList);
                 CreateDropDown(newPanel.transform, newControllable, associatedListFieldInfo, property.Value);
-                continue;
+
+				propertyDrawn = true;
+                //continue;
             }
             //property.Value.Attributes O
-            if (propertyType.ToString() == "System.Single" || propertyType.ToString() == "System.Int32")
+            if (propertyType.ToString() == "System.Single" || propertyType.ToString() == "System.Int32" && !propertyDrawn)
             {
                 var rangeAttribut = (RangeAttribute[]) property.Value.GetCustomAttributes(typeof(RangeAttribute), false);
 
@@ -159,31 +171,47 @@ public class UIMaster : MonoBehaviour
                     CreateInput(newPanel.transform, newControllable, property.Value, attribute.isInteractible);
                 else
                     CreateSlider(newPanel.transform, newControllable, property.Value, rangeAttribut[0], attribute.isInteractible, isFloat);
-                continue;
-            }
-            if (propertyType.ToString() == "System.Boolean")
+
+				propertyDrawn = true;
+				//continue;
+			}
+            if (propertyType.ToString() == "System.Boolean" && !propertyDrawn)
             {
                 CreateCheckbox(newPanel.transform, newControllable, property.Value, attribute.isInteractible);
-                continue;
-            }
-            if (propertyType.ToString() == "System.Int32" || propertyType.ToString() == "System.Float" || propertyType.ToString() == "System.String")
+
+				propertyDrawn = true;
+				//continue;
+			}
+            if ((propertyType.ToString() == "System.Int32" || propertyType.ToString() == "System.Float" || propertyType.ToString() == "System.String") && !propertyDrawn)
             {
                 CreateInput(newPanel.transform, newControllable, property.Value, attribute.isInteractible);
-                continue;
-            }
 
-            if (propertyType.ToString() == "UnityEngine.Color")
+				propertyDrawn = true;
+				//continue;
+			}
+
+            if (propertyType.ToString() == "UnityEngine.Color" && !propertyDrawn)
             {
                 CreateColor(newPanel.transform, newControllable, property.Value, attribute.isInteractible);
-                continue;
-            }
 
-            if(propertyType.ToString() == "UnityEngine.Vector3")
+				propertyDrawn = true;
+				//continue;
+			}
+
+            if(propertyType.ToString() == "UnityEngine.Vector3" && !propertyDrawn)
             {
                 CreateVector3(newPanel.transform, newControllable, property.Value, attribute.isInteractible);
-                continue;
-            }
-        }
+
+				propertyDrawn = true;
+				//continue;
+			}
+
+			//Add tooltip if it exists
+			var tooltipAttribut = (TooltipAttribute[])property.Value.GetCustomAttributes(typeof(TooltipAttribute), false);
+			if (tooltipAttribut.Length != 0) {
+				CreateTooltipText(newPanel.transform, newControllable, tooltipAttribut[0].tooltip);
+			}
+		}
 
         //Read all methods and add button
         foreach (var method in newControllable.Methods)
@@ -253,7 +281,14 @@ public class UIMaster : MonoBehaviour
         parent.gameObject.GetComponent<PanelUI>().AddUIElement(headerText.GetComponent<HeaderUI>());
     }
 
-    private void CreateDropDown(Transform parent, Controllable target, FieldInfo listProperty, FieldInfo activeElement)
+	private void CreateTooltipText(Transform parent, Controllable target, string text) {
+		var tooltipText = Instantiate(TooltipTextPrefab);
+		tooltipText.transform.SetParent(parent);
+		tooltipText.GetComponent<TooltipUI>().CreateUI(target, text);
+		parent.gameObject.GetComponent<PanelUI>().AddUIElement(tooltipText.GetComponent<TooltipUI>());
+	}
+
+	private void CreateDropDown(Transform parent, Controllable target, FieldInfo listProperty, FieldInfo activeElement)
     {
         var newDropdown = Instantiate(DropdownPrefab);
         newDropdown.transform.SetParent(parent);
