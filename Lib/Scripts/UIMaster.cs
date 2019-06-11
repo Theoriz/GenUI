@@ -37,9 +37,9 @@ public class UIMaster : MonoBehaviour
     private GameObject _rootCanvas;
     private Dictionary<string, GameObject> _panels;
 
-    public bool _rightClickMenuInstantiated;
-    public bool _skipNextButton;
-    public bool _destroyMenuOnNextFrame;
+    private bool _rightClickMenuInstantiated;
+    private bool _skipNextButton;
+    private bool _destroyMenuOnNextFrame;
     private GameObject _rightClickMenu;
 
     public static UIMaster Instance;
