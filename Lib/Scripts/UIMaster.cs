@@ -37,9 +37,9 @@ public class UIMaster : MonoBehaviour
     private GameObject _rootCanvas;
     private Dictionary<string, GameObject> _panels;
 
-    private bool _rightClickMenuInstantiated;
-    private bool _skipNextButton;
-    private bool _destroyMenuOnNextFrame;
+    public bool _rightClickMenuInstantiated;
+    public bool _skipNextButton;
+    public bool _destroyMenuOnNextFrame;
     private GameObject _rightClickMenu;
 
     public static UIMaster Instance;
@@ -83,8 +83,9 @@ public class UIMaster : MonoBehaviour
 
         if(_destroyMenuOnNextFrame)
         {
-            Destroy(_rightClickMenu);
             _destroyMenuOnNextFrame = false;
+            _rightClickMenuInstantiated = false;
+            Destroy(_rightClickMenu);
         }
 
         if((Input.GetMouseButtonUp(0) || Input.GetMouseButtonUp(1)) && _rightClickMenuInstantiated && !_skipNextButton)
