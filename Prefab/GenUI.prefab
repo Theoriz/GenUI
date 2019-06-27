@@ -93,7 +93,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.17254902, g: 0.17254902, b: 0.17254902, a: 0.7921569}
+  m_Color: {r: 0.11, g: 0.11, b: 0.11, a: 0.98039216}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -236,7 +236,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1277216160771640}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -244,7 +244,7 @@ Transform:
   - {fileID: 4671045617383216}
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &114736921750431862
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -285,9 +285,6 @@ MonoBehaviour:
   RightClickMenu: {fileID: 1762016755018953457, guid: b1a018ee1b41dfe4dbf5cf07bd1f1906,
     type: 3}
   showDebug: 0
-  _rightClickMenuInstantiated: 0
-  _skipNextButton: 0
-  _destroyMenuOnNextFrame: 0
 --- !u!114 &114445698576836282
 MonoBehaviour:
   m_ObjectHideFlags: 0
