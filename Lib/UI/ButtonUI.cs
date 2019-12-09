@@ -6,15 +6,15 @@ using System.Reflection;
 
 public class ButtonUI : ControllableUI
 {
-    public void CreateUI(Controllable target, MethodInfo method)
+    public void CreateUI(Controllable target, ClassMethodInfo method)
     {
         LinkedControllable = target;
-        Method = method;
+        Method = method.methodInfo;
 
-        this.GetComponentInChildren<Text>().text = method.Name;
+        this.GetComponentInChildren<Text>().text = method.methodInfo.Name;
         this.GetComponent<Button>().onClick.AddListener(() =>
         {
-            target.setMethodProp(method, method.Name, null);
+            target.setMethodProp(method, null);
         });
     }
 

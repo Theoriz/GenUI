@@ -37,9 +37,9 @@ public class UIMaster : MonoBehaviour
     private GameObject _rootCanvas;
     private Dictionary<string, GameObject> _panels;
 
-    public bool _rightClickMenuInstantiated;
-    public bool _skipNextButton;
-    public bool _destroyMenuOnNextFrame;
+    private bool _rightClickMenuInstantiated;
+    private bool _skipNextButton;
+    private bool _destroyMenuOnNextFrame;
     private GameObject _rightClickMenu;
 
     public static UIMaster Instance;
@@ -153,12 +153,21 @@ public class UIMaster : MonoBehaviour
             }
 
 			//Create list
-			if (attribute.TargetList != "" && attribute.TargetList != null && !propertyDrawn)
+			if (!string.IsNullOrEmpty(attribute.TargetList) && !propertyDrawn)
             {
                 var associatedListFieldInfo = newControllable.getFieldInfoByName(attribute.TargetList);
                 CreateDropDown(newPanel.transform, newControllable, associatedListFieldInfo, property.Value);
 
 				propertyDrawn = true;
+                //continue;
+            }
+
+            if(!string.IsNullOrEmpty(attribute.enumName) && !propertyDrawn)
+            {
+                var associatedListFieldInfo = newControllable.getFieldInfoByName(attribute.TargetList);
+                CreateDropDown(newPanel.transform, newControllable, associatedListFieldInfo, property.Value, attribute.enumName);
+
+                propertyDrawn = true;
                 //continue;
             }
             //property.Value.Attributes O
@@ -218,7 +227,7 @@ public class UIMaster : MonoBehaviour
         foreach (var method in newControllable.Methods)
         {
             if (showDebug)
-                Debug.Log("[UI] Adding button for (" + newControllable.GetType() + ") : " + method.Value.Name);
+                Debug.Log("[UI] Adding button for (" + newControllable.GetType() + ") : " + method.Value.methodInfo.Name);
 
             CreateButton(newPanel.transform, newControllable, method.Value);
         }
@@ -289,12 +298,15 @@ public class UIMaster : MonoBehaviour
 		parent.gameObject.GetComponent<PanelUI>().AddUIElement(tooltipText.GetComponent<TooltipUI>());
 	}
 
-	private void CreateDropDown(Transform parent, Controllable target, FieldInfo listProperty, FieldInfo activeElement)
+    private void CreateDropDown(Transform parent, Controllable target, FieldInfo listProperty, FieldInfo activeElement, string enumName = "")
     {
         var newDropdown = Instantiate(DropdownPrefab);
         newDropdown.transform.SetParent(parent);
         parent.gameObject.GetComponent<PanelUI>().AddUIElement(newDropdown.GetComponent<DropdownUI>());
-        newDropdown.GetComponent<DropdownUI>().CreateUI(target, listProperty, activeElement);
+        if(string.IsNullOrEmpty(enumName))
+            newDropdown.GetComponent<DropdownUI>().CreateUI(target, listProperty, activeElement);
+        else
+            newDropdown.GetComponent<DropdownUI>().CreateUI(target, activeElement, enumName);
     }
 
     private void CreateSlider(Transform parent, Controllable target, FieldInfo property, RangeAttribute rangeAttribut, bool isInteractible, bool isFloat = true)
@@ -321,10 +333,10 @@ public class UIMaster : MonoBehaviour
         newCheckbox.GetComponent<ToggleUI>().CreateUI(target, property, isInteractible);
     }
 
-    private void CreateButton(Transform parent, Controllable target, MethodInfo method)
+    private void CreateButton(Transform parent, Controllable target, ClassMethodInfo method)
     {
         //As we can't expose parameter in UI, ignore methods with arguments 
-        if (method.GetParameters().Length == 0)
+        if (method.methodInfo.GetParameters().Length == 0)
         {
             var newButton = Instantiate(MethodButtonPrefab);
             newButton.transform.SetParent(parent);
@@ -334,7 +346,7 @@ public class UIMaster : MonoBehaviour
         }
         else
         {
-            foreach (var parameter in method.GetParameters())
+            foreach (var parameter in method.methodInfo.GetParameters())
             {
                 //Will do cool stuff in the future
             }
