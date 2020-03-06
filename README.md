@@ -22,7 +22,7 @@ You can expose bool, int, float, string, List and Vector3 properties. It is poss
 ```C++
 public class MyScriptControllable : Controllable {
 
-	// Expose variables from myScript to OSC by creating OSCProperties with the name of those variables
+	// Expose variables from MyScript to OSC by creating OSCProperties with the name of those variables
 	[OSCProperty]
 	public int intParameterOfMyScript;
 
@@ -32,7 +32,7 @@ public class MyScriptControllable : Controllable {
 	//Create OSC methods to call methods from myScript
 	[OSCMethod]
 	public void MyOSCMethod() {
-		myScript.MyScriptMethod();
+		(TargetScript as MyScript).MyScriptMethod();
 	}
 }
 ```
