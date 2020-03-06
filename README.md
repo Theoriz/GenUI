@@ -22,9 +22,6 @@ You can expose bool, int, float, string, List and Vector3 properties. It is poss
 ```C++
 public class MyScriptControllable : Controllable {
 
-	// Reference to the script to control with this controllable
-	public MyScript myScript;
-
 	// Expose variables from myScript to OSC by creating OSCProperties with the name of those variables
 	[OSCProperty]
 	public int intParameterOfMyScript;
