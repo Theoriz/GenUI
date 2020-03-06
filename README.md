@@ -14,7 +14,6 @@ You can expose bool, int, float, string, List and Vector3 properties. It is poss
 2. Create a new script inheriting from "Controllable". It will be the interface for the script you want to control.
 3. Add to this script every attributes you want to control with UI/OSC and the metadata "[OSCProperty]. You can use booleans to use or not the UI, presets, etc. Just be sure that your attributs have the same name as the one in the script you want to control.
 4. Add the metadata "[OSCMethod] above methods you want to expose.
-5. Override the Awake method to set the TargetScript with the script you want to control before calling base.Awake()
 6. Run !
 
 <details><summary>**CONTROLLABLE EXAMPLE**</summary>
@@ -37,15 +36,6 @@ public class MyScriptControllable : Controllable {
 	[OSCMethod]
 	public void MyOSCMethod() {
 		myScript.MyScriptMethod();
-	}
-
-	//Override the Awake method
-	public override void Awake() {
-
-		//Set the controllable target script to myScript
-		TargetScript = myScript;
-
-		base.Awake();
 	}
 }
 ```
