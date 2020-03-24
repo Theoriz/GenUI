@@ -15,7 +15,7 @@ public class ColorUI : ControllableUI
         LinkedControllable = target;
         target.controllableValueChanged += HandleTargetChange;
 
-        this.GetComponentInChildren<Text>().text = property.Name;
+        this.GetComponentInChildren<Text>().text = ParseNameString(property.Name);
         this.GetComponentInChildren<Image>().color = (Color)property.GetValue(target);
     }
 

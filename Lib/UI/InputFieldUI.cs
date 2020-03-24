@@ -21,7 +21,7 @@ public class InputFieldUI : ControllableUI
         var inputFieldComponent = this.transform.GetComponentInChildren<InputField>();
         var textComponent = this.transform.GetChild(1).gameObject.GetComponent<Text>();
 
-        textComponent.text = property.Name;
+        textComponent.text = ParseNameString(property.Name);
         this.transform.GetComponentInChildren<InputField>().interactable = isInteractible;
 
         if (property.FieldType.ToString() == "System.Int32")

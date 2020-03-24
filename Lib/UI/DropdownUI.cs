@@ -23,7 +23,7 @@ public class DropdownUI : ControllableUI
         var activeElementIndex = TypeConverter.getIndexInEnum(listInObject, Property.GetValue(LinkedControllable).ToString());
 
         var text = this.transform.GetChild(0).GetComponent<Text>();
-        text.text = activeElement.Name;
+        text.text = ParseNameString(activeElement.Name);
 
         var dropdown = this.GetComponentInChildren<Dropdown>();
         dropdown.value = 0;
@@ -50,7 +50,7 @@ public class DropdownUI : ControllableUI
             Debug.LogError("Can't find Enum " + _enumName + ", if GenUI is in Plugin folder move it outside from it.");
 
         var text = this.transform.GetChild(0).GetComponent<Text>();
-        text.text = activeElement.Name;
+        text.text = ParseNameString(activeElement.Name);
 
         var dropdown = this.GetComponentInChildren<Dropdown>();
         dropdown.value = 0;

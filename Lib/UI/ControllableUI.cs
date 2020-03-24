@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 public class ControllableUI : MonoBehaviour {
 
@@ -28,5 +29,18 @@ public class ControllableUI : MonoBehaviour {
     {
 
         GUIUtility.systemCopyBuffer = "/" + ControllableMaster.instance.RootOSCAddress + "/" + LinkedControllable.id + "/" + (Property == null ? Method.Name : Property.Name) ;
+    }
+
+    public string ParseNameString(string name) {
+
+        var r = new Regex(@"
+                (?<=[A-Z])(?=[A-Z][a-z]) |
+                 (?<=[^A-Z])(?=[A-Z]) |
+                 (?<=[A-Za-z])(?=[^A-Za-z])", RegexOptions.IgnorePatternWhitespace);
+
+        string output = char.ToUpper(name[0]) + name.Substring(1);
+
+        return r.Replace(output, " ");
+
     }
 }

@@ -49,7 +49,7 @@ public class SliderUI : ControllableUI
             target.setFieldProp(property, list);
         });
 
-        textComponent.text = property.Name;
+        textComponent.text = ParseNameString(property.Name);
         var tmp = "" + property.GetValue(target);
         tmp = tmp.Replace(",", ".");
         inputComponent.text = "" + tmp;
