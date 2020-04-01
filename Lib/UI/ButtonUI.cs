@@ -11,7 +11,7 @@ public class ButtonUI : ControllableUI
         LinkedControllable = target;
         Method = method.methodInfo;
 
-        this.GetComponentInChildren<Text>().text = method.methodInfo.Name;
+        this.GetComponentInChildren<Text>().text = ParseNameString(method.methodInfo.Name);
         this.GetComponent<Button>().onClick.AddListener(() =>
         {
             target.setMethodProp(method, null);

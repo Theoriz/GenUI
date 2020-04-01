@@ -243,13 +243,13 @@ public class UIMaster : MonoBehaviour
         var usePreset = false;
         foreach (var text in allText)
         {
-            if (text.text == "Save" || text.text == "SaveAs" || text.text == "Load" || text.text == "Show")
+            if (text.text == "Save" || text.text == "Save As" || text.text == "Load" || text.text == "Show")
             {
                 text.transform.parent.SetParent(lastPanel.transform.Find("PresetHolder"));
                 usePreset = true;
             }
 
-            if (text.text == "SaveAll" || text.text == "SaveAsAll" || text.text == "LoadAll")
+            if (text.text == "Save All" || text.text == "Save As All" || text.text == "Load All")
             {
                 var globalPresetHolder = lastPanel.transform.Find("AllPresetHolder");
                 if (globalPresetHolder == null)

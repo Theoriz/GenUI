@@ -15,7 +15,7 @@ public class Vector3UI : ControllableUI
         LinkedControllable = target;
         target.controllableValueChanged += HandleTargetChange;
 
-        this.transform.GetChild(1).GetComponent<Text>().text = property.Name;
+        this.transform.GetChild(1).GetComponent<Text>().text = ParseNameString(property.Name);
         var XInput = this.transform.GetChild(0).Find("XInput").GetChild(0).GetComponent<InputField>();
         var YInput = this.transform.GetChild(0).Find("YInput").GetChild(0).GetComponent<InputField>();
         var ZInput = this.transform.GetChild(0).Find("ZInput").GetChild(0).GetComponent<InputField>();
