@@ -295,6 +295,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   IsConnected: 0
+  IncrementalConnect: 1
   ShowDebug: 0
   OSCReceiverName: OCF
   RootOSCAddress: OCF
@@ -327,6 +328,7 @@ MonoBehaviour:
   HideCursorWithGenUI: 0
   IPAddress: 
   OSCInputPort: -1
+  IncrementalConnect: 0
   IsConnected: 0
 --- !u!114 &114933107520360336
 MonoBehaviour:
