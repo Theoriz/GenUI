@@ -272,6 +272,12 @@ public class UIMaster : MonoBehaviour
 
         lastPanel.GetComponent<PanelUI>().Init(controllable);
 
+        //Close panel if needed
+        if (controllable.closePanelAtStart)
+            _panels[controllableId].GetComponentInChildren<PanelUI>().Close();
+        else
+            _panels[controllableId].GetComponentInChildren<PanelUI>().Open();
+
         //Set GenUI on top
         if (_panels.ContainsKey("GenUI"))
         {
