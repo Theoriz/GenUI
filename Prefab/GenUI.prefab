@@ -93,6 +93,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.11, g: 0.11, b: 0.11, a: 0.98039216}
   m_RaycastTarget: 1
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -256,7 +257,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   AutoHideCursor: 0
   HideUIAtStart: 0
-  CloseGenUIPanelAtStart: 0
+  CloseGenUIPanelAtStart: 1
   UIToggleKey: 104
   MainPanel: {fileID: 224261597021104126}
   PanelPrefab: {fileID: 1622460675983054, guid: 9cef4e71017f00646a574461cd08ecdd,
@@ -277,7 +278,13 @@ MonoBehaviour:
     type: 3}
   ColorPrefab: {fileID: 1115744468916518, guid: ca6343af27d42bb4391b628c402eb65d,
     type: 3}
+  Vector2Prefab: {fileID: 1330587078194876, guid: 4a59034ff4f688447844d84cab269d66,
+    type: 3}
+  Vector2IntPrefab: {fileID: 1330587078194876, guid: 6f7c78a021a7c3d4983854daf9c9148c,
+    type: 3}
   Vector3Prefab: {fileID: 1330587078194876, guid: 980530528cd9a894d9a198d08d09c0f0,
+    type: 3}
+  Vector3IntPrefab: {fileID: 1330587078194876, guid: 54f2f7a007fcaf64eaa32c0c1b02b21f,
     type: 3}
   RightClickMenu: {fileID: 1762016755018953457, guid: b1a018ee1b41dfe4dbf5cf07bd1f1906,
     type: 3}
@@ -323,6 +330,7 @@ MonoBehaviour:
   usePanel: 1
   usePresets: 1
   hasPresets: 0
+  closePanelAtStart: 0
   currentPreset: 
   presetList: []
   HideCursorWithGenUI: 0
@@ -513,6 +521,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.5588235, g: 0.5588235, b: 0.5588235, a: 1}
   m_RaycastTarget: 1
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -601,6 +610,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -678,6 +688,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.13333334, g: 0.13333334, b: 0.13333334, a: 1}
   m_RaycastTarget: 1
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -907,8 +918,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1934192251487848}
-  m_LocalRotation: {x: -0.40821788, y: 0.23456968, z: -0.10938163, w: 0.8754261}
-  m_LocalPosition: {x: 0, y: -1.928363, z: 2.2981334}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 4679437618935694}

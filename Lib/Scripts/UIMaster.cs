@@ -25,7 +25,10 @@ public class UIMaster : MonoBehaviour
     public GameObject HeaderTextPrefab;
 	public GameObject TooltipTextPrefab;
     public GameObject ColorPrefab;
+    public GameObject Vector2Prefab;
+    public GameObject Vector2IntPrefab;
     public GameObject Vector3Prefab;
+    public GameObject Vector3IntPrefab;
     public GameObject RightClickMenu;
 
     public bool showDebug;
@@ -216,8 +219,29 @@ public class UIMaster : MonoBehaviour
 				//continue;
 			}
 
-			//Add tooltip if it exists
-			var tooltipAttribut = (TooltipAttribute[])property.Value.GetCustomAttributes(typeof(TooltipAttribute), false);
+            if (propertyType.ToString() == "UnityEngine.Vector3Int" && !propertyDrawn) {
+                CreateVector3Int(newPanel.transform, newControllable, property.Value, attribute.isInteractible);
+
+                propertyDrawn = true;
+                //continue;
+            }
+
+            if (propertyType.ToString() == "UnityEngine.Vector2" && !propertyDrawn) {
+                CreateVector2(newPanel.transform, newControllable, property.Value, attribute.isInteractible);
+
+                propertyDrawn = true;
+                //continue;
+            }
+
+            if (propertyType.ToString() == "UnityEngine.Vector2Int" && !propertyDrawn) {
+                CreateVector2Int(newPanel.transform, newControllable, property.Value, attribute.isInteractible);
+
+                propertyDrawn = true;
+                //continue;
+            }
+
+            //Add tooltip if it exists
+            var tooltipAttribut = (TooltipAttribute[])property.Value.GetCustomAttributes(typeof(TooltipAttribute), false);
 			if (tooltipAttribut.Length != 0) {
 				CreateTooltipText(newPanel.transform, newControllable, tooltipAttribut[0].tooltip);
 			}
@@ -373,6 +397,27 @@ public class UIMaster : MonoBehaviour
         newVector3.transform.SetParent(parent);
         parent.gameObject.GetComponent<PanelUI>().AddUIElement(newVector3.GetComponent<Vector3UI>());
         newVector3.GetComponent<Vector3UI>().CreateUI(target, property, isInteractible);
+    }
+
+    private void CreateVector3Int(Transform parent, Controllable target, FieldInfo property, bool isInteractible) {
+        var newVector3Int = Instantiate(Vector3IntPrefab);
+        newVector3Int.transform.SetParent(parent);
+        parent.gameObject.GetComponent<PanelUI>().AddUIElement(newVector3Int.GetComponent<Vector3IntUI>());
+        newVector3Int.GetComponent<Vector3IntUI>().CreateUI(target, property, isInteractible);
+    }
+
+    private void CreateVector2(Transform parent, Controllable target, FieldInfo property, bool isInteractible) {
+        var newVector2 = Instantiate(Vector2Prefab);
+        newVector2.transform.SetParent(parent);
+        parent.gameObject.GetComponent<PanelUI>().AddUIElement(newVector2.GetComponent<Vector2UI>());
+        newVector2.GetComponent<Vector2UI>().CreateUI(target, property, isInteractible);
+    }
+
+    private void CreateVector2Int(Transform parent, Controllable target, FieldInfo property, bool isInteractible) {
+        var newVector2Int = Instantiate(Vector2IntPrefab);
+        newVector2Int.transform.SetParent(parent);
+        parent.gameObject.GetComponent<PanelUI>().AddUIElement(newVector2Int.GetComponent<Vector2IntUI>());
+        newVector2Int.GetComponent<Vector2IntUI>().CreateUI(target, property, isInteractible);
     }
 
     public void ClickOnDropdown()
