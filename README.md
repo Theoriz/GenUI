@@ -32,7 +32,7 @@ public class MyScriptControllable : Controllable {
 	[OSCProperty][Range(0,1)]
 	public float floatParameterWithRange;
 	
-	[OSCProperty((isInteractible = false)]
+	[OSCProperty(isInteractible = false)]
 	public bool readOnlyBoolParameter;
 
 	//Create OSC methods to call methods from myScript
