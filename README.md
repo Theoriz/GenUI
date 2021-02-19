@@ -24,10 +24,16 @@ public class MyScriptControllable : Controllable {
 
 	// Expose variables from MyScript to OSC by creating OSCProperties with the name of those variables
 	[OSCProperty]
-	public int intParameterOfMyScript;
+	public int intParameter;
 
 	[OSCProperty]
-	public float floatParameterOfMyScript;
+	public float floatParameter;
+	
+	[OSCProperty][Range(0,1)]
+	public float floatParameterWithRange;
+	
+	[OSCProperty((isInteractible = false)]
+	public bool readOnlyBoolParameter;
 
 	//Create OSC methods to call methods from myScript
 	[OSCMethod]
