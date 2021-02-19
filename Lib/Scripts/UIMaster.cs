@@ -71,6 +71,16 @@ public class UIMaster : MonoBehaviour
         transform.GetChild(0).gameObject.SetActive(displayUI);
     }
 
+    public void ShowUI() {
+        if (!displayUI)
+            ToggleUI();
+	}
+
+    public void HideUI() {
+        if (displayUI)
+            ToggleUI();
+    }
+
     void Update()
     {
         if (Input.GetKeyDown(UIToggleKey))
