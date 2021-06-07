@@ -12,36 +12,49 @@ public class GenUIPanelMover : MonoBehaviour
 
     public float speed = 10;
 
-    private RectTransform rectTransform;
+    private RectTransform _rectTransform;
+    private Vector2 _defaultAnchoredPosition;
+    private Vector3 _defaultScale;
 
     private void Start() {
 
-        rectTransform = GetComponent<RectTransform>();
+        _rectTransform = GetComponent<RectTransform>();
+        _defaultAnchoredPosition = _rectTransform.anchoredPosition;
+        _defaultScale = _rectTransform.localScale;
     }
 
     // Update is called once per frame
     void Update()
     {
         if (Input.GetKey(leftKey))
-            rectTransform.anchoredPosition += Vector2.left * speed;
+            _rectTransform.anchoredPosition += Vector2.left * speed;
 
         if (Input.GetKey(rightKey))
-            rectTransform.anchoredPosition += Vector2.right * speed;
+            _rectTransform.anchoredPosition += Vector2.right * speed;
 
         if (Input.GetKey(upKey)) {
             if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) {
-                rectTransform.localScale += Vector3.one * 0.1f;
+                _rectTransform.localScale += Vector3.one * 0.1f;
             } else {
-                rectTransform.anchoredPosition += Vector2.up * speed;
+                _rectTransform.anchoredPosition += Vector2.up * speed;
             }
         }
 
         if (Input.GetKey(downKey)) {
             if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) {
-                rectTransform.localScale -= Vector3.one * 0.1f;
+                _rectTransform.localScale -= Vector3.one * 0.1f;
             } else {
-                rectTransform.anchoredPosition += Vector2.down * speed;
+                _rectTransform.anchoredPosition += Vector2.down * speed;
             }
         }
+
+        if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) &&
+            Input.GetKey(leftKey) &&
+            Input.GetKey(rightKey) &&
+			Input.GetKey(downKey)) {
+            //Reset
+            _rectTransform.anchoredPosition = _defaultAnchoredPosition;
+            _rectTransform.localScale = _defaultScale;
+		}
     }
 }
