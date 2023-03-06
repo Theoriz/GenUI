@@ -64,7 +64,10 @@ public class DropdownUI : ControllableUI
 
     public override void HandleTargetChange(string name)
     {
-        if(enumType != null) //New real enum handling
+        if (name != Property.Name && !String.IsNullOrEmpty(name))
+            return;
+
+        if (enumType != null) //New real enum handling
         {
             var dropdown = this.GetComponentInChildren<Dropdown>();
             dropdown.ClearOptions();
