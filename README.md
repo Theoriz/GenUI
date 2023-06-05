@@ -1,5 +1,6 @@
 # GenUI
-Automatic OSC Control for Unity
+Automatic OSC Control for Unity.
+
 This plugins allows you to simply create a UI for your application, exposing script sliders, inputfield and method. This UI is also fully controllable via OSC.
 
 ![Demo](https://github.com/Theoriz/GenUI-Demo/blob/master/gif/genui.gif) 
