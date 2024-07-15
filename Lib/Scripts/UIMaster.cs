@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,11 +7,25 @@ using UnityEngine.EventSystems;
 
 public class UIMaster : MonoBehaviour
 {
+    public static UIMaster Instance;
+
     [Header("Global settings")]
     public bool AutoHideCursor;
     public bool HideUIAtStart;
     public bool CloseGenUIPanelAtStart;
-    public KeyCode UIToggleKey;
+    public KeyCode UIToggleKey = KeyCode.H;
+    public KeyCode UIResetKey = KeyCode.R;
+    public KeyCode UIScaleUpKey = KeyCode.PageUp;
+    public KeyCode UIScaleDownKey = KeyCode.PageDown;
+
+    public float UIScale
+    {
+        get => _UIScale;
+        set { 
+            _UIScale = value;
+            _canvasScaler.scaleFactor = _UIScale;
+        }
+    }
 
     [Header("Prefabs")]
     public Transform MainPanel;
@@ -33,19 +46,21 @@ public class UIMaster : MonoBehaviour
 
     public bool showDebug;
 
-    
-
     private bool displayUI;
     private GameObject _camera;
     private GameObject _rootCanvas;
     private Dictionary<string, GameObject> _panels;
+    private CanvasScaler _canvasScaler;
+    private RectTransform _scrollViewTransform;
 
     private bool _rightClickMenuInstantiated;
     private bool _skipNextButton;
     private bool _destroyMenuOnNextFrame;
     private GameObject _rightClickMenu;
 
-    public static UIMaster Instance;
+    private float _UIScale = 1;
+    private const float _UIScaleSpeed = 2;
+    private const float _UIMovementSpeed = 500;
 
     // Use this for initialization
     void Awake()
@@ -57,7 +72,11 @@ public class UIMaster : MonoBehaviour
         ControllableMaster.controllableRemoved += RemoveUI;
 
         _rootCanvas = transform.GetChild(0).gameObject;
+        _canvasScaler = _rootCanvas.GetComponent<CanvasScaler>();
+        _scrollViewTransform = (RectTransform)_rootCanvas.transform.GetChild(0);
         displayUI = true;
+
+        ResetUITransform();
 
         if (HideUIAtStart)
             ToggleUI();
@@ -93,6 +112,8 @@ public class UIMaster : MonoBehaviour
 			}
             ToggleUI();
         }
+
+        UpdateUITransform();
 
         if(_destroyMenuOnNextFrame)
         {
@@ -463,4 +484,91 @@ public class UIMaster : MonoBehaviour
         _rightClickMenuInstantiated = true;
         _skipNextButton = true;
     }
+
+    #region UI Transform
+
+    void ResetUITransform()
+    {
+        //Set scale from screen size to always get a visible UI
+        UIScale = Screen.width * 1.5f / 1920;
+
+        _scrollViewTransform.anchoredPosition = Vector2.zero;
+    }
+
+    void UpdateUITransform()
+    {
+        if (displayUI)
+        {
+            if(Input.GetKeyDown(UIResetKey))
+                ResetUITransform();
+        }
+
+        UpdateUIScale();
+        UpdateUIPosition();
+    }
+
+    void UpdateUIScale()
+    {
+        //UI Scaling
+        if (displayUI)
+        {
+            if (Input.GetKey(UIScaleUpKey))
+            {
+                //Avoid scaling the UI if currently writing in an input field
+                if (EventSystem.current.currentSelectedGameObject)
+                {
+                    if (EventSystem.current.currentSelectedGameObject.GetComponent<InputField>())
+                    {
+                        return;
+                    }
+                }
+
+                UIScale += _UIScaleSpeed * Time.deltaTime;
+            }
+
+            if (Input.GetKey(UIScaleDownKey))
+            {
+                //Avoid scaling the UI if currently writing in an input field
+                if (EventSystem.current.currentSelectedGameObject)
+                {
+                    if (EventSystem.current.currentSelectedGameObject.GetComponent<InputField>())
+                    {
+                        return;
+                    }
+                }
+
+                UIScale -= _UIScaleSpeed * Time.deltaTime;
+            }
+        }
+    }
+
+    void UpdateUIPosition()
+    {
+        if (displayUI && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)))
+        {
+            //Avoid scaling the UI if currently writing in an input field
+            if (EventSystem.current.currentSelectedGameObject)
+            {
+                if (EventSystem.current.currentSelectedGameObject.GetComponent<InputField>())
+                {
+                    return;
+                }
+            }
+
+            if (Input.GetKey(KeyCode.LeftArrow))
+                _scrollViewTransform.anchoredPosition += Vector2.left * _UIMovementSpeed * Time.deltaTime;
+
+            if (Input.GetKey(KeyCode.RightArrow))
+                _scrollViewTransform.anchoredPosition += Vector2.right * _UIMovementSpeed * Time.deltaTime;
+
+            if (Input.GetKey(KeyCode.UpArrow))
+                _scrollViewTransform.anchoredPosition += Vector2.up * _UIMovementSpeed * Time.deltaTime;
+
+            if (Input.GetKey(KeyCode.DownArrow))
+                _scrollViewTransform.anchoredPosition += Vector2.down * _UIMovementSpeed * Time.deltaTime;
+
+        }
+    }
+
+    #endregion
 }

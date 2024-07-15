@@ -10,6 +10,13 @@ Example Unity project can be found at : https://github.com/theoriz/genui-demo
 ## What's inside ?
 You can expose bool, int, float, string, List and Vector3 properties. It is possible to define a range for int and float in order to get a slider in the UI by adding the Range metadata, otherwise you would get an inputfield. Method appear as button in UI so you can't give it arguments but this is possible using OSC.
 
+## Default Shortcuts
+
+- H : Toggle the UI.
+- PageUp / PageDown: Scale up/down the UI, only when the UI is visible.
+- Ctrl + Left/Right/Up/Down arrow : Move the UI, only when the UI is visible.
+- R : Reset the UI, only when the UI is visible.
+
 ## How to use ?
 1. Drop the prefab "GenUI" in your game.
 2. Create a new script inheriting from "Controllable". It will be the interface for the script you want to control.
