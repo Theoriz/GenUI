@@ -100,6 +100,11 @@ public class UIMaster : MonoBehaviour
             ToggleUI();
     }
 
+    public bool IsUIVisible()
+    {
+        return displayUI;
+    }
+
     void Update()
     {
         if (Input.GetKeyDown(UIToggleKey))
