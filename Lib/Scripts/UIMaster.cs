@@ -10,7 +10,14 @@ public class UIMaster : MonoBehaviour
     public static UIMaster Instance;
 
     [Header("Global settings")]
-    public bool AutoHideCursor;
+    public bool AutoHideCursor
+    {
+        get => _AutoHideCursor;
+        set { _AutoHideCursor = value; UpdateUI(); }
+    }
+
+    [SerializeField] private bool _AutoHideCursor = true;
+
     public bool HideUIAtStart;
     public bool CloseGenUIPanelAtStart;
     public KeyCode UIToggleKey = KeyCode.H;
@@ -85,9 +92,8 @@ public class UIMaster : MonoBehaviour
     public void ToggleUI()
     {
         displayUI = !displayUI;
-        if (AutoHideCursor)
-            Cursor.visible = displayUI;
-        transform.GetChild(0).gameObject.SetActive(displayUI);
+
+        UpdateUI();
     }
 
     public void ShowUI() {
@@ -98,6 +104,19 @@ public class UIMaster : MonoBehaviour
     public void HideUI() {
         if (displayUI)
             ToggleUI();
+    }
+
+    public void UpdateUI()
+    {
+        if (AutoHideCursor && !Application.isEditor && !displayUI)
+        {
+            Cursor.visible = false;
+        } else
+        {
+            Cursor.visible = true;
+        }
+
+        transform.GetChild(0).gameObject.SetActive(displayUI);
     }
 
     public bool IsUIVisible()

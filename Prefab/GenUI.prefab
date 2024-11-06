@@ -29,11 +29,11 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 224395928353128896}
   - {fileID: 224246105580803028}
   m_Father: {fileID: 224016024828273574}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 1}
@@ -93,6 +93,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.11, g: 0.11, b: 0.11, a: 0.98039216}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -136,10 +137,10 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0, y: 0, z: 0}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 224892611139806414}
   m_Father: {fileID: 4679437618935694}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -163,7 +164,9 @@ Canvas:
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
   m_AdditionalShaderChannelsFlag: 0
+  m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
@@ -189,6 +192,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
+  m_PresetInfoIsWorld: 0
 --- !u!114 &114987638695357340
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -234,14 +238,15 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1277216160771640}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 224016024828273574}
   - {fileID: 4671045617383216}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &114736921750431862
 MonoBehaviour:
@@ -255,39 +260,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82735d6d849c37f428ed8699076fb09a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  AutoHideCursor: 0
-  HideUIAtStart: 0
+  AutoHideCursor: 1
+  HideUIAtStart: 1
   CloseGenUIPanelAtStart: 1
   UIToggleKey: 104
+  UIResetKey: 114
+  UIScaleUpKey: 280
+  UIScaleDownKey: 281
   MainPanel: {fileID: 224261597021104126}
-  PanelPrefab: {fileID: 1622460675983054, guid: 9cef4e71017f00646a574461cd08ecdd,
-    type: 3}
-  MethodButtonPrefab: {fileID: 1946855127059288, guid: 69228a3d9baefa74ab0ef84df415066f,
-    type: 3}
-  SliderPrefab: {fileID: 1018181201034402, guid: 89ea43e620d17ff4399df6de2e79a506,
-    type: 3}
-  CheckboxPrefab: {fileID: 1515742993973044, guid: b1d168cb8d7c47344ae77fb36c2baaf3,
-    type: 3}
-  InputPrefab: {fileID: 1981622790165228, guid: 545e59ae5d00cd14fb3104bb8ccd4205,
-    type: 3}
-  DropdownPrefab: {fileID: 989818094581739360, guid: 8c943b3283ab76341a12fb7984edb8ec,
-    type: 3}
-  HeaderTextPrefab: {fileID: 1438555048624790, guid: 56fe3109dec04154d9c43c4e9c5e90cb,
-    type: 3}
-  TooltipTextPrefab: {fileID: 1438555048624790, guid: faffed60158841c4da7c59453081fa26,
-    type: 3}
-  ColorPrefab: {fileID: 1115744468916518, guid: ca6343af27d42bb4391b628c402eb65d,
-    type: 3}
-  Vector2Prefab: {fileID: 1330587078194876, guid: 4a59034ff4f688447844d84cab269d66,
-    type: 3}
-  Vector2IntPrefab: {fileID: 1330587078194876, guid: 6f7c78a021a7c3d4983854daf9c9148c,
-    type: 3}
-  Vector3Prefab: {fileID: 1330587078194876, guid: 980530528cd9a894d9a198d08d09c0f0,
-    type: 3}
-  Vector3IntPrefab: {fileID: 1330587078194876, guid: 54f2f7a007fcaf64eaa32c0c1b02b21f,
-    type: 3}
-  RightClickMenu: {fileID: 1762016755018953457, guid: b1a018ee1b41dfe4dbf5cf07bd1f1906,
-    type: 3}
+  PanelPrefab: {fileID: 1622460675983054, guid: 9cef4e71017f00646a574461cd08ecdd, type: 3}
+  MethodButtonPrefab: {fileID: 1946855127059288, guid: 69228a3d9baefa74ab0ef84df415066f, type: 3}
+  SliderPrefab: {fileID: 1018181201034402, guid: 89ea43e620d17ff4399df6de2e79a506, type: 3}
+  CheckboxPrefab: {fileID: 1515742993973044, guid: b1d168cb8d7c47344ae77fb36c2baaf3, type: 3}
+  InputPrefab: {fileID: 1981622790165228, guid: 545e59ae5d00cd14fb3104bb8ccd4205, type: 3}
+  DropdownPrefab: {fileID: 989818094581739360, guid: 8c943b3283ab76341a12fb7984edb8ec, type: 3}
+  HeaderTextPrefab: {fileID: 1438555048624790, guid: 56fe3109dec04154d9c43c4e9c5e90cb, type: 3}
+  TooltipTextPrefab: {fileID: 1438555048624790, guid: faffed60158841c4da7c59453081fa26, type: 3}
+  ColorPrefab: {fileID: 1115744468916518, guid: ca6343af27d42bb4391b628c402eb65d, type: 3}
+  Vector2Prefab: {fileID: 1330587078194876, guid: 4a59034ff4f688447844d84cab269d66, type: 3}
+  Vector2IntPrefab: {fileID: 1330587078194876, guid: 6f7c78a021a7c3d4983854daf9c9148c, type: 3}
+  Vector3Prefab: {fileID: 1330587078194876, guid: 980530528cd9a894d9a198d08d09c0f0, type: 3}
+  Vector3IntPrefab: {fileID: 1330587078194876, guid: 54f2f7a007fcaf64eaa32c0c1b02b21f, type: 3}
+  RightClickMenu: {fileID: 1762016755018953457, guid: b1a018ee1b41dfe4dbf5cf07bd1f1906, type: 3}
   showDebug: 0
 --- !u!114 &114445698576836282
 MonoBehaviour:
@@ -301,8 +295,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 77cc626fd7555044aaa739a8062117a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  uiMaster: {fileID: 114736921750431862}
   IsConnected: 0
   IncrementalConnect: 1
+  useDocumentsDirectory: 0
   ShowDebug: 0
   OSCReceiverName: OCF
   RootOSCAddress: OCF
@@ -489,9 +485,9 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0.000000059605}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 224705126785427858}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -521,6 +517,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.5588235, g: 0.5588235, b: 0.5588235, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -564,10 +561,10 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 224261597021104126}
   m_Father: {fileID: 224892611139806414}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -610,6 +607,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -655,10 +653,10 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 224705126785427858}
   m_Father: {fileID: 224892611139806414}
-  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -688,6 +686,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.13333334, g: 0.13333334, b: 0.13333334, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -716,6 +715,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Navigation:
     m_Mode: 3
+    m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
@@ -809,9 +809,9 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 224395928353128896}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -843,6 +843,7 @@ MonoBehaviour:
   m_ChildControlHeight: 1
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
 --- !u!114 &114925216385016382
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -883,10 +884,10 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 224579476644313692}
   m_Father: {fileID: 224246105580803028}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -918,12 +919,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1934192251487848}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4679437618935694}
-  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &114355037692774112
 MonoBehaviour:
@@ -952,6 +954,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f231c4fb786f3946a6b90b886c48677, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_SendPointerHoverToParent: 1
   m_HorizontalAxis: Horizontal
   m_VerticalAxis: Vertical
   m_SubmitButton: Submit
