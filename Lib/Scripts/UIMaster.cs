@@ -4,6 +4,7 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using System.Linq;
 
 public class UIMaster : MonoBehaviour
 {
@@ -19,7 +20,6 @@ public class UIMaster : MonoBehaviour
     [SerializeField] private bool _AutoHideCursor = true;
 
     public bool HideUIAtStart;
-    public bool CloseGenUIPanelAtStart;
     public KeyCode UIToggleKey = KeyCode.H;
     public KeyCode UIResetKey = KeyCode.R;
     public KeyCode UIScaleUpKey = KeyCode.PageUp;
@@ -357,14 +357,19 @@ public class UIMaster : MonoBehaviour
         else
             _panels[controllableId].GetComponentInChildren<PanelUI>().Open();
 
+        //Order panels by alphabetical order
+        var panelIds = _panels.Keys.ToArray();
+        Array.Sort(panelIds);
+
+        for(int i = 0; i < panelIds.Length; i++)
+        {
+            _panels[panelIds[i]].transform.SetAsLastSibling();
+        }
+
         //Set GenUI on top
         if (_panels.ContainsKey("GenUI"))
         {
             _panels["GenUI"].transform.SetAsFirstSibling();
-            if (CloseGenUIPanelAtStart)
-                _panels["GenUI"].GetComponentInChildren<PanelUI>().Close();
-            else
-                _panels["GenUI"].GetComponentInChildren<PanelUI>().Open();
         }
     }
 
