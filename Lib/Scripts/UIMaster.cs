@@ -24,6 +24,7 @@ public class UIMaster : MonoBehaviour
     public KeyCode UIResetKey = KeyCode.R;
     public KeyCode UIScaleUpKey = KeyCode.PageUp;
     public KeyCode UIScaleDownKey = KeyCode.PageDown;
+    public bool enableUIMovement = true;
 
     public float UIScale
     {
@@ -533,7 +534,9 @@ public class UIMaster : MonoBehaviour
         }
 
         UpdateUIScale();
-        UpdateUIPosition();
+
+        if(enableUIMovement)
+            UpdateUIPosition();
     }
 
     void UpdateUIScale()
