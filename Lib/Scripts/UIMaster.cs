@@ -69,6 +69,9 @@ public class UIMaster : MonoBehaviour
     // Use this for initialization
     void Awake()
     {
+        //Enable canvas that is disabled by default in prefab to not be visible in scene view.
+        transform.GetChild(0).gameObject.SetActive(true);
+
         Instance = this;
         _panels = new Dictionary<string, GameObject>();
 
