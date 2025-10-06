@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 4214b57e615806c448ba9d993d629531
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 150497
+  packageName: Flexible Color Picker
+  packageVersion: 2.5.0
+  assetPath: Assets/FlexibleColorPicker/FlexibleColorPicker.prefab
+  uploadId: 504863

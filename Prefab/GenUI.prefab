@@ -278,6 +278,7 @@ MonoBehaviour:
   Vector3Prefab: {fileID: 1330587078194876, guid: 980530528cd9a894d9a198d08d09c0f0, type: 3}
   Vector3IntPrefab: {fileID: 1330587078194876, guid: 54f2f7a007fcaf64eaa32c0c1b02b21f, type: 3}
   RightClickMenu: {fileID: 1762016755018953457, guid: b1a018ee1b41dfe4dbf5cf07bd1f1906, type: 3}
+  ColorPicker: {fileID: 2130943084915617138, guid: 4214b57e615806c448ba9d993d629531, type: 3}
   showDebug: 0
 --- !u!114 &114445698576836282
 MonoBehaviour:

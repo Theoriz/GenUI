@@ -48,6 +48,7 @@ public class UIMaster : MonoBehaviour
     public GameObject Vector3Prefab;
     public GameObject Vector3IntPrefab;
     public GameObject RightClickMenu;
+    public GameObject ColorPicker;
 
     public bool showDebug;
 
@@ -57,10 +58,15 @@ public class UIMaster : MonoBehaviour
     private CanvasScaler _canvasScaler;
     private RectTransform _scrollViewTransform;
 
-    private bool _rightClickMenuInstantiated;
     private bool _skipNextButton;
-    private bool _destroyMenuOnNextFrame;
+
+    private bool _rightClickMenuInstantiated;
+    private bool _destroyRightClickMenuOnNextFrame;
     private GameObject _rightClickMenu;
+
+    private bool _colorPickerInstantiated;
+    private bool _destroyColorPickerOnNextFrame;
+    private GameObject _colorPicker;
 
     private float _UIScale = 1;
     private const float _UIScaleSpeed = 2;
@@ -139,16 +145,27 @@ public class UIMaster : MonoBehaviour
 
         UpdateUITransform();
 
-        if(_destroyMenuOnNextFrame)
+        if(_destroyRightClickMenuOnNextFrame)
         {
-            _destroyMenuOnNextFrame = false;
+            _destroyRightClickMenuOnNextFrame = false;
             _rightClickMenuInstantiated = false;
             Destroy(_rightClickMenu);
         }
 
-        if ((Mouse.current.leftButton.wasReleasedThisFrame || Mouse.current.rightButton.wasReleasedThisFrame) && _rightClickMenuInstantiated && !_skipNextButton)
+        if (_destroyColorPickerOnNextFrame)
         {
-            _destroyMenuOnNextFrame = true;
+            _destroyColorPickerOnNextFrame = false;
+            _colorPickerInstantiated = false;
+            Destroy(_colorPicker);
+        }
+
+        if ((Mouse.current.leftButton.wasReleasedThisFrame || Mouse.current.rightButton.wasReleasedThisFrame) && !_skipNextButton)
+        {
+            if(_rightClickMenuInstantiated)
+                _destroyRightClickMenuOnNextFrame = true;
+
+            if (_colorPickerInstantiated)
+                _destroyColorPickerOnNextFrame = true;
         }
 
         if(_skipNextButton)
@@ -511,6 +528,32 @@ public class UIMaster : MonoBehaviour
             rectTransform.anchoredPosition = new Vector2(0.0f, rectTransform.anchoredPosition.y);
             */
         _rightClickMenuInstantiated = true;
+        _skipNextButton = true;
+    }
+
+    public void CreateColorPicker(ControllableUI controllableUI)
+    {
+        Debug.LogWarning("CREATING COLOR PICKER");
+
+        if (_colorPickerInstantiated)
+        {
+            Destroy(_colorPicker);
+            _colorPickerInstantiated = false;
+        }
+
+        _colorPicker = Instantiate(ColorPicker, _rootCanvas.transform);
+
+        //_rightClickMenu.transform.GetChild(0).GetComponent<Button>().onClick.AddListener(controllableUI.CopyAddressToClipboard);
+        //_rightClickMenu.transform.GetChild(0).GetComponent<Button>().onClick.AddListener(() => { Destroy(_rightClickMenu); });
+
+        var rectTransform = _colorPicker.GetComponent<RectTransform>();
+        rectTransform.pivot = new Vector2(0.0f, 0.5f);
+        rectTransform.anchorMin = new Vector2(0.0f, 0.5f);
+        rectTransform.anchorMax = new Vector2(0.0f, 0.5f);
+
+        _colorPicker.transform.position = Mouse.current.position.value;
+
+        _colorPickerInstantiated = true;
         _skipNextButton = true;
     }
 

@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: ffe04ecf2f96f9c45bab5a2f39e0d8c9
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 150497
+  packageName: Flexible Color Picker
+  packageVersion: 2.5.0
+  assetPath: Assets/FlexibleColorPicker/ExampleScene/FCP_ExampleScript.cs
+  uploadId: 504863
