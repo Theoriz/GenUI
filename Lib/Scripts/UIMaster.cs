@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Linq;
+using UnityEngine.InputSystem;
 
 public class UIMaster : MonoBehaviour
 {
@@ -20,10 +21,6 @@ public class UIMaster : MonoBehaviour
     [SerializeField] private bool _AutoHideCursor = true;
 
     public bool HideUIAtStart;
-    public KeyCode UIToggleKey = KeyCode.H;
-    public KeyCode UIResetKey = KeyCode.R;
-    public KeyCode UIScaleUpKey = KeyCode.PageUp;
-    public KeyCode UIScaleDownKey = KeyCode.PageDown;
     public bool enableUIMovement = true;
 
     public float UIScale
@@ -55,7 +52,6 @@ public class UIMaster : MonoBehaviour
     public bool showDebug;
 
     private bool displayUI;
-    private GameObject _camera;
     private GameObject _rootCanvas;
     private Dictionary<string, GameObject> _panels;
     private CanvasScaler _canvasScaler;
@@ -127,7 +123,7 @@ public class UIMaster : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(UIToggleKey))
+        if (Keyboard.current.f1Key.wasPressedThisFrame)
         {
 			//Avoid toggling the UI if currently writing in an input field
 			if (EventSystem.current.currentSelectedGameObject) {
@@ -147,7 +143,7 @@ public class UIMaster : MonoBehaviour
             Destroy(_rightClickMenu);
         }
 
-        if((Input.GetMouseButtonUp(0) || Input.GetMouseButtonUp(1)) && _rightClickMenuInstantiated && !_skipNextButton)
+        if ((Mouse.current.leftButton.wasReleasedThisFrame || Mouse.current.rightButton.wasReleasedThisFrame) && _rightClickMenuInstantiated && !_skipNextButton)
         {
             _destroyMenuOnNextFrame = true;
         }
@@ -505,7 +501,7 @@ public class UIMaster : MonoBehaviour
         rectTransform.anchorMin = new Vector2(0.0f, 0.5f);
         rectTransform.anchorMax = new Vector2(0.0f, 0.5f);
 
-        _rightClickMenu.transform.position = Input.mousePosition;
+        _rightClickMenu.transform.position = Mouse.current.position.value;
         /*
         Debug.Log(rectTransform.anchoredPosition.x);
         if (rectTransform.anchoredPosition.x < 0)
@@ -529,7 +525,7 @@ public class UIMaster : MonoBehaviour
     {
         if (displayUI)
         {
-            if(Input.GetKeyDown(UIResetKey))
+            if(Keyboard.current.f2Key.wasPressedThisFrame)
                 ResetUITransform();
         }
 
@@ -544,7 +540,7 @@ public class UIMaster : MonoBehaviour
         //UI Scaling
         if (displayUI)
         {
-            if (Input.GetKey(UIScaleUpKey))
+            if (Keyboard.current.pageUpKey.isPressed)
             {
                 //Avoid scaling the UI if currently writing in an input field
                 if (EventSystem.current.currentSelectedGameObject)
@@ -558,7 +554,7 @@ public class UIMaster : MonoBehaviour
                 UIScale += _UIScaleSpeed * Time.deltaTime;
             }
 
-            if (Input.GetKey(UIScaleDownKey))
+            if (Keyboard.current.pageDownKey.isPressed)
             {
                 //Avoid scaling the UI if currently writing in an input field
                 if (EventSystem.current.currentSelectedGameObject)
@@ -576,7 +572,7 @@ public class UIMaster : MonoBehaviour
 
     void UpdateUIPosition()
     {
-        if (displayUI && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)))
+        if (displayUI && (Keyboard.current.leftCtrlKey.isPressed || Keyboard.current.rightCtrlKey.isPressed))
         {
             //Avoid scaling the UI if currently writing in an input field
             if (EventSystem.current.currentSelectedGameObject)
@@ -587,16 +583,16 @@ public class UIMaster : MonoBehaviour
                 }
             }
 
-            if (Input.GetKey(KeyCode.LeftArrow))
+            if (Keyboard.current.leftArrowKey.isPressed)
                 _scrollViewTransform.anchoredPosition += Vector2.left * _UIMovementSpeed * Time.deltaTime;
 
-            if (Input.GetKey(KeyCode.RightArrow))
+            if (Keyboard.current.rightArrowKey.isPressed)
                 _scrollViewTransform.anchoredPosition += Vector2.right * _UIMovementSpeed * Time.deltaTime;
 
-            if (Input.GetKey(KeyCode.UpArrow))
+            if (Keyboard.current.upArrowKey.isPressed)
                 _scrollViewTransform.anchoredPosition += Vector2.up * _UIMovementSpeed * Time.deltaTime;
 
-            if (Input.GetKey(KeyCode.DownArrow))
+            if (Keyboard.current.downArrowKey.isPressed)
                 _scrollViewTransform.anchoredPosition += Vector2.down * _UIMovementSpeed * Time.deltaTime;
 
         }
