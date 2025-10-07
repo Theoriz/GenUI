@@ -27,7 +27,6 @@ public class ControllableUI : MonoBehaviour {
 
     public void CopyAddressToClipboard()
     {
-
         GUIUtility.systemCopyBuffer = "/" + ControllableMaster.instance.RootOSCAddress + "/" + LinkedControllable.id + "/" + (Property == null ? Method.Name : Property.Name) ;
     }
 

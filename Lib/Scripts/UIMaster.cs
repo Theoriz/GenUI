@@ -10,14 +10,14 @@ using UnityEngine.InputSystem;
 public class UIMaster : MonoBehaviour
 {
     public static UIMaster Instance;
-
-    [Header("Global settings")]
+    
     public bool AutoHideCursor
     {
         get => _AutoHideCursor;
         set { _AutoHideCursor = value; UpdateUI(); }
     }
 
+    [Header("Global settings")]
     [SerializeField] private bool _AutoHideCursor = true;
 
     public bool HideUIAtStart;
@@ -32,41 +32,33 @@ public class UIMaster : MonoBehaviour
         }
     }
 
-    [Header("Prefabs")]
-    public Transform MainPanel;
-    public GameObject PanelPrefab;
-    public GameObject MethodButtonPrefab;
-    public GameObject SliderPrefab;
-    public GameObject CheckboxPrefab;
-    public GameObject InputPrefab;
-    public GameObject DropdownPrefab;
-    public GameObject HeaderTextPrefab;
-	public GameObject TooltipTextPrefab;
-    public GameObject ColorPrefab;
-    public GameObject Vector2Prefab;
-    public GameObject Vector2IntPrefab;
-    public GameObject Vector3Prefab;
-    public GameObject Vector3IntPrefab;
-    public GameObject RightClickMenu;
-    public GameObject ColorPicker;
+    [HideInInspector] public GameObject PanelPrefab;
+    [HideInInspector] public GameObject MethodButtonPrefab;
+    [HideInInspector] public GameObject SliderPrefab;
+    [HideInInspector] public GameObject CheckboxPrefab;
+    [HideInInspector] public GameObject InputPrefab;
+    [HideInInspector] public GameObject DropdownPrefab;
+    [HideInInspector] public GameObject HeaderTextPrefab;
+	[HideInInspector] public GameObject TooltipTextPrefab;
+    [HideInInspector] public GameObject ColorPrefab;
+    [HideInInspector] public GameObject Vector2Prefab;
+    [HideInInspector] public GameObject Vector2IntPrefab;
+    [HideInInspector] public GameObject Vector3Prefab;
+    [HideInInspector] public GameObject Vector3IntPrefab;
 
-    public bool showDebug;
+    [Header("Components")]
+    public Transform MainPanel;
+    public RightClickMenu rightClickMenu;
+    public ColorPicker colorPicker;
+
+    [Header("Debug")]
+    public bool showDebug = false;
 
     private bool displayUI;
     private GameObject _rootCanvas;
     private Dictionary<string, GameObject> _panels;
     private CanvasScaler _canvasScaler;
     private RectTransform _scrollViewTransform;
-
-    private bool _skipNextButton;
-
-    private bool _rightClickMenuInstantiated;
-    private bool _destroyRightClickMenuOnNextFrame;
-    private GameObject _rightClickMenu;
-
-    private bool _colorPickerInstantiated;
-    private bool _destroyColorPickerOnNextFrame;
-    private GameObject _colorPicker;
 
     private float _UIScale = 1;
     private const float _UIScaleSpeed = 2;
@@ -77,6 +69,9 @@ public class UIMaster : MonoBehaviour
     {
         //Enable canvas that is disabled by default in prefab to not be visible in scene view.
         transform.GetChild(0).gameObject.SetActive(true);
+
+        InitializeRightClickMenu();
+        InitializeColorPicker();
 
         Instance = this;
         _panels = new Dictionary<string, GameObject>();
@@ -145,33 +140,33 @@ public class UIMaster : MonoBehaviour
 
         UpdateUITransform();
 
-        if(_destroyRightClickMenuOnNextFrame)
-        {
-            _destroyRightClickMenuOnNextFrame = false;
-            _rightClickMenuInstantiated = false;
-            Destroy(_rightClickMenu);
-        }
+        //if(_destroyRightClickMenuOnNextFrame)
+        //{
+        //    _destroyRightClickMenuOnNextFrame = false;
+        //    _rightClickMenuInstantiated = false;
+        //    Destroy(_rightClickMenu);
+        //}
 
-        if (_destroyColorPickerOnNextFrame)
-        {
-            _destroyColorPickerOnNextFrame = false;
-            _colorPickerInstantiated = false;
-            Destroy(_colorPicker);
-        }
+        //if (_destroyColorPickerOnNextFrame)
+        //{
+        //    _destroyColorPickerOnNextFrame = false;
+        //    _colorPickerInstantiated = false;
+        //    Destroy(_colorPicker);
+        //}
 
-        if ((Mouse.current.leftButton.wasReleasedThisFrame || Mouse.current.rightButton.wasReleasedThisFrame) && !_skipNextButton)
-        {
-            if(_rightClickMenuInstantiated)
-                _destroyRightClickMenuOnNextFrame = true;
+        //if ((Mouse.current.leftButton.wasReleasedThisFrame || Mouse.current.rightButton.wasReleasedThisFrame) && !_skipNextButton)
+        //{
+        //    if(_rightClickMenuInstantiated)
+        //        _destroyRightClickMenuOnNextFrame = true;
 
-            if (_colorPickerInstantiated)
-                _destroyColorPickerOnNextFrame = true;
-        }
+        //    if (_colorPickerInstantiated)
+        //        _destroyColorPickerOnNextFrame = true;
+        //}
 
-        if(_skipNextButton)
-        {
-            _skipNextButton = false;
-        }
+        //if(_skipNextButton)
+        //{
+        //    _skipNextButton = false;
+        //}
     }
 
     public void RemoveUI(Controllable dyingControllable)
@@ -501,61 +496,57 @@ public class UIMaster : MonoBehaviour
     {
         ControllableMaster.RefreshAllPresets();
     }
-    
+
+    #region Right Click Menu
+
+    void InitializeRightClickMenu()
+    {
+        rightClickMenu.gameObject.SetActive(false);
+        rightClickMenu.closeButton.onClick.AddListener(CloseRightClickMenu);
+        rightClickMenu.copyAddressButton.onClick.AddListener(OnCopyAddressClick);
+    }
+
     public void CreateRightClickMenu(ControllableUI controllableUI)
     {
-        if(_rightClickMenuInstantiated)
-        {
-            Destroy(_rightClickMenu);
-            _rightClickMenuInstantiated = false;
-        }
+        rightClickMenu.gameObject.SetActive(true);
+        rightClickMenu.transform.position = Mouse.current.position.value;
+        rightClickMenu.linkedUI = controllableUI;
+    }
 
-        _rightClickMenu = Instantiate(RightClickMenu, _rootCanvas.transform);
-        
-        _rightClickMenu.transform.GetChild(0).GetComponent<Button>().onClick.AddListener(controllableUI.CopyAddressToClipboard);
-        _rightClickMenu.transform.GetChild(0).GetComponent<Button>().onClick.AddListener(() => { Destroy(_rightClickMenu); });
+    void CloseRightClickMenu()
+    {
+        rightClickMenu.gameObject.SetActive(false);
+    }
 
-        
-        var rectTransform = _rightClickMenu.GetComponent<RectTransform>();
-        rectTransform.pivot = new Vector2(0.0f, 0.5f);
-        rectTransform.anchorMin = new Vector2(0.0f, 0.5f);
-        rectTransform.anchorMax = new Vector2(0.0f, 0.5f);
+    void OnCopyAddressClick()
+    {
+        rightClickMenu.linkedUI.CopyAddressToClipboard();
+        CloseRightClickMenu();
+    }
 
-        _rightClickMenu.transform.position = Mouse.current.position.value;
-        /*
-        Debug.Log(rectTransform.anchoredPosition.x);
-        if (rectTransform.anchoredPosition.x < 0)
-            rectTransform.anchoredPosition = new Vector2(0.0f, rectTransform.anchoredPosition.y);
-            */
-        _rightClickMenuInstantiated = true;
-        _skipNextButton = true;
+    #endregion
+
+    #region Color Picker
+
+    void InitializeColorPicker()
+    {
+        colorPicker.gameObject.SetActive(false);
+        colorPicker.closeButton.onClick.AddListener(CloseColorPicker);
     }
 
     public void CreateColorPicker(ControllableUI controllableUI)
     {
-        Debug.LogWarning("CREATING COLOR PICKER");
-
-        if (_colorPickerInstantiated)
-        {
-            Destroy(_colorPicker);
-            _colorPickerInstantiated = false;
-        }
-
-        _colorPicker = Instantiate(ColorPicker, _rootCanvas.transform);
-
-        //_rightClickMenu.transform.GetChild(0).GetComponent<Button>().onClick.AddListener(controllableUI.CopyAddressToClipboard);
-        //_rightClickMenu.transform.GetChild(0).GetComponent<Button>().onClick.AddListener(() => { Destroy(_rightClickMenu); });
-
-        var rectTransform = _colorPicker.GetComponent<RectTransform>();
-        rectTransform.pivot = new Vector2(0.0f, 0.5f);
-        rectTransform.anchorMin = new Vector2(0.0f, 0.5f);
-        rectTransform.anchorMax = new Vector2(0.0f, 0.5f);
-
-        _colorPicker.transform.position = Mouse.current.position.value;
-
-        _colorPickerInstantiated = true;
-        _skipNextButton = true;
+        colorPicker.transform.position = Mouse.current.position.value;
+        colorPicker.linkedUI = controllableUI as ColorUI;
+        colorPicker.gameObject.SetActive(true);
     }
+
+    void CloseColorPicker()
+    {
+        colorPicker.gameObject.SetActive(false);
+    }
+
+    #endregion
 
     #region UI Transform
 

@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Reflection;
 using System;
-using System.Globalization;
+using System.Collections.Generic;
+using static UnityEngine.GraphicsBuffer;
 
 public class ColorUI : ControllableUI
 {
@@ -16,7 +16,7 @@ public class ColorUI : ControllableUI
         target.controllableValueChanged += HandleTargetChange;
 
         this.GetComponentInChildren<Text>().text = ParseNameString(property.Name);
-        this.GetComponentInChildren<Image>().color = (Color)property.GetValue(target);
+        this.GetComponentInChildren<Image>().color = GetCurrentColorValue();
     }
 
     public override void HandleTargetChange(string name)
@@ -24,6 +24,19 @@ public class ColorUI : ControllableUI
         if (name != Property.Name && !String.IsNullOrEmpty(name))
             return;
 
-        this.GetComponentInChildren<Image>().color = (Color)Property.GetValue(LinkedControllable);
+        this.GetComponentInChildren<Image>().color = GetCurrentColorValue();
+    }
+
+    public void OnColorPickerUpdated(Color newColor)
+    {
+        var list = new List<object>();
+        list.Add(newColor);
+        LinkedControllable.setFieldProp(Property, list);
+        HandleTargetChange("");
+    }
+
+    public Color GetCurrentColorValue()
+    {
+        return (Color)Property.GetValue(LinkedControllable);
     }
 }
