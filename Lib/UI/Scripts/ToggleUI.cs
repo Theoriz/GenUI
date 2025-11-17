@@ -7,6 +7,8 @@ using System.Globalization;
 
 public class ToggleUI : ControllableUI
 {
+    public Toggle toggle;
+
     // Use this for initialization
     public void CreateUI(Controllable target, FieldInfo property, bool isInteractible)
     {
@@ -17,9 +19,10 @@ public class ToggleUI : ControllableUI
         HandleTargetChange(property.Name); //To set color
 
         this.GetComponentInChildren<Text>().text = ParseNameString(property.Name);
-        this.GetComponent<Toggle>().isOn = (bool)property.GetValue(target);
-        this.GetComponent<Toggle>().interactable = isInteractible;
-        this.GetComponent<Toggle>().onValueChanged.AddListener((value) =>
+        
+        toggle.isOn = (bool)property.GetValue(target);
+        toggle.interactable = isInteractible;
+        toggle.onValueChanged.AddListener((value) =>
         {
             var list = new List<object>();
             list.Add(value);
@@ -33,18 +36,18 @@ public class ToggleUI : ControllableUI
             return;
 
         var newValue = (bool)Property.GetValue(LinkedControllable);
-        this.GetComponent<Toggle>().isOn = newValue;
+        toggle.isOn = newValue;
         if (newValue)
         { //GREEN
-            var blockColors = this.GetComponent<Toggle>().colors;
+            var blockColors = toggle.colors;
             blockColors.disabledColor = new Color(0.43f, 0.9f, 0.47f, 0.75f);
-            this.GetComponent<Toggle>().colors = blockColors;
+            toggle.colors = blockColors;
         }
         else //RED
         {
-            var blockColors = this.GetComponent<Toggle>().colors;
+            var blockColors = toggle.colors;
             blockColors.disabledColor = new Color(0.9f, 0.4f, 0.4f, 0.8f);
-            this.GetComponent<Toggle>().colors = blockColors;
+            toggle.colors = blockColors;
         }
     }
 }
