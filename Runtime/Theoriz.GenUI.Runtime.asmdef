@@ -1,5 +1,5 @@
 {
-    "name": "Theoriz.GenUI",
+    "name": "Theoriz.GenUI.Runtime",
     "rootNamespace": "",
     "references": [
         "GUID:449ae4094c79a1a47ab30accd190c85f",
