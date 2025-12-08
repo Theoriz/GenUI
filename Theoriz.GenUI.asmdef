@@ -1,0 +1,17 @@
+{
+    "name": "Theoriz.GenUI",
+    "rootNamespace": "",
+    "references": [
+        "GUID:449ae4094c79a1a47ab30accd190c85f",
+        "GUID:75469ad4d38634e559750d17036d5f7c"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
