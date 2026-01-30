@@ -605,7 +605,7 @@ public class UIMaster : MonoBehaviour
 
     void UpdateUIPosition()
     {
-        if (displayUI && (Keyboard.current.leftCtrlKey.isPressed || Keyboard.current.rightCtrlKey.isPressed))
+        if (Keyboard.current.ctrlKey.isPressed)
         {
             //Avoid scaling the UI if currently writing in an input field
             if (EventSystem.current.currentSelectedGameObject)
