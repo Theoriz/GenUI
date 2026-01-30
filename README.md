@@ -10,7 +10,7 @@ Example Unity project can be found at : https://github.com/theoriz/genui-demo
 ## Default Shortcuts
 
 - F1 : Toggle the UI.
-- PageUp / PageDown: Scale up/down the UI, only when the UI is visible.
+- PageUp / PageDown or Ctrl + Plus/Minus: Scale up/down the UI, only when the UI is visible.
 - Ctrl + Left/Right/Up/Down arrow : Move the UI, only when the UI is visible.
 - F2 : Reset the UI, only when the UI is visible.
 

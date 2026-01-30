@@ -138,7 +138,8 @@ public class UIMaster : MonoBehaviour
             ToggleUI();
         }
 
-        UpdateUITransform();
+        if(displayUI)
+            UpdateUITransform();
 
         //if(_destroyRightClickMenuOnNextFrame)
         //{
@@ -560,11 +561,8 @@ public class UIMaster : MonoBehaviour
 
     void UpdateUITransform()
     {
-        if (displayUI)
-        {
-            if(Keyboard.current.f2Key.wasPressedThisFrame)
+        if(Keyboard.current.f2Key.wasPressedThisFrame)
                 ResetUITransform();
-        }
 
         UpdateUIScale();
 
@@ -574,36 +572,34 @@ public class UIMaster : MonoBehaviour
 
     void UpdateUIScale()
     {
-        //UI Scaling
-        if (displayUI)
+        if (Keyboard.current.pageUpKey.isPressed || 
+            (Keyboard.current.ctrlKey.isPressed && (Keyboard.current.equalsKey.isPressed || Keyboard.current.numpadPlusKey.isPressed)))
         {
-            if (Keyboard.current.pageUpKey.isPressed)
+            //Avoid scaling the UI if currently writing in an input field
+            if (EventSystem.current.currentSelectedGameObject)
             {
-                //Avoid scaling the UI if currently writing in an input field
-                if (EventSystem.current.currentSelectedGameObject)
+                if (EventSystem.current.currentSelectedGameObject.GetComponent<InputField>())
                 {
-                    if (EventSystem.current.currentSelectedGameObject.GetComponent<InputField>())
-                    {
-                        return;
-                    }
+                    return;
                 }
-
-                UIScale += _UIScaleSpeed * Time.deltaTime;
             }
 
-            if (Keyboard.current.pageDownKey.isPressed)
-            {
-                //Avoid scaling the UI if currently writing in an input field
-                if (EventSystem.current.currentSelectedGameObject)
-                {
-                    if (EventSystem.current.currentSelectedGameObject.GetComponent<InputField>())
-                    {
-                        return;
-                    }
-                }
+            UIScale += _UIScaleSpeed * Time.deltaTime;
+        }
 
-                UIScale -= _UIScaleSpeed * Time.deltaTime;
+        if (Keyboard.current.pageDownKey.isPressed || 
+            (Keyboard.current.ctrlKey.isPressed && (Keyboard.current.digit6Key.isPressed || Keyboard.current.numpadMinusKey.isPressed)))
+        {
+            //Avoid scaling the UI if currently writing in an input field
+            if (EventSystem.current.currentSelectedGameObject)
+            {
+                if (EventSystem.current.currentSelectedGameObject.GetComponent<InputField>())
+                {
+                    return;
+                }
             }
+
+            UIScale -= _UIScaleSpeed * Time.deltaTime;
         }
     }
 
