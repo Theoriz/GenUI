@@ -296,7 +296,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   IsConnected: 0
   IncrementalConnect: 1
-  useDocumentsDirectory: 0
+  useDocumentsDirectory: 1
   ShowDebug: 0
   OSCReceiverName: OCF
   RootOSCAddress: OCF
