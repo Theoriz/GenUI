@@ -21,7 +21,7 @@ Example Unity project can be found at : https://github.com/theoriz/genui-demo
 
 ### Automatic Controllable Generation (Easy - Recommended)
 
-1. In your MonoBehaviour script, add the [OSCExposed] attribute to the fields, properties and methods of you want to expose to the UI and OSC.
+1. In your MonoBehaviour script, add the [OSCExposed] attribute to the fields, properties and methods you want to expose to the UI and OSC.
 
 > [!TIP]
 > You can set some fields or properties as read only by using [OSCExposed(readOnly = true)].
