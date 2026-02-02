@@ -209,7 +209,7 @@ public class UIMaster : MonoBehaviour
             OSCProperty attribute = Attribute.GetCustomAttribute(property.Value, typeof(OSCProperty)) as OSCProperty;
 
             //Check if needs to be in UI
-            if (!attribute.ShowInUI) continue;
+            if (!attribute.showInUI) continue;
 
             if (showDebug)
                 Debug.Log("[UI] Adding control for (" + newControllable.GetType() + ") : " + property.Value.Name + " of type : " + propertyType.ToString());
@@ -224,9 +224,9 @@ public class UIMaster : MonoBehaviour
             }
 
 			//Create list
-			if (!string.IsNullOrEmpty(attribute.TargetList) && !propertyDrawn)
+			if (!string.IsNullOrEmpty(attribute.targetList) && !propertyDrawn)
             {
-                var associatedListFieldInfo = newControllable.getFieldInfoByName(attribute.TargetList);
+                var associatedListFieldInfo = newControllable.getFieldInfoByName(attribute.targetList);
                 CreateDropDown(newPanel.transform, newControllable, associatedListFieldInfo, property.Value);
 
 				propertyDrawn = true;
@@ -235,7 +235,7 @@ public class UIMaster : MonoBehaviour
 
             if(!string.IsNullOrEmpty(attribute.enumName) && !propertyDrawn)
             {
-                var associatedListFieldInfo = newControllable.getFieldInfoByName(attribute.TargetList);
+                var associatedListFieldInfo = newControllable.getFieldInfoByName(attribute.targetList);
                 CreateDropDown(newPanel.transform, newControllable, associatedListFieldInfo, property.Value, attribute.enumName);
 
                 propertyDrawn = true;
@@ -249,23 +249,23 @@ public class UIMaster : MonoBehaviour
                 bool isFloat = propertyType.ToString() != "System.Int32";
 
                 if (rangeAttribut.Length == 0)
-                    CreateInput(newPanel.transform, newControllable, property.Value, attribute.isInteractible);
+                    CreateInput(newPanel.transform, newControllable, property.Value, !attribute.readOnly);
                 else
-                    CreateSlider(newPanel.transform, newControllable, property.Value, rangeAttribut[0], attribute.isInteractible, isFloat);
+                    CreateSlider(newPanel.transform, newControllable, property.Value, rangeAttribut[0], !attribute.readOnly, isFloat);
 
 				propertyDrawn = true;
 				//continue;
 			}
             if (propertyType.ToString() == "System.Boolean" && !propertyDrawn)
             {
-                CreateCheckbox(newPanel.transform, newControllable, property.Value, attribute.isInteractible);
+                CreateCheckbox(newPanel.transform, newControllable, property.Value, !attribute.readOnly);
 
 				propertyDrawn = true;
 				//continue;
 			}
             if ((propertyType.ToString() == "System.Int32" || propertyType.ToString() == "System.Float" || propertyType.ToString() == "System.String") && !propertyDrawn)
             {
-                CreateInput(newPanel.transform, newControllable, property.Value, attribute.isInteractible);
+                CreateInput(newPanel.transform, newControllable, property.Value, !attribute.readOnly);
 
 				propertyDrawn = true;
 				//continue;
@@ -273,7 +273,7 @@ public class UIMaster : MonoBehaviour
 
             if (propertyType.ToString() == "UnityEngine.Color" && !propertyDrawn)
             {
-                CreateColor(newPanel.transform, newControllable, property.Value, attribute.isInteractible);
+                CreateColor(newPanel.transform, newControllable, property.Value, !attribute.readOnly);
 
 				propertyDrawn = true;
 				//continue;
@@ -281,28 +281,28 @@ public class UIMaster : MonoBehaviour
 
             if(propertyType.ToString() == "UnityEngine.Vector3" && !propertyDrawn)
             {
-                CreateVector3(newPanel.transform, newControllable, property.Value, attribute.isInteractible);
+                CreateVector3(newPanel.transform, newControllable, property.Value, !attribute.readOnly);
 
 				propertyDrawn = true;
 				//continue;
 			}
 
             if (propertyType.ToString() == "UnityEngine.Vector3Int" && !propertyDrawn) {
-                CreateVector3Int(newPanel.transform, newControllable, property.Value, attribute.isInteractible);
+                CreateVector3Int(newPanel.transform, newControllable, property.Value, !attribute.readOnly);
 
                 propertyDrawn = true;
                 //continue;
             }
 
             if (propertyType.ToString() == "UnityEngine.Vector2" && !propertyDrawn) {
-                CreateVector2(newPanel.transform, newControllable, property.Value, attribute.isInteractible);
+                CreateVector2(newPanel.transform, newControllable, property.Value, !attribute.readOnly);
 
                 propertyDrawn = true;
                 //continue;
             }
 
             if (propertyType.ToString() == "UnityEngine.Vector2Int" && !propertyDrawn) {
-                CreateVector2Int(newPanel.transform, newControllable, property.Value, attribute.isInteractible);
+                CreateVector2Int(newPanel.transform, newControllable, property.Value, !attribute.readOnly);
 
                 propertyDrawn = true;
                 //continue;
