@@ -22,6 +22,10 @@ Example Unity project can be found at : https://github.com/theoriz/genui-demo
 ### Automatic Controllable Generation (Easy - Recommended)
 
 1. In your MonoBehaviour script, add the [OSCExposed] attribute to the fields, properties and methods of you want to expose to the UI and OSC.
+
+> [!TIP]
+> You can set some fields or properties as read only by using [OSCExposed(readOnly = true)].
+
 2. On the script component of your script in your scene, click on the three dots on the top right and choose Add Controllable. It will prompt you to generate a Controllable script, click Generate.
 
 > [!TIP]
@@ -55,7 +59,7 @@ public class MyScriptControllable : Controllable {
 	[OSCProperty][Range(0,1)]
 	public float floatParameterWithRange;
 	
-	[OSCProperty(isInteractible = false)]
+	[OSCProperty(readOnly = true)]
 	public bool readOnlyBoolParameter;
 
 	//Create OSC methods to call methods from myScript
@@ -111,7 +115,7 @@ It is also possible to load a specific file via the OSC method "LoadPresetWithNa
   
 
 ## Expose a List
-To expose a string list you have to create a index string variable which will be used by the dropdown mennu as an index. It will allows you to know which element of the list is selected. Simply specify [OSCProperty(TargetList=yourListName)].
+To expose a string list you have to create a index string variable which will be used by the dropdown mennu as an index. It will allows you to know which element of the list is selected. Simply specify [OSCProperty(targetList=yourListName)].
 
 # Dev
 OCF : http://github.com/theoriz/OCF
