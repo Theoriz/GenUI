@@ -23,6 +23,10 @@ public class UIMaster : MonoBehaviour
     public bool HideUIAtStart;
     public bool enableUIMovement = true;
 
+    [Header("Shortcuts")]
+    public Key toggleUIKey = Key.F1;
+    public Key resetUIKey = Key.F2;
+
     public float UIScale
     {
         get => _UIScale;
@@ -127,7 +131,7 @@ public class UIMaster : MonoBehaviour
 
     void Update()
     {
-        if (Keyboard.current.f1Key.wasPressedThisFrame)
+        if (Keyboard.current[toggleUIKey].wasPressedThisFrame)
         {
 			//Avoid toggling the UI if currently writing in an input field
 			if (EventSystem.current.currentSelectedGameObject) {
@@ -561,7 +565,7 @@ public class UIMaster : MonoBehaviour
 
     void UpdateUITransform()
     {
-        if(Keyboard.current.f2Key.wasPressedThisFrame)
+        if (Keyboard.current[resetUIKey].wasPressedThisFrame)
                 ResetUITransform();
 
         UpdateUIScale();
