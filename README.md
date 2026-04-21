@@ -1,11 +1,27 @@
 # GenUI
-Automatic OSC Control for Unity.
+Generative UI and OSC Control for Unity.
 
 This plugins allows you to simply create a UI for your application, exposing script sliders, inputfield and method. This UI is also fully controllable via OSC.
 
 ![Demo](https://github.com/Theoriz/GenUI-Demo/blob/master/gif/genui.gif) 
 
-Example Unity project can be found at : https://github.com/theoriz/genui-demo
+## Installation
+
+Add the following line to your project's `Packages/manifest.json`:
+
+```json
+{
+  "dependencies": {
+    "com.theoriz.genui": "https://github.com/Theoriz/GenUI.git"
+  }
+}
+```
+
+Or in the Unity Editor, go to **Window > Package Manager > + > Add package from git URL** and enter:
+
+```
+https://github.com/Theoriz/GenUI.git
+```
 
 ## Default Shortcuts
 
