@@ -7,9 +7,5 @@
   "author": {
     "name": "Theoriz",
     "url": "https://theoriz.com"
-  },
-  "license": "MIT",
-  "dependencies": {
-    "com.theoriz.ocf": "https://github.com/Theoriz/OCF.git"
   }
 }
