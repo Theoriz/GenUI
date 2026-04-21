@@ -2,8 +2,8 @@
     "name": "Theoriz.GenUI.Runtime",
     "rootNamespace": "",
     "references": [
-        "GUID:449ae4094c79a1a47ab30accd190c85f",
-        "GUID:75469ad4d38634e559750d17036d5f7c"
+        "Theoriz.OCF.Runtime",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
