@@ -41,7 +41,7 @@ https://github.com/Theoriz/GenUI.git
 - F2 : Reset the UI, only when the UI is visible.
 
 ## Setup
-1. Add the "GenUI" prefab to your scene.
+1. In the toolbar go to Theoriz -> GenUI -> Add GenUI to Scene. Or add the GenUI prefab from the Samples folder manually. 
 2. Generate controllables for the scripts you want to control. You can use the manual or automatic workflow below.
 3. Run the scene, press F1 to toggle the UI.
 
