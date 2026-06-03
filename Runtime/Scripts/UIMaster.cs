@@ -94,6 +94,17 @@ public class UIMaster : MonoBehaviour
             ToggleUI();
     }
 
+    void OnDestroy()
+    {
+        // Static event: must unsubscribe or destroyed instances keep receiving
+        // callbacks when Domain Reload is disabled
+        ControllableMaster.controllableAdded -= CreateUI;
+        ControllableMaster.controllableRemoved -= RemoveUI;
+
+        if (Instance == this)
+            Instance = null;
+    }
+
     public void ToggleUI()
     {
         displayUI = !displayUI;
