@@ -7,8 +7,8 @@ using System.Text.RegularExpressions;
 public class ControllableUI : MonoBehaviour {
 
     public Controllable LinkedControllable;
-    public FieldInfo Property;
-    public MethodInfo Method;
+    [System.NonSerialized] public FieldInfo Property;
+    [System.NonSerialized] public MethodInfo Method;
 
     public bool IsInteractible;
 

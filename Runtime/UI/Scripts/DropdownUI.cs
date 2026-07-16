@@ -8,8 +8,8 @@ using System;
 
 public class DropdownUI : ControllableUI
 {
-    public FieldInfo ListProperty;
-    public Type enumType = null;
+    [System.NonSerialized] public FieldInfo ListProperty;
+    [System.NonSerialized] public Type enumType = null;
 
     // Use this for initialization
     public void CreateUI(Controllable target, FieldInfo listProperty, FieldInfo activeElement) {

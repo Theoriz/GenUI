@@ -156,33 +156,6 @@ public class UIMaster : MonoBehaviour
         if(displayUI)
             UpdateUITransform();
 
-        //if(_destroyRightClickMenuOnNextFrame)
-        //{
-        //    _destroyRightClickMenuOnNextFrame = false;
-        //    _rightClickMenuInstantiated = false;
-        //    Destroy(_rightClickMenu);
-        //}
-
-        //if (_destroyColorPickerOnNextFrame)
-        //{
-        //    _destroyColorPickerOnNextFrame = false;
-        //    _colorPickerInstantiated = false;
-        //    Destroy(_colorPicker);
-        //}
-
-        //if ((Mouse.current.leftButton.wasReleasedThisFrame || Mouse.current.rightButton.wasReleasedThisFrame) && !_skipNextButton)
-        //{
-        //    if(_rightClickMenuInstantiated)
-        //        _destroyRightClickMenuOnNextFrame = true;
-
-        //    if (_colorPickerInstantiated)
-        //        _destroyColorPickerOnNextFrame = true;
-        //}
-
-        //if(_skipNextButton)
-        //{
-        //    _skipNextButton = false;
-        //}
     }
 
     public void RemoveUI(Controllable dyingControllable)

@@ -3,7 +3,6 @@ using UnityEngine.UI;
 using System.Reflection;
 using System;
 using System.Collections.Generic;
-using static UnityEngine.GraphicsBuffer;
 
 public class ColorUI : ControllableUI
 {
