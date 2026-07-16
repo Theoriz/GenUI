@@ -8,15 +8,28 @@ public class ColorPicker : MonoBehaviour
 
     [HideInInspector] public ColorUI linkedUI;
 
+    private Color _lastPushedColor;
+
     private void OnEnable()
     {
         if (linkedUI)
-            colorPicker.SetColor(linkedUI.GetCurrentColorValue());
+        {
+            var c = linkedUI.GetCurrentColorValue();
+            colorPicker.SetColor(c);
+            _lastPushedColor = c;
+        }
     }
 
     private void Update()
     {
-        if (linkedUI)
-            linkedUI.OnColorPickerUpdated(colorPicker.GetColor());
+        if (!linkedUI)
+            return;
+
+        var c = colorPicker.GetColor();
+        if (c != _lastPushedColor)
+        {
+            _lastPushedColor = c;
+            linkedUI.OnColorPickerUpdated(c);
+        }
     }
 }

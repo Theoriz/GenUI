@@ -142,7 +142,7 @@ public class UIMaster : MonoBehaviour
 
     void Update()
     {
-        if (Keyboard.current[toggleUIKey].wasPressedThisFrame)
+        if (Keyboard.current != null && Keyboard.current[toggleUIKey].wasPressedThisFrame)
         {
 			//Avoid toggling the UI if currently writing in an input field
 			if (EventSystem.current.currentSelectedGameObject) {
@@ -562,6 +562,9 @@ public class UIMaster : MonoBehaviour
 
     void UpdateUITransform()
     {
+        if (Keyboard.current == null)
+            return;
+
         if (Keyboard.current[resetUIKey].wasPressedThisFrame)
                 ResetUITransform();
 
@@ -577,7 +580,7 @@ public class UIMaster : MonoBehaviour
             (Keyboard.current.ctrlKey.isPressed && (Keyboard.current.equalsKey.isPressed || Keyboard.current.numpadPlusKey.isPressed)))
         {
             //Avoid scaling the UI if currently writing in an input field
-            if (EventSystem.current.currentSelectedGameObject)
+            if (EventSystem.current != null && EventSystem.current.currentSelectedGameObject)
             {
                 if (EventSystem.current.currentSelectedGameObject.GetComponent<InputField>())
                 {
@@ -592,7 +595,7 @@ public class UIMaster : MonoBehaviour
             (Keyboard.current.ctrlKey.isPressed && (Keyboard.current.digit6Key.isPressed || Keyboard.current.numpadMinusKey.isPressed)))
         {
             //Avoid scaling the UI if currently writing in an input field
-            if (EventSystem.current.currentSelectedGameObject)
+            if (EventSystem.current != null && EventSystem.current.currentSelectedGameObject)
             {
                 if (EventSystem.current.currentSelectedGameObject.GetComponent<InputField>())
                 {
@@ -609,7 +612,7 @@ public class UIMaster : MonoBehaviour
         if (Keyboard.current.ctrlKey.isPressed)
         {
             //Avoid scaling the UI if currently writing in an input field
-            if (EventSystem.current.currentSelectedGameObject)
+            if (EventSystem.current != null && EventSystem.current.currentSelectedGameObject)
             {
                 if (EventSystem.current.currentSelectedGameObject.GetComponent<InputField>())
                 {
