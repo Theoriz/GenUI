@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,6 +9,10 @@ using System.Globalization;
 public class SliderUI : ControllableUI
 {
     public bool IsFloat;
+
+    // True while the UI is being refreshed from the target value; the slider/input callbacks
+    // ignore writes made during that window instead of pushing them back to the Controllable.
+    private bool _updating;
 
     // Use this for initialization
     public void CreateUI(Controllable target, FieldInfo property, RangeAttribute rangeAttribut, bool isInteractible, bool isFloat = true) {
@@ -30,29 +34,24 @@ public class SliderUI : ControllableUI
 
         inputComponent.onEndEdit.AddListener((value) =>
         {
+            if (_updating)
+                return;
+
             var list = new List<object>();
             if (!IsFloat)
-            {
-                var result = int.Parse(value.ToString(), CultureInfo.InvariantCulture);
-                //result = (int)Mathf.Clamp(result, rangeAttribut.min, rangeAttribut.max);
-                HandleTargetChange("");
-                list.Add(result);
-            }
+                list.Add(Mathf.Clamp(TypeConverter.getInt(value), (int)rangeAttribut.min, (int)rangeAttribut.max));
             else
-            {
-                var result = float.Parse(value.ToString(), CultureInfo.InvariantCulture);
-                //result = Mathf.Clamp(result, rangeAttribut.min, rangeAttribut.max);
-                HandleTargetChange("");
-                list.Add(result);
-            }
+                list.Add(Mathf.Clamp(TypeConverter.getFloat(value), rangeAttribut.min, rangeAttribut.max));
 
             target.setFieldProp(property, list);
+
+            // The stored value may be clamped or unchanged, in which case no change event is
+            // raised, so refresh the display explicitly to keep it in step with the target.
+            HandleTargetChange("");
         });
 
         textComponent.text = ParseNameString(property.Name);
-        var tmp = "" + property.GetValue(target);
-        tmp = tmp.Replace(",", ".");
-        inputComponent.text = "" + tmp;
+        inputComponent.text = FormatValue(property.GetValue(target));
         inputComponent.transform.Find("Text").gameObject.GetComponent<Text>().color = Color.white;
 
         sliderComponent.maxValue = rangeAttribut.max;
@@ -62,17 +61,20 @@ public class SliderUI : ControllableUI
 
         sliderComponent.onValueChanged.AddListener((value) =>
         {
+            if (_updating)
+                return;
+
             var list = new List<object>();
             list.Add(value);
             LinkedControllable.setFieldProp(property, list);
-            inputComponent.text = property.GetValue(target).ToString();
+            inputComponent.text = FormatValue(property.GetValue(target));
         });
 
 
         if (isFloat)
-            sliderComponent.value = float.Parse(property.GetValue(target).ToString());
+            sliderComponent.value = TypeConverter.getFloat(property.GetValue(target));
         else
-            sliderComponent.value = (int)property.GetValue(target);
+            sliderComponent.value = TypeConverter.getInt(property.GetValue(target));
     }
 
     public override void HandleTargetChange(string name)
@@ -80,18 +82,26 @@ public class SliderUI : ControllableUI
         if (name != Property.Name && !String.IsNullOrEmpty(name))
             return;
 
-        if (IsFloat)
+        if (_updating)
+            return;
+
+        _updating = true;
+        try
         {
+            var value = Property.GetValue(LinkedControllable);
+
             this.GetComponentInChildren<Slider>().value =
-                (float)Property.GetValue(LinkedControllable);
-            var str = "" + Property.GetValue(LinkedControllable);
-            str = str.Replace(",", ".");
-            this.GetComponentInChildren<InputField>().text = "" + str;
+                IsFloat ? TypeConverter.getFloat(value) : TypeConverter.getInt(value);
+            this.GetComponentInChildren<InputField>().text = FormatValue(value);
         }
-        else
+        finally
         {
-            this.GetComponentInChildren<Slider>().value = (int)Property.GetValue(LinkedControllable);
-            this.GetComponentInChildren<InputField>().text = this.GetComponentInChildren<Slider>().value.ToString();
+            _updating = false;
         }
+    }
+
+    static string FormatValue(object value)
+    {
+        return Convert.ToString(value, CultureInfo.InvariantCulture);
     }
 }
