@@ -192,6 +192,9 @@ public class UIMaster : MonoBehaviour
         if (showDebug)
             Debug.Log("Removing UI for " + dyingControllable.id);
 
+        if (!_panels.ContainsKey(dyingControllable.id))
+            return;
+
         if (_panels[dyingControllable.id] != null)
             _panels[dyingControllable.id].GetComponentInChildren<PanelUI>().RemoveUI();
 
@@ -205,6 +208,13 @@ public class UIMaster : MonoBehaviour
             Debug.Log("Adding " + newControllable.id + ", use panel : " + newControllable.usePanel);
 
         if (!newControllable.usePanel) return;
+
+        if (_panels.ContainsKey(newControllable.id))
+        {
+            if (showDebug)
+                Debug.LogWarning("[GenUI] A panel for '" + newControllable.id + "' already exists; skipping.");
+            return;
+        }
 
         //First we create a panel for the controllable
         var newControllableHolder = Instantiate(PanelPrefab);
@@ -257,7 +267,7 @@ public class UIMaster : MonoBehaviour
                 //continue;
             }
             //property.Value.Attributes O
-            if (propertyType.ToString() == "System.Single" || propertyType.ToString() == "System.Int32" && !propertyDrawn)
+            if ((propertyType.ToString() == "System.Single" || propertyType.ToString() == "System.Int32") && !propertyDrawn)
             {
                 var rangeAttribut = (RangeAttribute[]) property.Value.GetCustomAttributes(typeof(RangeAttribute), false);
 
@@ -278,7 +288,7 @@ public class UIMaster : MonoBehaviour
 				propertyDrawn = true;
 				//continue;
 			}
-            if ((propertyType.ToString() == "System.Int32" || propertyType.ToString() == "System.Float" || propertyType.ToString() == "System.String") && !propertyDrawn)
+            if (propertyType.ToString() == "System.String" && !propertyDrawn)
             {
                 CreateInput(newPanel.transform, newControllable, property.Value, !attribute.readOnly);
 
@@ -322,6 +332,9 @@ public class UIMaster : MonoBehaviour
                 propertyDrawn = true;
                 //continue;
             }
+
+            if (!propertyDrawn)
+                Debug.LogWarning("[GenUI] No widget created for '" + property.Value.Name + "' on " + newControllable.id + " : unsupported type " + propertyType + ".");
 
             //Add tooltip if it exists
             var tooltipAttribut = (TooltipAttribute[])property.Value.GetCustomAttributes(typeof(TooltipAttribute), false);

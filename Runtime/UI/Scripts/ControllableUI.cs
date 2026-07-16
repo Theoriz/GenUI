@@ -30,16 +30,19 @@ public class ControllableUI : MonoBehaviour {
         GUIUtility.systemCopyBuffer = "/" + ControllableMaster.instance.RootOSCAddress + "/" + LinkedControllable.id + "/" + (Property == null ? Method.Name : Property.Name) ;
     }
 
-    public string ParseNameString(string name) {
-
-        var r = new Regex(@"
+    static readonly Regex _nameRegex = new Regex(@"
                 (?<=[A-Z])(?=[A-Z][a-z]) |
                  (?<=[^A-Z])(?=[A-Z]) |
-                 (?<=[A-Za-z])(?=[^A-Za-z])", RegexOptions.IgnorePatternWhitespace);
+                 (?<=[A-Za-z])(?=[^A-Za-z])", RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+
+    public string ParseNameString(string name) {
+
+        if (string.IsNullOrEmpty(name))
+            return name;
 
         string output = char.ToUpper(name[0]) + name.Substring(1);
 
-        return r.Replace(output, " ");
+        return _nameRegex.Replace(output, " ");
 
     }
 }

@@ -35,8 +35,8 @@ public class Vector2UI : ControllableUI
         XInput.onEndEdit.AddListener((value) =>
         {
             var list = new List<object>();
-            list.Add(float.Parse(value.ToString(), CultureInfo.InvariantCulture));
-            list.Add(float.Parse(YInput.text.ToString(), CultureInfo.InvariantCulture));
+            list.Add(TypeConverter.getFloat(value.ToString()));
+            list.Add(TypeConverter.getFloat(YInput.text.ToString()));
 
             target.setFieldProp(property, list);
         });
@@ -44,8 +44,8 @@ public class Vector2UI : ControllableUI
         YInput.onEndEdit.AddListener((value) =>
         {
             var list = new List<object>();
-            list.Add(float.Parse(XInput.text.ToString(), CultureInfo.InvariantCulture));
-            list.Add(float.Parse(value.ToString(), CultureInfo.InvariantCulture));
+            list.Add(TypeConverter.getFloat(XInput.text.ToString()));
+            list.Add(TypeConverter.getFloat(value.ToString()));
 
             target.setFieldProp(property, list);
         });

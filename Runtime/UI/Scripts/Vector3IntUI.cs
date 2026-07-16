@@ -33,9 +33,9 @@ public class Vector3IntUI : ControllableUI
         XInput.onEndEdit.AddListener((value) =>
         {
             var list = new List<object>();
-            list.Add(int.Parse(value.ToString(), CultureInfo.InvariantCulture));
-            list.Add(int.Parse(YInput.text.ToString(), CultureInfo.InvariantCulture));
-            list.Add(int.Parse(ZInput.text.ToString(), CultureInfo.InvariantCulture));
+            list.Add(TypeConverter.getInt(value.ToString()));
+            list.Add(TypeConverter.getInt(YInput.text.ToString()));
+            list.Add(TypeConverter.getInt(ZInput.text.ToString()));
 
             target.setFieldProp(property, list);
         });
@@ -43,9 +43,9 @@ public class Vector3IntUI : ControllableUI
         YInput.onEndEdit.AddListener((value) =>
         {
             var list = new List<object>();
-            list.Add(int.Parse(XInput.text.ToString(), CultureInfo.InvariantCulture));
-            list.Add(int.Parse(value.ToString(), CultureInfo.InvariantCulture));
-            list.Add(int.Parse(ZInput.text.ToString(), CultureInfo.InvariantCulture));
+            list.Add(TypeConverter.getInt(XInput.text.ToString()));
+            list.Add(TypeConverter.getInt(value.ToString()));
+            list.Add(TypeConverter.getInt(ZInput.text.ToString()));
 
             target.setFieldProp(property, list);
         });
@@ -53,9 +53,9 @@ public class Vector3IntUI : ControllableUI
         ZInput.onEndEdit.AddListener((value) =>
         {
             var list = new List<object>();
-            list.Add(int.Parse(XInput.text.ToString(), CultureInfo.InvariantCulture));
-            list.Add(int.Parse(YInput.text.ToString(), CultureInfo.InvariantCulture));
-            list.Add(int.Parse(value.ToString(), CultureInfo.InvariantCulture));
+            list.Add(TypeConverter.getInt(XInput.text.ToString()));
+            list.Add(TypeConverter.getInt(YInput.text.ToString()));
+            list.Add(TypeConverter.getInt(value.ToString()));
 
             target.setFieldProp(property, list);
         });

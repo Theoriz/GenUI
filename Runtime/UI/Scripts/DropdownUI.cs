@@ -26,8 +26,8 @@ public class DropdownUI : ControllableUI
         text.text = ParseNameString(activeElement.Name);
 
         var dropdown = this.GetComponentInChildren<Dropdown>();
-        dropdown.value = 0;
         dropdown.AddOptions(listInObject);
+        dropdown.value = Mathf.Max(0, activeElementIndex);
         dropdown.onValueChanged.AddListener((value) =>
         {
             var associatedList = (List<string>)ListProperty.GetValue(LinkedControllable);
@@ -53,8 +53,9 @@ public class DropdownUI : ControllableUI
         text.text = ParseNameString(activeElement.Name);
 
         var dropdown = this.GetComponentInChildren<Dropdown>();
-        dropdown.value = 0;
-        dropdown.AddOptions(Enum.GetNames(enumType).ToList());
+        var enumNames = Enum.GetNames(enumType).ToList();
+        dropdown.AddOptions(enumNames);
+        dropdown.value = Mathf.Max(0, TypeConverter.getIndexInEnum(enumNames, Property.GetValue(LinkedControllable)?.ToString() ?? ""));
         dropdown.onValueChanged.AddListener((value) =>
         {
             List<object> objParams = new List<object> { Enum.GetNames(enumType)[value] };
@@ -72,14 +73,14 @@ public class DropdownUI : ControllableUI
             var dropdown = this.GetComponentInChildren<Dropdown>();
             dropdown.ClearOptions();
             dropdown.AddOptions(Enum.GetNames(enumType).ToList());
-            dropdown.value = TypeConverter.getIndexInEnum(Enum.GetNames(enumType).ToList(), Property.GetValue(LinkedControllable).ToString());
+            dropdown.value = Mathf.Max(0, TypeConverter.getIndexInEnum(Enum.GetNames(enumType).ToList(), Property.GetValue(LinkedControllable).ToString()));
         }
         else
         {
             var dropdown = this.GetComponentInChildren<Dropdown>();
             dropdown.ClearOptions();
             dropdown.AddOptions((List<string>)ListProperty.GetValue(LinkedControllable));
-            dropdown.value = TypeConverter.getIndexInEnum((List<string>)ListProperty.GetValue(LinkedControllable), Property.GetValue(LinkedControllable).ToString());
+            dropdown.value = Mathf.Max(0, TypeConverter.getIndexInEnum((List<string>)ListProperty.GetValue(LinkedControllable), Property.GetValue(LinkedControllable).ToString()));
         }
     }
 
