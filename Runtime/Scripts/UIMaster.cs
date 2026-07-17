@@ -591,8 +591,10 @@ public class UIMaster : MonoBehaviour
             UIScale += _UIScaleSpeed * Time.deltaTime;
         }
 
-        if (Keyboard.current.pageDownKey.isPressed || 
-            (Keyboard.current.ctrlKey.isPressed && (Keyboard.current.digit6Key.isPressed || Keyboard.current.numpadMinusKey.isPressed)))
+        //Key enum values are physical positions named after US QWERTY: minusKey prints '-' on QWERTY,
+        //digit6Key prints '-' on AZERTY. Both are bound so Ctrl+- zooms out on either layout.
+        if (Keyboard.current.pageDownKey.isPressed ||
+            (Keyboard.current.ctrlKey.isPressed && (Keyboard.current.minusKey.isPressed || Keyboard.current.digit6Key.isPressed || Keyboard.current.numpadMinusKey.isPressed)))
         {
             //Avoid scaling the UI if currently writing in an input field
             if (EventSystem.current != null && EventSystem.current.currentSelectedGameObject)
