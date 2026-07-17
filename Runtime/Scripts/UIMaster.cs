@@ -330,19 +330,26 @@ public class UIMaster : MonoBehaviour
 
     public void CleanGeneratedUI(string controllableId, Controllable controllable)
     {
-        //Order Save and Load preset buttons
+        //Order Save and Load preset buttons. Buttons are identified by the name of the method they
+        //invoke, not by their label: the label is derived from the method name by ParseNameString,
+        //and a panel's title Text also lives in this subtree.
         var lastPanel = _panels[controllableId].transform.GetChild(1);
-        var allText = lastPanel.GetComponentsInChildren<Text>();
+        var allButtons = lastPanel.GetComponentsInChildren<ButtonUI>();
+        var isGlobalPresetPanel = controllable is ControllableMasterControllable;
         var usePreset = false;
-        foreach (var text in allText)
+        foreach (var button in allButtons)
         {
-            if (text.text == "Save" || text.text == "Save As" || text.text == "Load" || text.text == "Show")
+            if (button.Method == null) continue;
+
+            if (Array.IndexOf(Controllable.PresetMethodNames, button.Method.Name) >= 0)
             {
-                text.transform.parent.SetParent(lastPanel.transform.Find("PresetHolder"));
+                button.transform.SetParent(lastPanel.transform.Find("PresetHolder"));
                 usePreset = true;
             }
 
-            if (text.text == "Save All" || text.text == "Save As All" || text.text == "Load All")
+            //Only this panel owns the global preset buttons; a target script may expose its own SaveAll.
+            if (isGlobalPresetPanel &&
+                Array.IndexOf(ControllableMasterControllable.AllPresetMethodNames, button.Method.Name) >= 0)
             {
                 var globalPresetHolder = lastPanel.transform.Find("AllPresetHolder");
                 if (globalPresetHolder == null)
@@ -352,7 +359,7 @@ public class UIMaster : MonoBehaviour
                     globalPresetHolder.transform.SetParent(lastPanel.transform);
                     globalPresetHolder.transform.SetSiblingIndex(1); //Set first
                 }
-                text.transform.parent.SetParent(globalPresetHolder);
+                button.transform.SetParent(globalPresetHolder);
             }
         }
 
