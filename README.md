@@ -1,7 +1,7 @@
 # GenUI
 Generative UI and OSC Control for Unity.
 
-This plugins allows you to simply create a UI for your application, exposing script sliders, inputfield and method. This UI is also fully controllable via OSC.
+This plugin allows you to simply create a UI for your application, exposing script sliders, input fields and methods. This UI is also fully controllable via OSC.
 
 ![Demo](https://github.com/Theoriz/GenUI-Demo/blob/master/gif/genui.gif) 
 
@@ -36,9 +36,11 @@ https://github.com/Theoriz/GenUI.git
 ## Default Shortcuts
 
 - F1 : Toggle the UI.
-- PageUp / PageDown or Ctrl + Plus/Minus: Scale up/down the UI, only when the UI is visible.
+- PageUp / PageDown, or Ctrl + Plus/Minus (numpad included) : Scale up/down the UI, only when the UI is visible.
 - Ctrl + Left/Right/Up/Down arrow : Move the UI, only when the UI is visible.
 - F2 : Reset the UI, only when the UI is visible.
+
+Scaling is ignored while you are typing in an input field.
 
 ## Setup
 1. In the toolbar go to Theoriz -> GenUI -> Add GenUI to Scene. Or add the GenUI prefab from the Samples folder manually. 
@@ -52,6 +54,9 @@ https://github.com/Theoriz/GenUI.git
 > [!TIP]
 > You can set some fields or properties as read only by using [OSCExposed(readOnly = true)].
 
+> [!WARNING]
+> Do not reuse a name that "Controllable" already declares — `Save`, `id`, `debug` and `name` are the ones most often hit. The generated Controllable inherits from "Controllable", so a member of the same name shadows the real one and breaks it. The generator refuses these and tells you which member to rename. See [Reserved names](https://github.com/Theoriz/OCF#reserved-names) in the OCF documentation.
+
 2. On the script component of your script in your scene, click on the three dots on the top right and choose Add Controllable. It will prompt you to generate a Controllable script, click Generate.
 
 > [!TIP]
@@ -60,6 +65,8 @@ https://github.com/Theoriz/GenUI.git
 3. Once the Controllable is generated and compiled, click on the three dots on the top right and choose Add Controllable again. This time it should add the Controllable component and set it up automatically.
 
 ### Manual Controllable Generation (Advanced - More Options)
+
+Writing the Controllable yourself is the only way to reach the [OSCProperty] options that have no [OSCExposed] equivalent — `targetList`, `enumName`, `includeInPresets` and `showInUI`. (`readOnly` needs no hand-written mirror: use [OSCExposed(readOnly = true)] and the generator forwards it.) They are documented in [OSCProperty options](https://github.com/Theoriz/OCF#oscproperty-options) in the OCF documentation.
 
 1. Create a new script inheriting from "Controllable". It will be the interface for the script you want to control.
 2. For each field or property you want to control with UI/OSC, add a field in the Controllable with the [OSCProperty] attribute and **the exact same name** as the corresponding field or property in the script you want to control.
@@ -115,8 +122,11 @@ You can expose the following types :
 - Vector2Int
 - Vector3
 - Vector3Int
-- Vector4
 - Color
+
+Enums are also supported, and render as a dropdown — see [Exposing an enum](https://github.com/Theoriz/OCF#exposing-an-enum) in the OCF documentation.
+
+Exposing a type that is not in this list logs a warning and draws no widget.
 
 The Header, Range, and Tooltip attributes are also supported in Controllables.
 
@@ -125,23 +135,37 @@ You can also expose methods. Methods without parameters will show as a button in
 ## OSC Control
 To access a property or launch a method, use its address.
 
-For example : "/OCF/id/method" or "/OCF/id/floatProperty/ 1.5" by default the id corresponds to the script type name but this can be changed by setting the public variable ID in your script extending "Controllable".
+For example : "/OCF/id/method" or "/OCF/id/floatProperty 1.5". By default the id corresponds to the script type name, but this can be changed by setting the public variable `id` on your script extending "Controllable".
 
 > [!TIP]
 > You can copy the OSC Control Address of any exposed parameter in the UI directly by right clicking on the parameter value.
 
-You can also get your own OSC messages by connecting to MessageAvailable event in OSCMaster. This event will be triggered for every OSC message which doesn't start by /OCF/.
+To handle your own OSC messages — anything not addressed to /OCF/ — subscribe to the receiver directly :
+
+```C#
+using UnityOSC;
+
+OSCMaster.Receivers["myReceiver"].messageReceived += (OSCMessage m) => Debug.Log(m.Address);
+```
 
 ## Presets
-This plugin comes with a preset system, you can save the state of a "'Controllable" script. It saves each property to a file that can be loaded later so that you can create differents settings for your script. To use it, simply click on "Save preset" then select the wanted preset inside the dropdown menu and press "Load Preset".
-It is also possible to load a specific file via the OSC method "LoadPresetWithName" giving it as argument :
+This plugin comes with a preset system, you can save the state of a "Controllable" script. It saves each property to a file that can be loaded later so that you can create different settings for your script. To use it, simply click on "Save", then select the wanted preset inside the dropdown menu and press "Load".
+
+Each panel has "Save", "Save As", "Load" and "Show" buttons, and the GenUI panel has "Save All", "Save As All" and "Load All" to apply the same action to every controllable at once.
+
+It is also possible to load a specific file via the OSC method "LoadWithName", giving it as arguments :
   - fileName (string) : case sensitive;
   - duration (float) : tween duration in seconds;
-  - tweenType (string) : "EaseInOut", "EaseIn", "EaseOut" or "Linear" if you want to tween the current value to preset's one;
-  
+  - tweenStyle (string) : "EaseInOut", "EaseIn", "EaseOut" or "Linear" if you want to tween the current value to the preset's one;
+
+```
+/OCF/id/LoadWithName "myPreset.pst" 2.0 "EaseInOut"
+```
 
 ## Expose a List
-To expose a string list you have to create a index string variable which will be used by the dropdown mennu as an index. It will allows you to know which element of the list is selected. Simply specify [OSCProperty(targetList=yourListName)].
+To expose a string list you have to create an index string variable which will be used by the dropdown menu as an index. It will allow you to know which element of the list is selected. Simply specify [OSCProperty(targetList = "yourListName")].
+
+See [Exposing a list](https://github.com/Theoriz/OCF#exposing-a-list) in the OCF documentation for a full example.
 
 # Dev
 OCF : http://github.com/theoriz/OCF
