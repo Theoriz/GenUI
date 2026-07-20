@@ -49,6 +49,7 @@ public class UIMaster : MonoBehaviour
     [HideInInspector] public GameObject Vector2IntPrefab;
     [HideInInspector] public GameObject Vector3Prefab;
     [HideInInspector] public GameObject Vector3IntPrefab;
+    [HideInInspector] public GameObject Vector4Prefab;
 
     [Header("Components")]
     public Transform MainPanel;
@@ -285,6 +286,14 @@ public class UIMaster : MonoBehaviour
 				//continue;
 			}
 
+            if (propertyType.ToString() == "UnityEngine.Vector4" && !propertyDrawn)
+            {
+                CreateVector4(newPanel.transform, newControllable, property.Value, !attribute.readOnly);
+
+                propertyDrawn = true;
+                //continue;
+            }
+
             if (propertyType.ToString() == "UnityEngine.Vector3Int" && !propertyDrawn) {
                 CreateVector3Int(newPanel.transform, newControllable, property.Value, !attribute.readOnly);
 
@@ -484,6 +493,14 @@ public class UIMaster : MonoBehaviour
         newVector3.transform.SetParent(parent);
         parent.gameObject.GetComponent<PanelUI>().AddUIElement(newVector3.GetComponent<Vector3UI>());
         newVector3.GetComponent<Vector3UI>().CreateUI(target, property, isInteractible);
+    }
+
+    private void CreateVector4(Transform parent, Controllable target, FieldInfo property, bool isInteractible)
+    {
+        var newVector4 = Instantiate(Vector4Prefab);
+        newVector4.transform.SetParent(parent);
+        parent.gameObject.GetComponent<PanelUI>().AddUIElement(newVector4.GetComponent<Vector4UI>());
+        newVector4.GetComponent<Vector4UI>().CreateUI(target, property, isInteractible);
     }
 
     private void CreateVector3Int(Transform parent, Controllable target, FieldInfo property, bool isInteractible) {

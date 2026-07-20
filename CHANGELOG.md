@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Vector4 support: a four-field widget, added to the supported types.
+
 ### Fixed
 
 - The global preset panel stacked all preset buttons into its top row. `Save All` / `Save As All` / `Load All` now sit on top and the per-controllable buttons at the bottom.

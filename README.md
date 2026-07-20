@@ -122,6 +122,7 @@ You can expose the following types :
 - Vector2Int
 - Vector3
 - Vector3Int
+- Vector4
 - Color
 
 Enums are also supported, and render as a dropdown — see [Exposing an enum](https://github.com/Theoriz/OCF#exposing-an-enum) in the OCF documentation.

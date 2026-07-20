@@ -279,6 +279,7 @@ MonoBehaviour:
   Vector2IntPrefab: {fileID: 1330587078194876, guid: 6f7c78a021a7c3d4983854daf9c9148c, type: 3}
   Vector3Prefab: {fileID: 1330587078194876, guid: 980530528cd9a894d9a198d08d09c0f0, type: 3}
   Vector3IntPrefab: {fileID: 1330587078194876, guid: 54f2f7a007fcaf64eaa32c0c1b02b21f, type: 3}
+  Vector4Prefab: {fileID: 1330587078194876, guid: f7c9583251da021468ceb668b16482c2, type: 3}
   MainPanel: {fileID: 224261597021104126}
   rightClickMenu: {fileID: 817308920242598605}
   colorPicker: {fileID: 1184009559293513404}
