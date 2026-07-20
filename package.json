@@ -7,5 +7,6 @@
   "author": {
     "name": "Theoriz",
     "url": "https://theoriz.com"
-  }
+  },
+  "keywords": ["osc", "ui", "gui", "control"]
 }

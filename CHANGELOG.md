@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - Vector4 support: a four-field widget, added to the supported types.
+- `keywords` in package.json, matching the other Theoriz packages.
 
 ### Changed
 
