@@ -2,7 +2,6 @@
 using UnityEngine.EventSystems;
 using UnityEngine.Events;
 
-[ExecuteInEditMode]
 [AddComponentMenu("Event/MouseButtonEvent")]
 public class MouseButtonEvent : MonoBehaviour, IPointerUpHandler
 {

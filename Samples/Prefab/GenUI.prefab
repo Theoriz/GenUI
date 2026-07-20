@@ -259,7 +259,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82735d6d849c37f428ed8699076fb09a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _AutoHideCursor: 1
+  _autoHideCursor: 1
   HideUIAtStart: 1
   enableUIMovement: 1
   toggleUIKey: 94

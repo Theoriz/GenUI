@@ -13,12 +13,12 @@ public class UIMaster : MonoBehaviour
     
     public bool AutoHideCursor
     {
-        get => _AutoHideCursor;
-        set { _AutoHideCursor = value; UpdateUI(); }
+        get => _autoHideCursor;
+        set { _autoHideCursor = value; UpdateUI(); }
     }
 
     [Header("Global settings")]
-    [SerializeField] private bool _AutoHideCursor = true;
+    [SerializeField] private bool _autoHideCursor = true;
 
     public bool HideUIAtStart;
     public bool enableUIMovement = true;
@@ -29,10 +29,10 @@ public class UIMaster : MonoBehaviour
 
     public float UIScale
     {
-        get => _UIScale;
+        get => _uiScale;
         set { 
-            _UIScale = value;
-            _canvasScaler.scaleFactor = _UIScale;
+            _uiScale = value;
+            _canvasScaler.scaleFactor = _uiScale;
         }
     }
 
@@ -52,9 +52,9 @@ public class UIMaster : MonoBehaviour
     private CanvasScaler _canvasScaler;
     private RectTransform _scrollViewTransform;
 
-    private float _UIScale = 1;
-    private const float _UIScaleSpeed = 2;
-    private const float _UIMovementSpeed = 500;
+    private float _uiScale = 1;
+    private const float _uiScaleSpeed = 2;
+    private const float _uiMovementSpeed = 500;
 
     // Use this for initialization
     void Awake()
@@ -639,7 +639,7 @@ public class UIMaster : MonoBehaviour
                 }
             }
 
-            UIScale += _UIScaleSpeed * Time.deltaTime;
+            UIScale += _uiScaleSpeed * Time.deltaTime;
         }
 
         //Key enum values are physical positions named after US QWERTY: minusKey prints '-' on QWERTY,
@@ -656,7 +656,7 @@ public class UIMaster : MonoBehaviour
                 }
             }
 
-            UIScale -= _UIScaleSpeed * Time.deltaTime;
+            UIScale -= _uiScaleSpeed * Time.deltaTime;
         }
     }
 
@@ -674,16 +674,16 @@ public class UIMaster : MonoBehaviour
             }
 
             if (Keyboard.current.leftArrowKey.isPressed)
-                _scrollViewTransform.anchoredPosition += Vector2.left * _UIMovementSpeed * Time.deltaTime;
+                _scrollViewTransform.anchoredPosition += Vector2.left * _uiMovementSpeed * Time.deltaTime;
 
             if (Keyboard.current.rightArrowKey.isPressed)
-                _scrollViewTransform.anchoredPosition += Vector2.right * _UIMovementSpeed * Time.deltaTime;
+                _scrollViewTransform.anchoredPosition += Vector2.right * _uiMovementSpeed * Time.deltaTime;
 
             if (Keyboard.current.upArrowKey.isPressed)
-                _scrollViewTransform.anchoredPosition += Vector2.up * _UIMovementSpeed * Time.deltaTime;
+                _scrollViewTransform.anchoredPosition += Vector2.up * _uiMovementSpeed * Time.deltaTime;
 
             if (Keyboard.current.downArrowKey.isPressed)
-                _scrollViewTransform.anchoredPosition += Vector2.down * _UIMovementSpeed * Time.deltaTime;
+                _scrollViewTransform.anchoredPosition += Vector2.down * _uiMovementSpeed * Time.deltaTime;
 
         }
     }
