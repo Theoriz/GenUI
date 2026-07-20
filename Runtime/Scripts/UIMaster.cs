@@ -334,8 +334,22 @@ public class UIMaster : MonoBehaviour
         //invoke, not by their label: the label is derived from the method name by ParseNameString,
         //and a panel's title Text also lives in this subtree.
         var lastPanel = _panels[controllableId].transform.GetChild(1);
-        var allButtons = lastPanel.GetComponentsInChildren<ButtonUI>();
+        var presetHolder = lastPanel.Find("PresetHolder");
         var isGlobalPresetPanel = controllable is ControllableMasterControllable;
+
+        //Create the global preset holder up front, while PresetHolder is still empty. Cloning it
+        //lazily once the first SaveAll button appears would copy the Save/Load buttons already
+        //reparented into PresetHolder, stacking them into this top row too.
+        Transform globalPresetHolder = null;
+        if (isGlobalPresetPanel)
+        {
+            globalPresetHolder = Instantiate(presetHolder);
+            globalPresetHolder.name = "AllPresetHolder";
+            globalPresetHolder.SetParent(lastPanel);
+            globalPresetHolder.SetSiblingIndex(1); //Set first
+        }
+
+        var allButtons = lastPanel.GetComponentsInChildren<ButtonUI>();
         var usePreset = false;
         foreach (var button in allButtons)
         {
@@ -343,7 +357,7 @@ public class UIMaster : MonoBehaviour
 
             if (Array.IndexOf(Controllable.PresetMethodNames, button.Method.Name) >= 0)
             {
-                button.transform.SetParent(lastPanel.transform.Find("PresetHolder"));
+                button.transform.SetParent(presetHolder);
                 usePreset = true;
             }
 
@@ -351,24 +365,16 @@ public class UIMaster : MonoBehaviour
             if (isGlobalPresetPanel &&
                 Array.IndexOf(ControllableMasterControllable.AllPresetMethodNames, button.Method.Name) >= 0)
             {
-                var globalPresetHolder = lastPanel.transform.Find("AllPresetHolder");
-                if (globalPresetHolder == null)
-                {
-                    globalPresetHolder = Instantiate(lastPanel.transform.Find("PresetHolder"));
-                    globalPresetHolder.name = "AllPresetHolder";
-                    globalPresetHolder.transform.SetParent(lastPanel.transform);
-                    globalPresetHolder.transform.SetSiblingIndex(1); //Set first
-                }
                 button.transform.SetParent(globalPresetHolder);
             }
         }
 
         if (usePreset)
         {
-            lastPanel.transform.Find("PresetHolder").SetSiblingIndex(lastPanel.transform.childCount - 2); //last index being the preset list
+            presetHolder.SetSiblingIndex(lastPanel.transform.childCount - 2); //last index being the preset list
         }
         else
-            lastPanel.transform.Find("PresetHolder").gameObject.SetActive(false);
+            presetHolder.gameObject.SetActive(false);
 
         lastPanel.GetComponent<PanelUI>().Init(controllable);
 

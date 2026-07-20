@@ -6,9 +6,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- The global preset panel stacked all preset buttons into its top row. `Save All` / `Save As All` / `Load All` now sit on top and the per-controllable buttons at the bottom.
+
 ### Removed
 
-- Preset tweening documentation and support in the sample. The `TweenCurves` component was removed from the sample GenUI prefab, and the README no longer documents the `duration` / `tweenStyle` arguments of `LoadWithName`. Presets apply instantly. Requires the matching OCF change that removes tweening.
+- Preset tweening: removed the `TweenCurves` component from the sample prefab and the tween docs from the README. Requires the matching OCF change.
 
 ## [1.2.1] - 2026-07-20
 
