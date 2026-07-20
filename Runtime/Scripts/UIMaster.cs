@@ -36,28 +36,15 @@ public class UIMaster : MonoBehaviour
         }
     }
 
-    [HideInInspector] public GameObject PanelPrefab;
-    [HideInInspector] public GameObject MethodButtonPrefab;
-    [HideInInspector] public GameObject SliderPrefab;
-    [HideInInspector] public GameObject CheckboxPrefab;
-    [HideInInspector] public GameObject InputPrefab;
-    [HideInInspector] public GameObject DropdownPrefab;
-    [HideInInspector] public GameObject HeaderTextPrefab;
-	[HideInInspector] public GameObject TooltipTextPrefab;
-    [HideInInspector] public GameObject ColorPrefab;
-    [HideInInspector] public GameObject Vector2Prefab;
-    [HideInInspector] public GameObject Vector2IntPrefab;
-    [HideInInspector] public GameObject Vector3Prefab;
-    [HideInInspector] public GameObject Vector3IntPrefab;
-    [HideInInspector] public GameObject Vector4Prefab;
-
-    [Header("Components")]
-    public Transform MainPanel;
-    public RightClickMenu rightClickMenu;
-    public ColorPicker colorPicker;
-
     [Header("Debug")]
     public bool showDebug = false;
+
+    // All prefabs come from one Resources asset; the panel and popups are resolved/instantiated in
+    // Awake, so UIMaster carries no serialized wiring references.
+    private UIPrefabs _prefabs;
+    private Transform MainPanel;
+    private RightClickMenu rightClickMenu;
+    private ColorPicker colorPicker;
 
     private bool displayUI;
     private GameObject _rootCanvas;
@@ -75,6 +62,12 @@ public class UIMaster : MonoBehaviour
         //Enable canvas that is disabled by default in prefab to not be visible in scene view.
         transform.GetChild(0).gameObject.SetActive(true);
 
+        _rootCanvas = transform.GetChild(0).gameObject;
+        _canvasScaler = _rootCanvas.GetComponent<CanvasScaler>();
+        _scrollViewTransform = (RectTransform)_rootCanvas.transform.GetChild(0);
+
+        ResolvePrefabsAndLinks();
+
         InitializeRightClickMenu();
         InitializeColorPicker();
 
@@ -84,15 +77,38 @@ public class UIMaster : MonoBehaviour
         ControllableMaster.controllableAdded += CreateUI;
         ControllableMaster.controllableRemoved += RemoveUI;
 
-        _rootCanvas = transform.GetChild(0).gameObject;
-        _canvasScaler = _rootCanvas.GetComponent<CanvasScaler>();
-        _scrollViewTransform = (RectTransform)_rootCanvas.transform.GetChild(0);
         displayUI = true;
 
         ResetUITransform();
 
         if (HideUIAtStart)
             ToggleUI();
+    }
+
+    // Load the prefab set and resolve the panel + popup links without any serialized reference:
+    // the panel is the scroll view's content, and the popups are instantiated from the prefab set.
+    void ResolvePrefabsAndLinks()
+    {
+        _prefabs = Resources.Load<UIPrefabs>("GenUIPrefabs");
+        if (_prefabs == null)
+        {
+            Debug.LogError("[GenUI] Could not load the GenUIPrefabs asset from Resources. The UI cannot be built.");
+            return;
+        }
+
+        var scrollRect = GetComponentInChildren<ScrollRect>(true);
+        if (scrollRect != null)
+            MainPanel = scrollRect.content;
+        else
+            Debug.LogError("[GenUI] No ScrollRect found under UIMaster; the panel container is missing.");
+
+        var rightClickMenuObject = Instantiate(_prefabs.RightClickMenuPrefab, _rootCanvas.transform, false);
+        rightClickMenuObject.transform.SetAsLastSibling();
+        rightClickMenu = rightClickMenuObject.GetComponentInChildren<RightClickMenu>(true);
+
+        var colorPickerObject = Instantiate(_prefabs.ColorPickerPrefab, _rootCanvas.transform, false);
+        colorPickerObject.transform.SetAsLastSibling();
+        colorPicker = colorPickerObject.GetComponentInChildren<ColorPicker>(true);
     }
 
     void OnDestroy()
@@ -191,7 +207,7 @@ public class UIMaster : MonoBehaviour
         }
 
         //First we create a panel for the controllable
-        var newControllableHolder = Instantiate(PanelPrefab);
+        var newControllableHolder = Instantiate(_prefabs.PanelPrefab);
         newControllableHolder.transform.GetChild(0).GetComponent<Image>().color = newControllable.BarColor;
         newControllableHolder.transform.SetParent(MainPanel.transform);
 
@@ -411,14 +427,14 @@ public class UIMaster : MonoBehaviour
 
     private void CreateHeaderText(Transform parent, Controllable target, string text)
     {
-        var headerText = Instantiate(HeaderTextPrefab);
+        var headerText = Instantiate(_prefabs.HeaderTextPrefab);
         headerText.transform.SetParent(parent);
         headerText.GetComponent<HeaderUI>().CreateUI(target, text);
         parent.gameObject.GetComponent<PanelUI>().AddUIElement(headerText.GetComponent<HeaderUI>());
     }
 
 	private void CreateTooltipText(Transform parent, Controllable target, string text) {
-		var tooltipText = Instantiate(TooltipTextPrefab);
+		var tooltipText = Instantiate(_prefabs.TooltipTextPrefab);
 		tooltipText.transform.SetParent(parent);
 		tooltipText.GetComponent<TooltipUI>().CreateUI(target, text);
 		parent.gameObject.GetComponent<PanelUI>().AddUIElement(tooltipText.GetComponent<TooltipUI>());
@@ -426,7 +442,7 @@ public class UIMaster : MonoBehaviour
 
     private void CreateDropDown(Transform parent, Controllable target, FieldInfo listProperty, FieldInfo activeElement, string enumName = "")
     {
-        var newDropdown = Instantiate(DropdownPrefab);
+        var newDropdown = Instantiate(_prefabs.DropdownPrefab);
         newDropdown.transform.SetParent(parent);
         parent.gameObject.GetComponent<PanelUI>().AddUIElement(newDropdown.GetComponent<DropdownUI>());
         if(string.IsNullOrEmpty(enumName))
@@ -437,7 +453,7 @@ public class UIMaster : MonoBehaviour
 
     private void CreateSlider(Transform parent, Controllable target, FieldInfo property, RangeAttribute rangeAttribut, bool isInteractible, bool isFloat = true)
     {
-        var newSlider = Instantiate(SliderPrefab);
+        var newSlider = Instantiate(_prefabs.SliderPrefab);
         newSlider.transform.SetParent(parent);
         parent.gameObject.GetComponent<PanelUI>().AddUIElement(newSlider.GetComponent<SliderUI>());
         newSlider.GetComponent<SliderUI>().CreateUI(target, property, rangeAttribut, isInteractible,  isFloat);
@@ -445,7 +461,7 @@ public class UIMaster : MonoBehaviour
 
     private void CreateInput(Transform parent, Controllable target, FieldInfo property, bool isInteractible)
     {
-        var newInput = Instantiate(InputPrefab);
+        var newInput = Instantiate(_prefabs.InputPrefab);
         newInput.transform.SetParent(parent);
         parent.gameObject.GetComponent<PanelUI>().AddUIElement(newInput.GetComponent<InputFieldUI>());
         newInput.GetComponent<InputFieldUI>().CreateUI(target, property, isInteractible);
@@ -453,7 +469,7 @@ public class UIMaster : MonoBehaviour
 
     private void CreateCheckbox(Transform parent, Controllable target, FieldInfo property, bool isInteractible)
     {
-        var newCheckbox = Instantiate(CheckboxPrefab);
+        var newCheckbox = Instantiate(_prefabs.CheckboxPrefab);
         newCheckbox.transform.SetParent(parent);
         parent.gameObject.GetComponent<PanelUI>().AddUIElement(newCheckbox.GetComponent<ToggleUI>());
         newCheckbox.GetComponent<ToggleUI>().CreateUI(target, property, isInteractible);
@@ -464,7 +480,7 @@ public class UIMaster : MonoBehaviour
         //As we can't expose parameter in UI, ignore methods with arguments 
         if (method.methodInfo.GetParameters().Length == 0)
         {
-            var newButton = Instantiate(MethodButtonPrefab);
+            var newButton = Instantiate(_prefabs.MethodButtonPrefab);
             newButton.transform.SetParent(parent);
             newButton.transform.SetSiblingIndex(parent.childCount-2);
             parent.gameObject.GetComponent<PanelUI>().AddUIElement(newButton.GetComponent<ButtonUI>());
@@ -481,7 +497,7 @@ public class UIMaster : MonoBehaviour
 
     private void CreateColor(Transform parent, Controllable target, FieldInfo property, bool isInteractible)
     {
-        var newColor = Instantiate(ColorPrefab);
+        var newColor = Instantiate(_prefabs.ColorPrefab);
         newColor.transform.SetParent(parent);
         parent.gameObject.GetComponent<PanelUI>().AddUIElement(newColor.GetComponent<ColorUI>());
         newColor.GetComponent<ColorUI>().CreateUI(target, property, isInteractible);
@@ -489,7 +505,7 @@ public class UIMaster : MonoBehaviour
 
     private void CreateVector3(Transform parent, Controllable target, FieldInfo property, bool isInteractible)
     {
-        var newVector3 = Instantiate(Vector3Prefab);
+        var newVector3 = Instantiate(_prefabs.Vector3Prefab);
         newVector3.transform.SetParent(parent);
         parent.gameObject.GetComponent<PanelUI>().AddUIElement(newVector3.GetComponent<Vector3UI>());
         newVector3.GetComponent<Vector3UI>().CreateUI(target, property, isInteractible);
@@ -497,28 +513,28 @@ public class UIMaster : MonoBehaviour
 
     private void CreateVector4(Transform parent, Controllable target, FieldInfo property, bool isInteractible)
     {
-        var newVector4 = Instantiate(Vector4Prefab);
+        var newVector4 = Instantiate(_prefabs.Vector4Prefab);
         newVector4.transform.SetParent(parent);
         parent.gameObject.GetComponent<PanelUI>().AddUIElement(newVector4.GetComponent<Vector4UI>());
         newVector4.GetComponent<Vector4UI>().CreateUI(target, property, isInteractible);
     }
 
     private void CreateVector3Int(Transform parent, Controllable target, FieldInfo property, bool isInteractible) {
-        var newVector3Int = Instantiate(Vector3IntPrefab);
+        var newVector3Int = Instantiate(_prefabs.Vector3IntPrefab);
         newVector3Int.transform.SetParent(parent);
         parent.gameObject.GetComponent<PanelUI>().AddUIElement(newVector3Int.GetComponent<Vector3IntUI>());
         newVector3Int.GetComponent<Vector3IntUI>().CreateUI(target, property, isInteractible);
     }
 
     private void CreateVector2(Transform parent, Controllable target, FieldInfo property, bool isInteractible) {
-        var newVector2 = Instantiate(Vector2Prefab);
+        var newVector2 = Instantiate(_prefabs.Vector2Prefab);
         newVector2.transform.SetParent(parent);
         parent.gameObject.GetComponent<PanelUI>().AddUIElement(newVector2.GetComponent<Vector2UI>());
         newVector2.GetComponent<Vector2UI>().CreateUI(target, property, isInteractible);
     }
 
     private void CreateVector2Int(Transform parent, Controllable target, FieldInfo property, bool isInteractible) {
-        var newVector2Int = Instantiate(Vector2IntPrefab);
+        var newVector2Int = Instantiate(_prefabs.Vector2IntPrefab);
         newVector2Int.transform.SetParent(parent);
         parent.gameObject.GetComponent<PanelUI>().AddUIElement(newVector2Int.GetComponent<Vector2IntUI>());
         newVector2Int.GetComponent<Vector2IntUI>().CreateUI(target, property, isInteractible);

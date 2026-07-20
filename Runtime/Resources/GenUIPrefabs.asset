@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c81d40b7dc570054c919fe362cb1212a, type: 3}
+  m_Name: GenUIPrefabs
+  m_EditorClassIdentifier:
+  PanelPrefab: {fileID: 1622460675983054, guid: 9cef4e71017f00646a574461cd08ecdd, type: 3}
+  MethodButtonPrefab: {fileID: 1946855127059288, guid: 69228a3d9baefa74ab0ef84df415066f, type: 3}
+  SliderPrefab: {fileID: 1018181201034402, guid: 89ea43e620d17ff4399df6de2e79a506, type: 3}
+  CheckboxPrefab: {fileID: 1515742993973044, guid: b1d168cb8d7c47344ae77fb36c2baaf3, type: 3}
+  InputPrefab: {fileID: 1981622790165228, guid: 545e59ae5d00cd14fb3104bb8ccd4205, type: 3}
+  DropdownPrefab: {fileID: 989818094581739360, guid: 8c943b3283ab76341a12fb7984edb8ec, type: 3}
+  HeaderTextPrefab: {fileID: 1438555048624790, guid: 56fe3109dec04154d9c43c4e9c5e90cb, type: 3}
+  TooltipTextPrefab: {fileID: 1438555048624790, guid: faffed60158841c4da7c59453081fa26, type: 3}
+  ColorPrefab: {fileID: 1115744468916518, guid: ca6343af27d42bb4391b628c402eb65d, type: 3}
+  Vector2Prefab: {fileID: 1330587078194876, guid: 4a59034ff4f688447844d84cab269d66, type: 3}
+  Vector2IntPrefab: {fileID: 1330587078194876, guid: 6f7c78a021a7c3d4983854daf9c9148c, type: 3}
+  Vector3Prefab: {fileID: 1330587078194876, guid: 980530528cd9a894d9a198d08d09c0f0, type: 3}
+  Vector3IntPrefab: {fileID: 1330587078194876, guid: 54f2f7a007fcaf64eaa32c0c1b02b21f, type: 3}
+  Vector4Prefab: {fileID: 1330587078194876, guid: f7c9583251da021468ceb668b16482c2, type: 3}
+  RightClickMenuPrefab: {fileID: 1762016755018953457, guid: b1a018ee1b41dfe4dbf5cf07bd1f1906, type: 3}
+  ColorPickerPrefab: {fileID: 4550202560132126203, guid: 9c1f38ba68b9d4b47a0837f19e67d0d1, type: 3}
