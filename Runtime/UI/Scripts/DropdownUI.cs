@@ -27,7 +27,9 @@ public class DropdownUI : ControllableUI
 
         var dropdown = this.GetComponentInChildren<Dropdown>();
         dropdown.AddOptions(listInObject);
-        dropdown.value = Mathf.Max(0, activeElementIndex);
+        //SetValueWithoutNotify: only a genuine user selection should fire onValueChanged (which loads
+        //the selected preset). Programmatic updates here and in HandleTargetChange must not.
+        dropdown.SetValueWithoutNotify(Mathf.Max(0, activeElementIndex));
         dropdown.onValueChanged.AddListener((value) =>
         {
             var associatedList = (List<string>)ListProperty.GetValue(LinkedControllable);
@@ -55,7 +57,7 @@ public class DropdownUI : ControllableUI
         var dropdown = this.GetComponentInChildren<Dropdown>();
         var enumNames = Enum.GetNames(enumType).ToList();
         dropdown.AddOptions(enumNames);
-        dropdown.value = Mathf.Max(0, TypeConverter.getIndexInEnum(enumNames, Property.GetValue(LinkedControllable)?.ToString() ?? ""));
+        dropdown.SetValueWithoutNotify(Mathf.Max(0, TypeConverter.getIndexInEnum(enumNames, Property.GetValue(LinkedControllable)?.ToString() ?? "")));
         dropdown.onValueChanged.AddListener((value) =>
         {
             List<object> objParams = new List<object> { Enum.GetNames(enumType)[value] };
@@ -73,14 +75,14 @@ public class DropdownUI : ControllableUI
             var dropdown = this.GetComponentInChildren<Dropdown>();
             dropdown.ClearOptions();
             dropdown.AddOptions(Enum.GetNames(enumType).ToList());
-            dropdown.value = Mathf.Max(0, TypeConverter.getIndexInEnum(Enum.GetNames(enumType).ToList(), Property.GetValue(LinkedControllable).ToString()));
+            dropdown.SetValueWithoutNotify(Mathf.Max(0, TypeConverter.getIndexInEnum(Enum.GetNames(enumType).ToList(), Property.GetValue(LinkedControllable).ToString())));
         }
         else
         {
             var dropdown = this.GetComponentInChildren<Dropdown>();
             dropdown.ClearOptions();
             dropdown.AddOptions((List<string>)ListProperty.GetValue(LinkedControllable));
-            dropdown.value = Mathf.Max(0, TypeConverter.getIndexInEnum((List<string>)ListProperty.GetValue(LinkedControllable), Property.GetValue(LinkedControllable).ToString()));
+            dropdown.SetValueWithoutNotify(Mathf.Max(0, TypeConverter.getIndexInEnum((List<string>)ListProperty.GetValue(LinkedControllable), Property.GetValue(LinkedControllable).ToString())));
         }
     }
 

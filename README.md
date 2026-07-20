@@ -150,9 +150,9 @@ OSCMaster.Receivers["myReceiver"].messageReceived += (OSCMessage m) => Debug.Log
 ```
 
 ## Presets
-This plugin comes with a preset system, you can save the state of a "Controllable" script. It saves each property to a file that can be loaded later so that you can create different settings for your script. To use it, simply click on "Save", then select the wanted preset inside the dropdown menu and press "Load".
+This plugin comes with a preset system, you can save the state of a "Controllable" script. It saves each property to a file that can be loaded later so that you can create different settings for your script. To use it, click "Save", then simply select a preset in the dropdown menu — selecting it loads it immediately.
 
-Each panel has "Save", "Save As", "Load" and "Show" buttons, and the GenUI panel has "Save All", "Save As All" and "Load All" to apply the same action to every controllable at once.
+Each panel has "Save", "Save As" and "Show" buttons plus the preset dropdown, and the GenUI panel has "Save All" and "Save As All" to apply the same action to every controllable at once.
 
 It is also possible to load a specific file via the OSC method "LoadWithName", giving it the case-sensitive file name as its argument :
 

@@ -477,7 +477,12 @@ public class UIMaster : MonoBehaviour
 
     private void CreateButton(Transform parent, Controllable target, ClassMethodInfo method)
     {
-        //As we can't expose parameter in UI, ignore methods with arguments 
+        //Methods marked [OSCMethod(showInUI = false)] stay OSC-callable but get no button (e.g. Load, LoadAll).
+        var oscMethod = Attribute.GetCustomAttribute(method.methodInfo, typeof(OSCMethod)) as OSCMethod;
+        if (oscMethod != null && !oscMethod.showInUI)
+            return;
+
+        //As we can't expose parameter in UI, ignore methods with arguments
         if (method.methodInfo.GetParameters().Length == 0)
         {
             var newButton = Instantiate(_prefabs.MethodButtonPrefab);

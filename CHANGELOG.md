@@ -12,11 +12,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- Selecting a preset in the dropdown now loads it immediately; the per-panel **Load** and global **Load All** buttons were removed (loading is automatic — both remain OSC methods).
 - UIMaster no longer holds serialized wiring references: every prefab (widgets, right-click menu, color picker) comes from a `UIPrefabs` ScriptableObject loaded from Resources, and the panel link is resolved from the hierarchy at runtime. Adding a supported type only touches that asset.
 
 ### Fixed
 
-- The global preset panel stacked all preset buttons into its top row. `Save All` / `Save As All` / `Load All` now sit on top and the per-controllable buttons at the bottom.
+- The global preset panel stacked all preset buttons into its top row. The global preset buttons now sit on top and the per-controllable buttons at the bottom.
 
 ### Removed
 
