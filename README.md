@@ -165,7 +165,4 @@ To expose a string list you have to create an index string variable which will b
 
 See [Exposing a list](https://github.com/Theoriz/OCF#exposing-a-list) in the OCF documentation for a full example.
 
-# Dev
-OCF : http://github.com/theoriz/OCF
-
 
