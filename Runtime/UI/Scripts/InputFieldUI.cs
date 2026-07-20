@@ -66,7 +66,6 @@ public class InputFieldUI : ControllableUI
 
         this.transform.GetChild(0).Find("Text").gameObject.GetComponent<Text>().color = Color.white;
         this.transform.GetChild(0).Find("Placeholder").gameObject.GetComponent<Text>().text = target.getPropInfoForAddress(property.Name).GetValue(target).ToString();
-        this.GetComponent<RectTransform>().localScale = new Vector3(1.0f, 1.0f, 1.0f);
     }
 
     public override void HandleTargetChange(string name)

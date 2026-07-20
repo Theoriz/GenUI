@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [1.2.1] - 2026-07-20
+
+### Removed
+
+- ShouldNotExist, an internal MonoBehaviour on the panel prefab that forced localScale to one every frame, and a matching one-shot localScale reset in InputFieldUI. Both were vestigial from a pre-CanvasScaler scaling approach; UI scale is driven entirely by the canvas scaler's scaleFactor.
+
 ## [1.2.0] - 2026-07-17
 
 **Requires com.theoriz.ocf 1.2.0 or later.** UIMaster now uses the preset method name constants added
