@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+
+### Removed
+
+- Preset tweening documentation and support in the sample. The `TweenCurves` component was removed from the sample GenUI prefab, and the README no longer documents the `duration` / `tweenStyle` arguments of `LoadWithName`. Presets apply instantly. Requires the matching OCF change that removes tweening.
+
 ## [1.2.1] - 2026-07-20
 
 ### Removed

@@ -153,13 +153,10 @@ This plugin comes with a preset system, you can save the state of a "Controllabl
 
 Each panel has "Save", "Save As", "Load" and "Show" buttons, and the GenUI panel has "Save All", "Save As All" and "Load All" to apply the same action to every controllable at once.
 
-It is also possible to load a specific file via the OSC method "LoadWithName", giving it as arguments :
-  - fileName (string) : case sensitive;
-  - duration (float) : tween duration in seconds;
-  - tweenStyle (string) : "EaseInOut", "EaseIn", "EaseOut" or "Linear" if you want to tween the current value to the preset's one;
+It is also possible to load a specific file via the OSC method "LoadWithName", giving it the case-sensitive file name as its argument :
 
 ```
-/OCF/id/LoadWithName "myPreset.pst" 2.0 "EaseInOut"
+/OCF/id/LoadWithName "myPreset.pst"
 ```
 
 ## Expose a List
