@@ -4,7 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [1.3.0] - 2026-07-20
+
+**Requires com.theoriz.ocf 1.3.0 or later.** Preset auto-load and the removal of the Load / Load All
+buttons rely on `[OSCMethod(showInUI = false)]`, added in that release. The packages declare no UPM
+dependencies, so update OCF yourself.
 
 ### Added
 
