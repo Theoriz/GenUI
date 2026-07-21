@@ -54,6 +54,12 @@ https://github.com/Theoriz/GenUI.git
 
 Scaling is ignored while you are typing in an input field.
 
+## Scrubbing values
+
+Drag a numeric member's **label** left or right to lower or raise its value, like the Unity Inspector. Vector widgets have a label per axis (`x`, `y`, `z`, `w`), so each component scrubs on its own. Hold **Shift** for coarse steps or **Ctrl** for fine ones. A member with a `[Range]` crosses its whole span in one drag and stays clamped; dragging vertically scrolls the panel as usual, and read-only members cannot be scrubbed.
+
+The field itself stays a normal text box — click it to type.
+
 ## Setup
 1. In the toolbar go to Theoriz -> GenUI -> Add GenUI to Scene. It adds the GenUI prefab, plus an EventSystem if the scene has none, and is safe to run again on a scene that already has either.
 

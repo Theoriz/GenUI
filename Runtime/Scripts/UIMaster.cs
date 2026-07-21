@@ -184,6 +184,17 @@ public class UIMaster : MonoBehaviour
 
     }
 
+    //Every numeric widget gets its label wired for drag-to-scrub here rather than in each widget's
+    //CreateUI, so the seven of them share one call site.
+    static void AttachValueDragging(Transform panel)
+    {
+        foreach (var widget in panel.GetComponentsInChildren<ControllableUI>(true))
+        {
+            foreach (var target in widget.GetScrubTargets())
+                DragValueUI.Attach(widget, target);
+        }
+    }
+
     #region Tab navigation
 
     //Moves focus to the next editable field in the panel, wrapping at either end. Selecting the new
@@ -460,6 +471,8 @@ public class UIMaster : MonoBehaviour
 
             CreateButton(newPanel.transform, newControllable, method.Value);
         }
+
+        AttachValueDragging(newPanel.transform);
 
         CleanGeneratedUI(newControllable.id, newControllable);       
     }

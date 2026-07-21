@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [1.6.2] - 2026-07-21
+
+### Added
+
+- Drag a numeric member's label left or right to scrub its value, with Shift for coarse steps and Ctrl for fine ones.
+
 ## [1.6.1] - 2026-07-21
 
 ### Added

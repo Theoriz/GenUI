@@ -62,6 +62,19 @@ public class Vector2UI : ControllableUI
         return this.transform.GetChild(0).Find(childName).GetChild(0).GetComponent<InputField>();
     }
 
+    //Each axis carries its own label beside the box, so a scrub knows which component it moves.
+    public override ScrubTarget[] GetScrubTargets()
+    {
+        return new[] { MakeScrubTarget("XInput"), MakeScrubTarget("YInput") };
+    }
+
+    ScrubTarget MakeScrubTarget(string childName)
+    {
+        var axis = this.transform.GetChild(0).Find(childName);
+        return new ScrubTarget(axis.GetChild(0).GetComponent<InputField>(),
+                               axis.Find("Text").GetComponent<Text>());
+    }
+
     public override void HandleTargetChange(string name)
     { 
         if (name != Property.Name && !String.IsNullOrEmpty(name))

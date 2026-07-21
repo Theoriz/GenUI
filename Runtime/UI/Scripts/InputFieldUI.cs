@@ -74,6 +74,17 @@ public class InputFieldUI : ControllableUI
         return field != null ? new[] { field } : base.GetInputFields();
     }
 
+    //Only the int and float widgets scrub; the string one has nothing to scrub to.
+    public override ScrubTarget[] GetScrubTargets()
+    {
+        var field = this.transform.GetComponentInChildren<InputField>();
+        if (field == null || field.contentType == InputField.ContentType.Standard)
+            return base.GetScrubTargets();
+
+        var label = this.transform.GetChild(1).GetComponent<Text>();
+        return label != null ? new[] { new ScrubTarget(field, label) } : base.GetScrubTargets();
+    }
+
     public override void HandleTargetChange(string name)
     {
         if (name != Property.Name && !String.IsNullOrEmpty(name))

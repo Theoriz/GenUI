@@ -80,6 +80,16 @@ public class SliderUI : ControllableUI
         return field != null ? new[] { field } : base.GetInputFields();
     }
 
+    public override ScrubTarget[] GetScrubTargets()
+    {
+        var field = this.GetComponentInChildren<InputField>();
+        var label = this.transform.Find("Text");
+        if (field == null || label == null)
+            return base.GetScrubTargets();
+
+        return new[] { new ScrubTarget(field, label.GetComponent<Text>()) };
+    }
+
     public override void HandleTargetChange(string name)
     {
         if (name != Property.Name && !String.IsNullOrEmpty(name))

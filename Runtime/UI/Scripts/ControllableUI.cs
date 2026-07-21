@@ -26,7 +26,36 @@ public class ControllableUI : MonoBehaviour {
     {
     }
 
+    /// <summary>A numeric field and the label whose drag scrubs it.</summary>
+    public struct ScrubTarget
+    {
+        public InputField Field;
+        public Text Label;
+
+        public ScrubTarget(InputField field, Text label)
+        {
+            Field = field;
+            Label = label;
+        }
+    }
+
     static readonly InputField[] _noInputFields = new InputField[0];
+    static readonly ScrubTarget[] _noScrubTargets = new ScrubTarget[0];
+
+    /// <summary>
+    /// The widget's numeric fields, each paired with the label that scrubs it. Empty when the widget
+    /// holds nothing numeric.
+    /// </summary>
+    /// <remarks>
+    /// Paired rather than returned as a second array alongside <see cref="GetInputFields"/>: two
+    /// arrays that have to stay index-aligned are the kind of thing that silently mis-pairs later.
+    /// The label is the drag target because InputField activates editing on pointer-down and handles
+    /// its own drag for text selection, so a handler on the field would do both at once.
+    /// </remarks>
+    public virtual ScrubTarget[] GetScrubTargets()
+    {
+        return _noScrubTargets;
+    }
 
     /// <summary>
     /// The widget's editable fields, in the order Tab should visit them.
