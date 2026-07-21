@@ -6,11 +6,15 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Linq;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Controls;
 
 public class UIMaster : MonoBehaviour
 {
     public static UIMaster Instance;
-    
+
+    /// <summary>The values edited in this panel, so Ctrl+Z can put the last one back.</summary>
+    public UndoStack Undo { get; private set; }
+
     public bool AutoHideCursor
     {
         get => _autoHideCursor;
@@ -53,6 +57,16 @@ public class UIMaster : MonoBehaviour
     private RectTransform _scrollViewTransform;
     private ScrollRect _scrollRect;
 
+    //Shortcut keys resolved from what they print on the active layout rather than bound to a physical
+    //position; see KeyPrinting().
+    private readonly Dictionary<string, KeyControl> _keysByCharacter = new Dictionary<string, KeyControl>();
+    private Keyboard _resolvedKeyboard;
+    private string _resolvedLayout;
+
+    //See SuppressNavigationWhileCtrlHeld.
+    private bool _navigationSuppressed;
+    private bool _navigationWasEnabled;
+
     private float _uiScale = 1;
     private const float _uiScaleSpeed = 2;
     private const float _uiMovementSpeed = 500;
@@ -62,6 +76,8 @@ public class UIMaster : MonoBehaviour
     {
         //Enable canvas that is disabled by default in prefab to not be visible in scene view.
         transform.GetChild(0).gameObject.SetActive(true);
+
+        Undo = new UndoStack();
 
         _rootCanvas = transform.GetChild(0).gameObject;
         _canvasScaler = _rootCanvas.GetComponent<CanvasScaler>();
@@ -126,6 +142,10 @@ public class UIMaster : MonoBehaviour
         ControllableMaster.controllableAdded -= CreateUI;
         ControllableMaster.controllableRemoved -= RemoveUI;
 
+        //The EventSystem outlives this panel, so navigation must not be left switched off on it.
+        if (_navigationSuppressed && EventSystem.current != null)
+            EventSystem.current.sendNavigationEvents = _navigationWasEnabled;
+
         if (Instance == this)
             Instance = null;
     }
@@ -167,6 +187,8 @@ public class UIMaster : MonoBehaviour
 
     void Update()
     {
+        SuppressNavigationWhileCtrlHeld();
+
         if (Keyboard.current != null && Keyboard.current[toggleUIKey].wasPressedThisFrame)
         {
             //Avoid toggling the UI if currently writing in an input field
@@ -179,9 +201,107 @@ public class UIMaster : MonoBehaviour
         if (displayUI && Keyboard.current != null && Keyboard.current.tabKey.wasPressedThisFrame)
             MoveFocus(backwards: Keyboard.current.shiftKey.isPressed);
 
+        //Deliberately not guarded by FocusedInputField(), unlike every other shortcut here: the other
+        //ones step out of the way while a value is being typed, whereas undo is precisely what the
+        //user wants after typing one.
+        if (displayUI && Keyboard.current != null && Keyboard.current.ctrlKey.isPressed)
+        {
+            var undoKey = UndoKey();
+            if (undoKey != null && undoKey.wasPressedThisFrame)
+                UndoLastEdit();
+        }
+
         if(displayUI)
             UpdateUITransform();
 
+    }
+
+    //Puts the last value edited in the UI back to what it held before that edit. The widget restores
+    //it through setFieldProp, the same path an edit takes, so the target script and OSC follow.
+    void UndoLastEdit()
+    {
+        UndoStack.Entry entry;
+        if (!Undo.TryPop(out entry))
+            return;
+
+        entry.Widget.ApplyUndo(entry.Value);
+    }
+
+    /// <summary>
+    /// Turns the EventSystem's keyboard navigation off for as long as Ctrl is held.
+    /// </summary>
+    /// <remarks>
+    /// Every Ctrl shortcut here collides with the Navigate action on some layout: Ctrl+arrows is
+    /// Navigate outright, and Ctrl+Z is the physical W key on AZERTY, which Navigate binds to "up".
+    /// Either way the selection walks off the field being edited. Ctrl is never a navigation
+    /// modifier, so the moves are stopped at the source rather than corrected after the fact.
+    /// </remarks>
+    void SuppressNavigationWhileCtrlHeld()
+    {
+        var suppress = displayUI && Keyboard.current != null && Keyboard.current.ctrlKey.isPressed;
+
+        if (suppress == _navigationSuppressed || EventSystem.current == null)
+            return;
+
+        //Restores what the host project had it set to, not an assumed true.
+        if (suppress)
+            _navigationWasEnabled = EventSystem.current.sendNavigationEvents;
+
+        EventSystem.current.sendNavigationEvents = !suppress && _navigationWasEnabled;
+        _navigationSuppressed = suppress;
+    }
+
+    KeyControl UndoKey()
+    {
+        return KeyPrinting("z", Key.Z);
+    }
+
+    /// <summary>
+    /// The key that prints <paramref name="character"/> on the keyboard as it is currently laid out.
+    /// </summary>
+    /// <remarks>
+    /// Key values are physical positions named after US QWERTY, so binding one directly picks the
+    /// wrong key on any layout that moves the character: Z sits where QWERTY has W on AZERTY, and '-'
+    /// sits on the 6. displayName reports what a key prints under the active layout, so shortcuts
+    /// resolve the key they mean instead of listing the positions it might occupy. The lookup is
+    /// cached until the keyboard or its layout changes.
+    /// </remarks>
+    /// <param name="fallback">Physical key to use on a layout that prints the character nowhere.</param>
+    KeyControl KeyPrinting(string character, Key fallback)
+    {
+        var keyboard = Keyboard.current;
+        if (keyboard == null)
+            return null;
+
+        if (keyboard != _resolvedKeyboard || keyboard.keyboardLayout != _resolvedLayout)
+        {
+            _keysByCharacter.Clear();
+            _resolvedKeyboard = keyboard;
+            _resolvedLayout = keyboard.keyboardLayout;
+        }
+
+        KeyControl resolved;
+        if (_keysByCharacter.TryGetValue(character, out resolved))
+            return resolved;
+
+        resolved = keyboard[fallback];
+
+        foreach (var key in keyboard.allKeys)
+        {
+            if (string.Equals(key.displayName, character, StringComparison.OrdinalIgnoreCase))
+            {
+                resolved = key;
+                break;
+            }
+        }
+
+        _keysByCharacter[character] = resolved;
+        return resolved;
+    }
+
+    static bool IsPressed(KeyControl key)
+    {
+        return key != null && key.isPressed;
     }
 
     //Every numeric widget gets its label wired for drag-to-scrub here rather than in each widget's
@@ -731,14 +851,31 @@ public class UIMaster : MonoBehaviour
 
     public void CreateColorPicker(ControllableUI controllableUI)
     {
+        //Opening the picker on another member ends the session on the previous one, so a pick that is
+        //never explicitly closed still records its single undo.
+        EndColorPickerEdit();
+
         colorPicker.transform.position = Mouse.current.position.value;
         colorPicker.linkedUI = controllableUI as ColorUI;
         colorPicker.gameObject.SetActive(true);
+
+        if (colorPicker.linkedUI != null)
+            colorPicker.linkedUI.BeginPickerEdit();
     }
 
     void CloseColorPicker()
     {
+        EndColorPickerEdit();
+
         colorPicker.gameObject.SetActive(false);
+    }
+
+    //A colour pick is one edit for as long as the picker is open, however many colours it travels
+    //through, so the undo entry is recorded here rather than on every push from the picker.
+    void EndColorPickerEdit()
+    {
+        if (colorPicker.linkedUI != null)
+            colorPicker.linkedUI.EndPickerEdit();
     }
 
     #endregion
@@ -769,8 +906,11 @@ public class UIMaster : MonoBehaviour
 
     void UpdateUIScale()
     {
-        if (Keyboard.current.pageUpKey.isPressed || 
-            (Keyboard.current.ctrlKey.isPressed && (Keyboard.current.equalsKey.isPressed || Keyboard.current.numpadPlusKey.isPressed)))
+        //The '=' and '-' keys are found by what they print on the current layout, so Ctrl +/- lands on
+        //the same characters everywhere. The numpad needs no such lookup: it prints the same on every
+        //layout.
+        if (Keyboard.current.pageUpKey.isPressed ||
+            (Keyboard.current.ctrlKey.isPressed && (IsPressed(KeyPrinting("=", Key.Equals)) || Keyboard.current.numpadPlusKey.isPressed)))
         {
             //Avoid scaling the UI if currently writing in an input field
             if (FocusedInputField() != null)
@@ -779,10 +919,8 @@ public class UIMaster : MonoBehaviour
             UIScale += _uiScaleSpeed * Time.deltaTime;
         }
 
-        //Key enum values are physical positions named after US QWERTY: minusKey prints '-' on QWERTY,
-        //digit6Key prints '-' on AZERTY. Both are bound so Ctrl+- zooms out on either layout.
         if (Keyboard.current.pageDownKey.isPressed ||
-            (Keyboard.current.ctrlKey.isPressed && (Keyboard.current.minusKey.isPressed || Keyboard.current.digit6Key.isPressed || Keyboard.current.numpadMinusKey.isPressed)))
+            (Keyboard.current.ctrlKey.isPressed && (IsPressed(KeyPrinting("-", Key.Minus)) || Keyboard.current.numpadMinusKey.isPressed)))
         {
             //Avoid scaling the UI if currently writing in an input field
             if (FocusedInputField() != null)

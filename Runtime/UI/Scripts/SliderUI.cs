@@ -37,6 +37,8 @@ public class SliderUI : ControllableUI
             if (_updating)
                 return;
 
+            RecordUndo();
+
             var list = new List<object>();
             if (!IsFloat)
                 list.Add(Mathf.Clamp(TypeConverter.getInt(value), (int)rangeAttribut.min, (int)rangeAttribut.max));
@@ -59,6 +61,8 @@ public class SliderUI : ControllableUI
         {
             if (_updating)
                 return;
+
+            RecordUndo();
 
             var list = new List<object>();
             list.Add(value);

@@ -6,6 +6,7 @@
         "UnityEditor.TestRunner",
         "Theoriz.GenUI.Runtime",
         "Theoriz.GenUI.Editor",
+        "Theoriz.OCF.Runtime",
         "Unity.InputSystem"
     ],
     "includePlatforms": [

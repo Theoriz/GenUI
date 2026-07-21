@@ -46,6 +46,8 @@ public class Vector4UI : ControllableUI
 
         XInput.onEndEdit.AddListener((value) =>
         {
+            RecordUndo();
+
             var list = new List<object>();
             list.Add(TypeConverter.getFloat(value.ToString()));
             list.Add(TypeConverter.getFloat(YInput.text.ToString()));
@@ -57,6 +59,8 @@ public class Vector4UI : ControllableUI
 
         YInput.onEndEdit.AddListener((value) =>
         {
+            RecordUndo();
+
             var list = new List<object>();
             list.Add(TypeConverter.getFloat(XInput.text.ToString()));
             list.Add(TypeConverter.getFloat(value.ToString()));
@@ -68,6 +72,8 @@ public class Vector4UI : ControllableUI
 
         ZInput.onEndEdit.AddListener((value) =>
         {
+            RecordUndo();
+
             var list = new List<object>();
             list.Add(TypeConverter.getFloat(XInput.text.ToString()));
             list.Add(TypeConverter.getFloat(YInput.text.ToString()));
@@ -79,6 +85,8 @@ public class Vector4UI : ControllableUI
 
         WInput.onEndEdit.AddListener((value) =>
         {
+            RecordUndo();
+
             var list = new List<object>();
             list.Add(TypeConverter.getFloat(XInput.text.ToString()));
             list.Add(TypeConverter.getFloat(YInput.text.ToString()));

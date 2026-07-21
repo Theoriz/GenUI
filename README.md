@@ -51,6 +51,9 @@ https://github.com/Theoriz/GenUI.git
 - Ctrl + Left/Right/Up/Down arrow : Move the UI, only when the UI is visible.
 - F2 : Reset the UI, only when the UI is visible.
 - Tab / Shift + Tab : Move to the next/previous input field, selecting its text so you can type over it. Wraps around, skips read-only fields and collapsed panels, and scrolls the panel to keep the field visible.
+- Ctrl + Z : Undo the last value you changed in the UI, whichever member it was. A whole slider drag, label scrub or colour pick undoes in one press, and unlike the other shortcuts this one also works while you are typing in a field.
+
+Undo covers edits made in the UI only: values arriving over OSC, and members restored by loading a preset, are not undone. Selecting a preset is not undone either, since that would reload the previous one.
 
 Scaling is ignored while you are typing in an input field.
 

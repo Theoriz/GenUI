@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [1.7.0] - 2026-07-21
+
+### Added
+
+- Ctrl+Z undoes the last value changed in the UI, with a whole slider drag, label scrub or colour pick undoing in one press.
+
+### Fixed
+
+- Checkboxes no longer write their value back out when a change arrives from the target script or over OSC.
+- Ctrl +/- finds the `=` and `-` keys by what they print on the current keyboard layout, so zooming works on any layout rather than QWERTY and AZERTY only.
+- Keyboard navigation no longer moves the selection while Ctrl is held, so Ctrl shortcuts leave the focused field alone.
+
 ## [1.6.2] - 2026-07-21
 
 ### Added

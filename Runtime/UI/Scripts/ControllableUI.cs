@@ -26,6 +26,91 @@ public class ControllableUI : MonoBehaviour {
     {
     }
 
+    /// <summary>
+    /// The value the widget's member holds right now, for the undo stack.
+    /// </summary>
+    /// <remarks>
+    /// One boxed value is enough for every type GenUI draws: setFieldProp accepts a single Vector or
+    /// Color as well as the loose components the widgets send it. The enum dropdown is the exception
+    /// and overrides this.
+    /// </remarks>
+    public virtual UndoStack.Value CaptureValue()
+    {
+        return new UndoStack.Value(new List<object> { Property.GetValue(LinkedControllable) }, false);
+    }
+
+    /// <summary>
+    /// Records what this widget's member holds, so Ctrl+Z can put it back. Call it at the top of a
+    /// commit callback, while the member still holds the old value.
+    /// </summary>
+    protected void RecordUndo()
+    {
+        if (!CanRecordUndo())
+            return;
+
+        RecordUndo(CaptureValue());
+    }
+
+    /// <summary>
+    /// Records a value captured earlier, for a widget whose edit spans a whole interaction rather
+    /// than one callback - the colour picker, which is open for as long as the user is choosing.
+    /// </summary>
+    protected void RecordUndo(UndoStack.Value value)
+    {
+        if (!CanRecordUndo())
+            return;
+
+        UIMaster.Instance.Undo.Record(this, value, Time.unscaledTime);
+    }
+
+    bool CanRecordUndo()
+    {
+        if (Property == null || LinkedControllable == null || UIMaster.Instance == null)
+            return false;
+
+        //Setting currentPreset loads that preset, which rewrites every member of the controllable.
+        //Undoing a preset selection would mean silently reloading the previous one, so a preset
+        //choice is not treated as a value edit.
+        return Property.Name != "currentPreset";
+    }
+
+    /// <summary>
+    /// Whether the member already holds <paramref name="value"/>, making an undo to it a no-op.
+    /// </summary>
+    /// <remarks>
+    /// InputField raises onEndEdit whenever it loses focus, whether or not the text changed, so
+    /// leaving a field - by Tab, by clicking elsewhere - commits it and records an edit that changed
+    /// nothing. Rather than have every widget work out whether its callback is a real change, those
+    /// entries are recognised here and skipped when the stack is popped.
+    /// </remarks>
+    public virtual bool HoldsValue(UndoStack.Value value)
+    {
+        if (Property == null || LinkedControllable == null || value.Values == null || value.Values.Count != 1)
+            return false;
+
+        var current = CaptureValue();
+        if (current.Values == null || current.Values.Count != 1)
+            return false;
+
+        return Equals(current.Values[0], value.Values[0]);
+    }
+
+    /// <summary>
+    /// Restores a value taken from the undo stack.
+    /// </summary>
+    /// <remarks>
+    /// It goes back through setFieldProp, the same path an edit takes, so the restore is clamped to
+    /// [Range], written through to the target script, sent over OSC and redrawn in the widget without
+    /// any of that being duplicated here.
+    /// </remarks>
+    public virtual void ApplyUndo(UndoStack.Value value)
+    {
+        if (Property == null || LinkedControllable == null)
+            return;
+
+        LinkedControllable.setFieldProp(Property, value.Values, value.IsEnum);
+    }
+
     /// <summary>A numeric field and the label whose drag scrubs it.</summary>
     public struct ScrubTarget
     {

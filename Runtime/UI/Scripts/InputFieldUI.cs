@@ -37,6 +37,8 @@ public class InputFieldUI : ControllableUI
 
         inputFieldComponent.onEndEdit.AddListener((value) =>
         {
+            RecordUndo();
+
             var list = new List<object>();
             var propertyType = property.FieldType;
             if (ShowDebug)

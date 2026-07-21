@@ -32,6 +32,8 @@ public class DropdownUI : ControllableUI
         dropdown.SetValueWithoutNotify(Mathf.Max(0, activeElementIndex));
         dropdown.onValueChanged.AddListener((value) =>
         {
+            RecordUndo();
+
             var associatedList = (List<string>)ListProperty.GetValue(LinkedControllable);
             string activeItem = associatedList[value];
 
@@ -60,9 +62,22 @@ public class DropdownUI : ControllableUI
         dropdown.SetValueWithoutNotify(Mathf.Max(0, TypeConverter.getIndexInEnum(enumNames, Property.GetValue(LinkedControllable)?.ToString() ?? "")));
         dropdown.onValueChanged.AddListener((value) =>
         {
+            RecordUndo();
+
             List<object> objParams = new List<object> { Enum.GetNames(enumType)[value] };
             LinkedControllable.setFieldProp(Property, objParams, true);
         });
+    }
+
+    //setFieldProp reads an enum value back as its name, so that is what the undo stack has to carry;
+    //the list route stores a plain string and the default capture already fits it.
+    public override UndoStack.Value CaptureValue()
+    {
+        if (enumType == null)
+            return base.CaptureValue();
+
+        var current = Property.GetValue(LinkedControllable);
+        return new UndoStack.Value(new List<object> { current == null ? "" : current.ToString() }, true);
     }
 
     public override void HandleTargetChange(string name)

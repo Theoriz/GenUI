@@ -29,6 +29,8 @@ public class Vector2IntUI : ControllableUI
 
         XInput.onEndEdit.AddListener((value) =>
         {
+            RecordUndo();
+
             var list = new List<object>();
             list.Add(TypeConverter.getInt(value.ToString()));
             list.Add(TypeConverter.getInt(YInput.text.ToString()));
@@ -38,6 +40,8 @@ public class Vector2IntUI : ControllableUI
 
         YInput.onEndEdit.AddListener((value) =>
         {
+            RecordUndo();
+
             var list = new List<object>();
             list.Add(TypeConverter.getInt(XInput.text.ToString()));
             list.Add(TypeConverter.getInt(value.ToString()));

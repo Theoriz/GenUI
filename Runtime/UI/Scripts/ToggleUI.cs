@@ -24,6 +24,8 @@ public class ToggleUI : ControllableUI
         toggle.interactable = isInteractible;
         toggle.onValueChanged.AddListener((value) =>
         {
+            RecordUndo();
+
             var list = new List<object>();
             list.Add(value);
             target.setFieldProp(property, list);
@@ -36,7 +38,10 @@ public class ToggleUI : ControllableUI
             return;
 
         var newValue = (bool)Property.GetValue(LinkedControllable);
-        toggle.isOn = newValue;
+
+        //Without notify: this is the widget catching up with a value that has already been written,
+        //so raising onValueChanged would write it straight back and record an edit the user never made.
+        toggle.SetIsOnWithoutNotify(newValue);
         if (newValue)
         { //GREEN
             var blockColors = toggle.colors;
