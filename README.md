@@ -7,7 +7,14 @@ This plugin allows you to simply create a UI for your application, exposing scri
 
 ## Requirements
 
-GenUI requires **Unity 2022.3** or later and the **Input System** package (`com.unity.inputsystem`), which sets that floor. There is no fallback to the legacy input backend, so set **Project Settings > Player > Active Input Handling** to *Input System Package* or *Both*.
+| Requirement | Notes |
+|---|---|
+| **Unity 2022.3** or later | Set by the Input System dependency below. |
+| **com.unity.inputsystem** | No fallback to the legacy input backend, so set **Project Settings > Player > Active Input Handling** to *Input System Package* or *Both*. |
+| **com.theoriz.ocf** 1.5.1 or later | GenUI is the UI layer on top of OCF; the control model, OSC addressing and presets all live there. |
+| **com.theoriz.unityosc** 1.3.0 or later | OCF's transport. Earlier versions still work but declare Unity 2019.4. |
+
+The packages declare no UPM `dependencies`, so nothing installs them for you and nothing warns you when a version is too old — install all three, in the order below.
 
 ## Installation
 
@@ -43,6 +50,7 @@ https://github.com/Theoriz/GenUI.git
 - PageUp / PageDown, or Ctrl + Plus/Minus (numpad included) : Scale up/down the UI, only when the UI is visible.
 - Ctrl + Left/Right/Up/Down arrow : Move the UI, only when the UI is visible.
 - F2 : Reset the UI, only when the UI is visible.
+- Tab / Shift + Tab : Move to the next/previous input field, selecting its text so you can type over it. Wraps around, skips read-only fields and collapsed panels, and scrolls the panel to keep the field visible.
 
 Scaling is ignored while you are typing in an input field.
 

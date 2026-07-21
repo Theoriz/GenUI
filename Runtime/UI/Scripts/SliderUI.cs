@@ -73,6 +73,13 @@ public class SliderUI : ControllableUI
             sliderComponent.value = TypeConverter.getInt(property.GetValue(target));
     }
 
+    //The numeric box beside the slider. The slider itself is not a field, so Tab skips it.
+    public override InputField[] GetInputFields()
+    {
+        var field = this.GetComponentInChildren<InputField>();
+        return field != null ? new[] { field } : base.GetInputFields();
+    }
+
     public override void HandleTargetChange(string name)
     {
         if (name != Property.Name && !String.IsNullOrEmpty(name))

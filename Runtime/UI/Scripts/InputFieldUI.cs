@@ -68,6 +68,12 @@ public class InputFieldUI : ControllableUI
         this.transform.GetChild(0).Find("Placeholder").gameObject.GetComponent<Text>().text = target.getPropInfoForAddress(property.Name).GetValue(target).ToString();
     }
 
+    public override InputField[] GetInputFields()
+    {
+        var field = this.transform.GetComponentInChildren<InputField>();
+        return field != null ? new[] { field } : base.GetInputFields();
+    }
+
     public override void HandleTargetChange(string name)
     {
         if (name != Property.Name && !String.IsNullOrEmpty(name))

@@ -51,6 +51,7 @@ public class UIMaster : MonoBehaviour
     private Dictionary<string, GameObject> _panels;
     private CanvasScaler _canvasScaler;
     private RectTransform _scrollViewTransform;
+    private ScrollRect _scrollRect;
 
     private float _uiScale = 1;
     private const float _uiScaleSpeed = 2;
@@ -103,9 +104,9 @@ public class UIMaster : MonoBehaviour
             return;
         }
 
-        var scrollRect = GetComponentInChildren<ScrollRect>(true);
-        if (scrollRect != null)
-            MainPanel = scrollRect.content;
+        _scrollRect = GetComponentInChildren<ScrollRect>(true);
+        if (_scrollRect != null)
+            MainPanel = _scrollRect.content;
         else
             Debug.LogError("[GenUI] No ScrollRect found under UIMaster; the panel container is missing.");
 
@@ -168,18 +169,121 @@ public class UIMaster : MonoBehaviour
     {
         if (Keyboard.current != null && Keyboard.current[toggleUIKey].wasPressedThisFrame)
         {
-			//Avoid toggling the UI if currently writing in an input field
-			if (EventSystem.current != null && EventSystem.current.currentSelectedGameObject) {
-				if (EventSystem.current.currentSelectedGameObject.GetComponent<InputField>()) {
-					return;
-				}
-			}
+            //Avoid toggling the UI if currently writing in an input field
+            if (FocusedInputField() != null)
+                return;
+
             ToggleUI();
         }
+
+        if (displayUI && Keyboard.current != null && Keyboard.current.tabKey.wasPressedThisFrame)
+            MoveFocus(backwards: Keyboard.current.shiftKey.isPressed);
 
         if(displayUI)
             UpdateUITransform();
 
+    }
+
+    #region Tab navigation
+
+    //Moves focus to the next editable field in the panel, wrapping at either end. Selecting the new
+    //field is all that is needed to commit the old one: InputField.OnDeselect deactivates it, which
+    //raises onEndEdit, and OnSelect activates the new one and selects its text.
+    void MoveFocus(bool backwards)
+    {
+        if (MainPanel == null || EventSystem.current == null)
+            return;
+
+        //Rebuilt per keypress rather than cached: panels are created and destroyed at runtime, and
+        //Tab is not a hot path.
+        var fields = CollectInputFields();
+        if (fields.Count == 0)
+            return;
+
+        var index = NextIndex(fields.IndexOf(FocusedInputField()), fields.Count, backwards);
+        var next = fields[index];
+
+        EventSystem.current.SetSelectedGameObject(next.gameObject);
+        ScrollIntoView((RectTransform)next.transform);
+    }
+
+    //Hierarchy order matches visual order, since the panels are laid out top to bottom. Widgets
+    //return their own fields so multi-field ones come out in x, y, z, w order.
+    List<InputField> CollectInputFields()
+    {
+        var fields = new List<InputField>();
+
+        //Inactive widgets are skipped, which is what keeps collapsed panels out of the sequence.
+        foreach (var widget in MainPanel.GetComponentsInChildren<ControllableUI>())
+        {
+            foreach (var field in widget.GetInputFields())
+            {
+                //Read-only members render as non-interactable fields; Tab should pass over them.
+                if (field != null && field.interactable && field.gameObject.activeInHierarchy)
+                    fields.Add(field);
+            }
+        }
+
+        return fields;
+    }
+
+    /// <summary>
+    /// The field to focus next. <paramref name="current"/> is -1 when nothing is focused, which
+    /// starts the sequence at either end depending on direction.
+    /// </summary>
+    public static int NextIndex(int current, int count, bool backwards)
+    {
+        if (count <= 0)
+            return -1;
+
+        if (current < 0)
+            return backwards ? count - 1 : 0;
+
+        return ((current + (backwards ? -1 : 1)) % count + count) % count;
+    }
+
+    //Without this, tabbing past the bottom of the view looks like Tab stopped working. Note this
+    //moves the scroll view's content, not _scrollViewTransform, which is what Ctrl+arrows move.
+    void ScrollIntoView(RectTransform field)
+    {
+        if (_scrollRect == null || _scrollRect.viewport == null || MainPanel == null)
+            return;
+
+        Canvas.ForceUpdateCanvases();
+
+        var viewport = _scrollRect.viewport;
+        var content = (RectTransform)MainPanel;
+
+        var fieldTop = viewport.InverseTransformPoint(field.TransformPoint(new Vector2(0, field.rect.yMax))).y;
+        var fieldBottom = viewport.InverseTransformPoint(field.TransformPoint(new Vector2(0, field.rect.yMin))).y;
+
+        var viewTop = viewport.rect.yMax;
+        var viewBottom = viewport.rect.yMin;
+
+        var delta = 0f;
+        if (fieldTop > viewTop)
+            delta = fieldTop - viewTop;
+        else if (fieldBottom < viewBottom)
+            delta = fieldBottom - viewBottom;
+
+        if (delta != 0f)
+            content.anchoredPosition -= new Vector2(0, delta);
+    }
+
+    #endregion
+
+    /// <summary>The input field the user is currently typing in, or null.</summary>
+    /// <remarks>
+    /// The shortcuts use this to stay out of the way while a value is being typed; Tab uses it, the
+    /// other way round, to work out where it currently is.
+    /// </remarks>
+    static InputField FocusedInputField()
+    {
+        if (EventSystem.current == null)
+            return null;
+
+        var selected = EventSystem.current.currentSelectedGameObject;
+        return selected != null ? selected.GetComponent<InputField>() : null;
     }
 
     public void RemoveUI(Controllable dyingControllable)
@@ -656,13 +760,8 @@ public class UIMaster : MonoBehaviour
             (Keyboard.current.ctrlKey.isPressed && (Keyboard.current.equalsKey.isPressed || Keyboard.current.numpadPlusKey.isPressed)))
         {
             //Avoid scaling the UI if currently writing in an input field
-            if (EventSystem.current != null && EventSystem.current.currentSelectedGameObject)
-            {
-                if (EventSystem.current.currentSelectedGameObject.GetComponent<InputField>())
-                {
-                    return;
-                }
-            }
+            if (FocusedInputField() != null)
+                return;
 
             UIScale += _uiScaleSpeed * Time.deltaTime;
         }
@@ -673,13 +772,8 @@ public class UIMaster : MonoBehaviour
             (Keyboard.current.ctrlKey.isPressed && (Keyboard.current.minusKey.isPressed || Keyboard.current.digit6Key.isPressed || Keyboard.current.numpadMinusKey.isPressed)))
         {
             //Avoid scaling the UI if currently writing in an input field
-            if (EventSystem.current != null && EventSystem.current.currentSelectedGameObject)
-            {
-                if (EventSystem.current.currentSelectedGameObject.GetComponent<InputField>())
-                {
-                    return;
-                }
-            }
+            if (FocusedInputField() != null)
+                return;
 
             UIScale -= _uiScaleSpeed * Time.deltaTime;
         }
@@ -690,13 +784,8 @@ public class UIMaster : MonoBehaviour
         if (Keyboard.current.ctrlKey.isPressed)
         {
             //Avoid scaling the UI if currently writing in an input field
-            if (EventSystem.current != null && EventSystem.current.currentSelectedGameObject)
-            {
-                if (EventSystem.current.currentSelectedGameObject.GetComponent<InputField>())
-                {
-                    return;
-                }
-            }
+            if (FocusedInputField() != null)
+                return;
 
             if (Keyboard.current.leftArrowKey.isPressed)
                 _scrollViewTransform.anchoredPosition += Vector2.left * _uiMovementSpeed * Time.deltaTime;

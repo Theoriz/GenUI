@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [1.6.1] - 2026-07-21
+
+### Added
+
+- Tab and Shift+Tab move between input fields, selecting the field's text and scrolling it into view.
+- The README's Requirements section now lists OCF and UnityOSC, with the minimum version of each.
+
 ## [1.6.0] - 2026-07-21
 
 **Requires com.theoriz.ocf 1.5.1 or later**, which adds the `GlobalActionMethodNames` array this reads.

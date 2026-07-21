@@ -51,6 +51,17 @@ public class Vector2UI : ControllableUI
         });
     }
 
+    //Named rather than indexed, so Tab visits x then y whatever order the prefab holds them in.
+    public override InputField[] GetInputFields()
+    {
+        return new[] { FindInput("XInput"), FindInput("YInput") };
+    }
+
+    InputField FindInput(string childName)
+    {
+        return this.transform.GetChild(0).Find(childName).GetChild(0).GetComponent<InputField>();
+    }
+
     public override void HandleTargetChange(string name)
     { 
         if (name != Property.Name && !String.IsNullOrEmpty(name))

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
@@ -23,6 +24,20 @@ public class ControllableUI : MonoBehaviour {
 
     public virtual void HandleTargetChange(string name)
     {
+    }
+
+    static readonly InputField[] _noInputFields = new InputField[0];
+
+    /// <summary>
+    /// The widget's editable fields, in the order Tab should visit them.
+    /// </summary>
+    /// <remarks>
+    /// Widgets return them explicitly rather than letting callers search the hierarchy: the vector
+    /// widgets find their inputs by name, so nothing else guarantees x, y, z, w order.
+    /// </remarks>
+    public virtual InputField[] GetInputFields()
+    {
+        return _noInputFields;
     }
 
     public void CopyAddressToClipboard()
