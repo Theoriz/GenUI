@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [1.5.0] - 2026-07-21
+
+**Requires com.theoriz.ocf 1.4.0 or later**, which raises the change event on OSC and preset writes.
+The packages declare no UPM dependencies, so update OCF yourself.
+
+### Changed
+
+- `SliderUI` and `ColorUI` no longer refresh their display by hand after writing a value, since OCF now raises the change event itself.
+
 ## [1.4.0] - 2026-07-21
 
 ### Changed

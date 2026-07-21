@@ -44,10 +44,6 @@ public class SliderUI : ControllableUI
                 list.Add(Mathf.Clamp(TypeConverter.getFloat(value), rangeAttribut.min, rangeAttribut.max));
 
             target.setFieldProp(property, list);
-
-            // The stored value may be clamped or unchanged, in which case no change event is
-            // raised, so refresh the display explicitly to keep it in step with the target.
-            HandleTargetChange("");
         });
 
         textComponent.text = ParseNameString(property.Name);
