@@ -85,6 +85,13 @@ public class UIMaster : MonoBehaviour
             ToggleUI();
     }
 
+    void Start()
+    {
+        // Checked in Start rather than Awake: by now every Awake/OnEnable in the scene has run, so
+        // an EventSystem another script created is seen and no false warning fires.
+        EventSystemCheck.WarnIfMissing();
+    }
+
     // Load the prefab set and resolve the panel + popup links without any serialized reference:
     // the panel is the scroll view's content, and the popups are instantiated from the prefab set.
     void ResolvePrefabsAndLinks()
@@ -162,7 +169,7 @@ public class UIMaster : MonoBehaviour
         if (Keyboard.current != null && Keyboard.current[toggleUIKey].wasPressedThisFrame)
         {
 			//Avoid toggling the UI if currently writing in an input field
-			if (EventSystem.current.currentSelectedGameObject) {
+			if (EventSystem.current != null && EventSystem.current.currentSelectedGameObject) {
 				if (EventSystem.current.currentSelectedGameObject.GetComponent<InputField>()) {
 					return;
 				}

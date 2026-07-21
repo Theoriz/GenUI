@@ -4,6 +4,27 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [1.4.0] - 2026-07-21
+
+### Changed
+
+- The GenUI prefab no longer contains an EventSystem, which conflicted with the one in any scene that already drives UI. Existing scenes keep theirs as an override.
+- `Theoriz > GenUI > Add GenUI to Scene` now also adds an EventSystem when the scene has none, and is safe to re-run.
+- Minimum Unity is now 2022.3, matching the Input System package GenUI requires.
+
+### Added
+
+- A warning at play time when the scene has no EventSystem.
+- `Tests/` folder with EditMode and PlayMode tests.
+
+### Removed
+
+- The unused `UICanvas.prefab`.
+
+### Fixed
+
+- The F1 shortcut threw when `EventSystem.current` was null.
+
 ## [1.3.1] - 2026-07-21
 
 ### Fixed

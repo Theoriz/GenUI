@@ -5,6 +5,10 @@ This plugin allows you to simply create a UI for your application, exposing scri
 
 ![Demo](https://github.com/Theoriz/GenUI-Demo/blob/master/gif/genui.gif) 
 
+## Requirements
+
+GenUI requires **Unity 2022.3** or later and the **Input System** package (`com.unity.inputsystem`), which sets that floor. There is no fallback to the legacy input backend, so set **Project Settings > Player > Active Input Handling** to *Input System Package* or *Both*.
+
 ## Installation
 
 Add the following line to your project's `Packages/manifest.json`:
@@ -43,7 +47,11 @@ https://github.com/Theoriz/GenUI.git
 Scaling is ignored while you are typing in an input field.
 
 ## Setup
-1. In the toolbar go to Theoriz -> GenUI -> Add GenUI to Scene. Or add the GenUI prefab from the Samples folder manually. 
+1. In the toolbar go to Theoriz -> GenUI -> Add GenUI to Scene. It adds the GenUI prefab, plus an EventSystem if the scene has none, and is safe to run again on a scene that already has either.
+
+> [!NOTE]
+> The UI needs an EventSystem to receive input, but GenUI does not provide one itself — a second EventSystem breaks any scene that already drives UI. If you add the GenUI prefab from the Samples folder manually instead, add an EventSystem yourself via GameObject -> UI -> Event System. GenUI logs a warning at play time when it finds none.
+
 2. Generate controllables for the scripts you want to control. You can use the manual or automatic workflow below.
 3. Run the scene, press F1 to toggle the UI.
 

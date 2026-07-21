@@ -2,7 +2,8 @@
     "name": "Theoriz.GenUI.Editor",
     "rootNamespace": "",
     "references": [
-        "Theoriz.GenUI.Runtime"
+        "Theoriz.GenUI.Runtime",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [
         "Editor"
