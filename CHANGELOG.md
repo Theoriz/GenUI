@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [1.3.1] - 2026-07-21
+
+### Fixed
+
+- Tooltips were clipped to a single line: the panel's layout group leaves child heights alone, so anything that wrapped or followed a line break was cut off. `TooltipUI` now sizes itself to the text it holds.
+
+### Changed
+
+- Tooltips keep a gap underneath, so they read as belonging to the widget above rather than the one below. The amount is `bottomSpacing` on `Tooltip.prefab`.
+- Tooltip text is dimmed relative to the widget labels.
+
 ## [1.3.0] - 2026-07-20
 
 **Requires com.theoriz.ocf 1.3.0 or later.** Preset auto-load and the removal of the Load / Load All
