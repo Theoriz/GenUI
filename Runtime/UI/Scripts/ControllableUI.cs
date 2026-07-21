@@ -15,6 +15,8 @@ public class ControllableUI : MonoBehaviour {
 
     public bool ShowDebug;
 
+    #region Widget lifetime
+
     public virtual void RemoveUI()
     {
         LinkedControllable.controllableValueChanged -= HandleTargetChange;
@@ -25,6 +27,10 @@ public class ControllableUI : MonoBehaviour {
     public virtual void HandleTargetChange(string name)
     {
     }
+
+    #endregion
+
+    #region Undo
 
     /// <summary>
     /// The value the widget's member holds right now, for the undo stack.
@@ -111,6 +117,10 @@ public class ControllableUI : MonoBehaviour {
         LinkedControllable.setFieldProp(Property, value.Values, value.IsEnum);
     }
 
+    #endregion
+
+    #region Fields the panel drives
+
     /// <summary>A numeric field and the label whose drag scrubs it.</summary>
     public struct ScrubTarget
     {
@@ -154,6 +164,10 @@ public class ControllableUI : MonoBehaviour {
         return _noInputFields;
     }
 
+    #endregion
+
+    #region Naming and address
+
     public void CopyAddressToClipboard()
     {
         GUIUtility.systemCopyBuffer = "/" + ControllableMaster.instance.RootOSCAddress + "/" + LinkedControllable.id + "/" + (Property == null ? Method.Name : Property.Name) ;
@@ -174,4 +188,6 @@ public class ControllableUI : MonoBehaviour {
         return _nameRegex.Replace(output, " ");
 
     }
+
+    #endregion
 }

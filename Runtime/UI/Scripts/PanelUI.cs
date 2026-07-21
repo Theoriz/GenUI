@@ -8,6 +8,8 @@ public class PanelUI : ControllableUI
 
     public bool IsExpanded = true;
 
+    #region Contents
+
     public void Init(Controllable target)
     {
         LinkedControllable = target;
@@ -31,6 +33,10 @@ public class PanelUI : ControllableUI
         foreach (var element in _uiElements)
             element.RemoveUI();
     }
+
+    #endregion
+
+    #region Fold and unfold
 
     public void HandleClickOnButton()
     {
@@ -75,4 +81,6 @@ public class PanelUI : ControllableUI
     //{
 
     //}
+
+    #endregion
 }

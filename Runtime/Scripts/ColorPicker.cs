@@ -10,6 +10,8 @@ public class ColorPicker : MonoBehaviour
 
     private Color _lastPushedColor;
 
+    #region MonoBehaviour
+
     private void OnEnable()
     {
         if (linkedUI)
@@ -32,4 +34,6 @@ public class ColorPicker : MonoBehaviour
             linkedUI.OnColorPickerUpdated(c);
         }
     }
+
+    #endregion
 }

@@ -35,6 +35,8 @@ public class DragValueUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     string _lastWritten;
     bool _scrubbing;
 
+    #region Setup
+
     public static void Attach(ControllableUI owner, ControllableUI.ScrubTarget target)
     {
         if (owner == null || target.Field == null || target.Label == null)
@@ -55,6 +57,10 @@ public class DragValueUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         //The label has to receive raycasts to be draggable at all.
         target.Label.raycastTarget = true;
     }
+
+    #endregion
+
+    #region Drag handling
 
     public void OnBeginDrag(PointerEventData eventData)
     {
@@ -118,6 +124,19 @@ public class DragValueUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         _scrubbing = false;
     }
 
+    //Hands the gesture to whatever handles it further up - the panel's ScrollRect - so dragging
+    //vertically over a label still scrolls.
+    void Forward<T>(PointerEventData eventData, ExecuteEvents.EventFunction<T> handler)
+        where T : IEventSystemHandler
+    {
+        if (transform.parent != null)
+            ExecuteEvents.ExecuteHierarchy(transform.parent.gameObject, eventData, handler);
+    }
+
+    #endregion
+
+    #region Value
+
     /// <summary>
     /// Value change for a horizontal drag of <paramref name="pixelsX"/> screen pixels.
     /// </summary>
@@ -155,12 +174,5 @@ public class DragValueUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             : 0;
     }
 
-    //Hands the gesture to whatever handles it further up - the panel's ScrollRect - so dragging
-    //vertically over a label still scrolls.
-    void Forward<T>(PointerEventData eventData, ExecuteEvents.EventFunction<T> handler)
-        where T : IEventSystemHandler
-    {
-        if (transform.parent != null)
-            ExecuteEvents.ExecuteHierarchy(transform.parent.gameObject, eventData, handler);
-    }
+    #endregion
 }

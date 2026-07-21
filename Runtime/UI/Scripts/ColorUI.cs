@@ -11,6 +11,8 @@ public class ColorUI : ControllableUI
     private Color _colorBeforePicker;
     private bool _picking;
 
+    #region Widget
+
     // Use this for initialization
     public void CreateUI(Controllable target, FieldInfo property, bool isInteractible)
     {
@@ -30,6 +32,10 @@ public class ColorUI : ControllableUI
 
         this.GetComponentInChildren<Image>().color = GetCurrentColorValue();
     }
+
+    #endregion
+
+    #region Colour picker
 
     public void BeginPickerEdit()
     {
@@ -62,4 +68,6 @@ public class ColorUI : ControllableUI
     {
         return (Color)Property.GetValue(LinkedControllable);
     }
+
+    #endregion
 }

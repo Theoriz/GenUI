@@ -71,6 +71,8 @@ public class UIMaster : MonoBehaviour
     private const float _uiScaleSpeed = 2;
     private const float _uiMovementSpeed = 500;
 
+    #region MonoBehaviour
+
     // Use this for initialization
     void Awake()
     {
@@ -109,6 +111,56 @@ public class UIMaster : MonoBehaviour
         EventSystemCheck.WarnIfMissing();
     }
 
+    void Update()
+    {
+        SuppressNavigationWhileCtrlHeld();
+
+        if (Keyboard.current != null && Keyboard.current[toggleUIKey].wasPressedThisFrame)
+        {
+            //Avoid toggling the UI if currently writing in an input field
+            if (FocusedInputField() != null)
+                return;
+
+            ToggleUI();
+        }
+
+        if (displayUI && Keyboard.current != null && Keyboard.current.tabKey.wasPressedThisFrame)
+            MoveFocus(backwards: Keyboard.current.shiftKey.isPressed);
+
+        //Deliberately not guarded by FocusedInputField(), unlike every other shortcut here: the other
+        //ones step out of the way while a value is being typed, whereas undo is precisely what the
+        //user wants after typing one.
+        if (displayUI && Keyboard.current != null && Keyboard.current.ctrlKey.isPressed)
+        {
+            var undoKey = UndoKey();
+            if (undoKey != null && undoKey.wasPressedThisFrame)
+                UndoLastEdit();
+        }
+
+        if(displayUI)
+            UpdateUITransform();
+
+    }
+
+    void OnDestroy()
+    {
+        // Static event: must unsubscribe or destroyed instances keep receiving
+        // callbacks when Domain Reload is disabled
+        ControllableMaster.controllableAdded -= CreateUI;
+        ControllableMaster.controllableRemoved -= RemoveUI;
+
+        //The EventSystem outlives this panel, so navigation must not be left switched off on it.
+        if (_navigationSuppressed && EventSystem.current != null)
+            EventSystem.current.sendNavigationEvents = _navigationWasEnabled;
+
+        if (Instance == this)
+            Instance = null;
+    }
+
+    #endregion
+
+    #region Setup
+
     // Load the prefab set and resolve the panel + popup links without any serialized reference:
     // the panel is the scroll view's content, and the popups are instantiated from the prefab set.
     void ResolvePrefabsAndLinks()
@@ -135,20 +187,9 @@ public class UIMaster : MonoBehaviour
         colorPicker = colorPickerObject.GetComponentInChildren<ColorPicker>(true);
     }
 
-    void OnDestroy()
-    {
-        // Static event: must unsubscribe or destroyed instances keep receiving
-        // callbacks when Domain Reload is disabled
-        ControllableMaster.controllableAdded -= CreateUI;
-        ControllableMaster.controllableRemoved -= RemoveUI;
+    #endregion
 
-        //The EventSystem outlives this panel, so navigation must not be left switched off on it.
-        if (_navigationSuppressed && EventSystem.current != null)
-            EventSystem.current.sendNavigationEvents = _navigationWasEnabled;
-
-        if (Instance == this)
-            Instance = null;
-    }
+    #region Visibility
 
     public void ToggleUI()
     {
@@ -185,36 +226,9 @@ public class UIMaster : MonoBehaviour
         return displayUI;
     }
 
-    void Update()
-    {
-        SuppressNavigationWhileCtrlHeld();
+    #endregion
 
-        if (Keyboard.current != null && Keyboard.current[toggleUIKey].wasPressedThisFrame)
-        {
-            //Avoid toggling the UI if currently writing in an input field
-            if (FocusedInputField() != null)
-                return;
-
-            ToggleUI();
-        }
-
-        if (displayUI && Keyboard.current != null && Keyboard.current.tabKey.wasPressedThisFrame)
-            MoveFocus(backwards: Keyboard.current.shiftKey.isPressed);
-
-        //Deliberately not guarded by FocusedInputField(), unlike every other shortcut here: the other
-        //ones step out of the way while a value is being typed, whereas undo is precisely what the
-        //user wants after typing one.
-        if (displayUI && Keyboard.current != null && Keyboard.current.ctrlKey.isPressed)
-        {
-            var undoKey = UndoKey();
-            if (undoKey != null && undoKey.wasPressedThisFrame)
-                UndoLastEdit();
-        }
-
-        if(displayUI)
-            UpdateUITransform();
-
-    }
+    #region Keyboard shortcuts
 
     //Puts the last value edited in the UI back to what it held before that edit. The widget restores
     //it through setFieldProp, the same path an edit takes, so the target script and OSC follow.
@@ -304,16 +318,21 @@ public class UIMaster : MonoBehaviour
         return key != null && key.isPressed;
     }
 
-    //Every numeric widget gets its label wired for drag-to-scrub here rather than in each widget's
-    //CreateUI, so the seven of them share one call site.
-    static void AttachValueDragging(Transform panel)
+    /// <summary>The input field the user is currently typing in, or null.</summary>
+    /// <remarks>
+    /// The shortcuts use this to stay out of the way while a value is being typed; Tab uses it, the
+    /// other way round, to work out where it currently is.
+    /// </remarks>
+    static InputField FocusedInputField()
     {
-        foreach (var widget in panel.GetComponentsInChildren<ControllableUI>(true))
-        {
-            foreach (var target in widget.GetScrubTargets())
-                DragValueUI.Attach(widget, target);
-        }
+        if (EventSystem.current == null)
+            return null;
+
+        var selected = EventSystem.current.currentSelectedGameObject;
+        return selected != null ? selected.GetComponent<InputField>() : null;
     }
+
+    #endregion
 
     #region Tab navigation
 
@@ -403,18 +422,17 @@ public class UIMaster : MonoBehaviour
 
     #endregion
 
-    /// <summary>The input field the user is currently typing in, or null.</summary>
-    /// <remarks>
-    /// The shortcuts use this to stay out of the way while a value is being typed; Tab uses it, the
-    /// other way round, to work out where it currently is.
-    /// </remarks>
-    static InputField FocusedInputField()
-    {
-        if (EventSystem.current == null)
-            return null;
+    #region Panel building
 
-        var selected = EventSystem.current.currentSelectedGameObject;
-        return selected != null ? selected.GetComponent<InputField>() : null;
+    //Every numeric widget gets its label wired for drag-to-scrub here rather than in each widget's
+    //CreateUI, so the seven of them share one call site.
+    static void AttachValueDragging(Transform panel)
+    {
+        foreach (var widget in panel.GetComponentsInChildren<ControllableUI>(true))
+        {
+            foreach (var target in widget.GetScrubTargets())
+                DragValueUI.Attach(widget, target);
+        }
     }
 
     public void RemoveUI(Controllable dyingControllable)
@@ -811,6 +829,8 @@ public class UIMaster : MonoBehaviour
     {
         ControllableMaster.RefreshAllPresets();
     }
+
+    #endregion
 
     #region Right Click Menu
 
