@@ -65,12 +65,10 @@ Scaling is ignored while you are typing in an input field.
 > [!WARNING]
 > Do not reuse a name that "Controllable" already declares — `Save`, `id`, `debug` and `name` are the ones most often hit. The generated Controllable inherits from "Controllable", so a member of the same name shadows the real one and breaks it. The generator refuses these and tells you which member to rename. See [Reserved names](https://github.com/Theoriz/OCF#reserved-names) in the OCF documentation.
 
-2. On the script component of your script in your scene, click on the three dots on the top right and choose Add Controllable. It will prompt you to generate a Controllable script, click Generate.
+2. On the script component of your script in your scene, click on the three dots on the top right and choose Add Controllable. It will prompt you to generate a Controllable script, click Generate. Once compilation finishes, the Controllable component is added and set up automatically.
 
 > [!TIP]
-> You can also generate a controllable directly from the project window by right-clicking on a script and choosing Generate Controllable Script.
-
-3. Once the Controllable is generated and compiled, click on the three dots on the top right and choose Add Controllable again. This time it should add the Controllable component and set it up automatically.
+> You can also generate a controllable directly from the project window by right-clicking on a script and choosing Generate Controllable Script. That route only writes the script — there is no GameObject involved — so add the component yourself afterwards.
 
 ### Manual Controllable Generation (Advanced - More Options)
 

@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [1.5.1] - 2026-07-21
+
+### Fixed
+
+- The setup steps no longer tell you to choose `Add Controllable` a second time, which OCF 1.4.1 made unnecessary.
+
 ## [1.5.0] - 2026-07-21
 
 **Requires com.theoriz.ocf 1.4.0 or later**, which raises the change event on OSC and preset writes.

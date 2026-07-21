@@ -1,6 +1,6 @@
 {
   "name": "com.theoriz.genui",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "displayName": "GenUI",
   "description": "Generative UI and OSC control for Unity",
   "unity": "2022.3",
