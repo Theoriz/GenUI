@@ -369,16 +369,24 @@ public class UIMaster : MonoBehaviour
         var presetHolder = lastPanel.Find("PresetHolder");
         var isGlobalPresetPanel = controllable is ControllableMasterControllable;
 
-        //Create the global preset holder up front, while PresetHolder is still empty. Cloning it
+        //Create the global holders up front, while PresetHolder is still empty. Cloning them
         //lazily once the first SaveAll button appears would copy the Save/Load buttons already
-        //reparented into PresetHolder, stacking them into this top row too.
+        //reparented into PresetHolder, stacking them into these top rows too.
         Transform globalPresetHolder = null;
+        Transform globalActionHolder = null;
         if (isGlobalPresetPanel)
         {
             globalPresetHolder = Instantiate(presetHolder);
             globalPresetHolder.name = "AllPresetHolder";
             globalPresetHolder.SetParent(lastPanel);
             globalPresetHolder.SetSiblingIndex(1); //Set first
+
+            //Own row, directly under the preset row: these buttons have long labels and do not fit
+            //alongside Save All / Save As All.
+            globalActionHolder = Instantiate(presetHolder);
+            globalActionHolder.name = "GlobalActionHolder";
+            globalActionHolder.SetParent(lastPanel);
+            globalActionHolder.SetSiblingIndex(2);
         }
 
         var allButtons = lastPanel.GetComponentsInChildren<ButtonUI>();
@@ -399,7 +407,17 @@ public class UIMaster : MonoBehaviour
             {
                 button.transform.SetParent(globalPresetHolder);
             }
+
+            if (isGlobalPresetPanel &&
+                Array.IndexOf(ControllableMasterControllable.GlobalActionMethodNames, button.Method.Name) >= 0)
+            {
+                button.transform.SetParent(globalActionHolder);
+            }
         }
+
+        //Nothing landed in it, so it would otherwise render as an empty strip.
+        if (globalActionHolder != null && globalActionHolder.childCount == 0)
+            globalActionHolder.gameObject.SetActive(false);
 
         if (usePreset)
         {

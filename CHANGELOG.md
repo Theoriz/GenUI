@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [1.6.0] - 2026-07-21
+
+**Requires com.theoriz.ocf 1.5.1 or later**, which adds the `GlobalActionMethodNames` array this reads.
+The packages declare no UPM dependencies, so update OCF yourself.
+
+### Added
+
+- Buttons named in `ControllableMasterControllable.GlobalActionMethodNames` get their own row under Save All / Save As All, instead of being squeezed in beside them.
+
 ## [1.5.1] - 2026-07-21
 
 ### Fixed
