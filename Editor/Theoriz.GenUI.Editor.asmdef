@@ -3,6 +3,7 @@
     "rootNamespace": "",
     "references": [
         "Theoriz.GenUI.Runtime",
+        "Theoriz.OCF.Runtime",
         "Unity.InputSystem"
     ],
     "includePlatforms": [

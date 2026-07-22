@@ -443,8 +443,6 @@ public class UIMaster : MonoBehaviour
 
     public void RemoveUI(Controllable dyingControllable)
     {
-        if (!dyingControllable.controllableUsePanel) return;
-        
         if (showDebug)
             Debug.Log("Removing UI for " + dyingControllable.controllableId);
 
@@ -460,10 +458,14 @@ public class UIMaster : MonoBehaviour
 
     public void CreateUI(Controllable newControllable)
     {
-        if(showDebug)
-            Debug.Log("Adding " + newControllable.controllableId + ", use panel : " + newControllable.controllableUsePanel);
+        //Panel appearance is GenUI's own, so it comes from an optional sibling component rather than
+        //from the Controllable; see GenUIPanelSettings.
+        var usePanel = GenUIPanelSettings.UsePanel(newControllable);
 
-        if (!newControllable.controllableUsePanel) return;
+        if(showDebug)
+            Debug.Log("Adding " + newControllable.controllableId + ", use panel : " + usePanel);
+
+        if (!usePanel) return;
 
         if (_panels.ContainsKey(newControllable.controllableId))
         {
@@ -472,14 +474,16 @@ public class UIMaster : MonoBehaviour
             return;
         }
 
+        var barColor = GenUIPanelSettings.BarColorFor(newControllable);
+
         //First we create a panel for the controllable
         var newControllableHolder = Instantiate(_prefabs.PanelPrefab);
-        newControllableHolder.transform.GetChild(0).GetComponent<Image>().color = newControllable.controllableBarColor;
+        newControllableHolder.transform.GetChild(0).GetComponent<Image>().color = barColor;
         newControllableHolder.transform.SetParent(MainPanel.transform);
 
         var newPanel = newControllableHolder.transform.GetChild(1).gameObject;
         newPanel.GetComponentInChildren<Text>().text = newControllable.controllableId;
-        newPanel.transform.GetChild(0).GetChild(0).GetComponentInChildren<Image>().color = newControllable.controllableBarColor;
+        newPanel.transform.GetChild(0).GetChild(0).GetComponentInChildren<Image>().color = barColor;
 
         _panels.Add(newControllable.controllableId, newControllableHolder);
 
@@ -703,7 +707,7 @@ public class UIMaster : MonoBehaviour
         lastPanel.GetComponent<PanelUI>().Init(controllable);
 
         //Close panel if needed
-        if (controllable.controllableClosePanelAtStart)
+        if (GenUIPanelSettings.ClosePanelAtStart(controllable))
             _panels[controllableId].GetComponentInChildren<PanelUI>().Close();
         else
             _panels[controllableId].GetComponentInChildren<PanelUI>().Open();

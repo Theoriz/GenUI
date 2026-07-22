@@ -223,6 +223,7 @@ GameObject:
   - component: {fileID: 114736921750431862}
   - component: {fileID: 114445698576836282}
   - component: {fileID: 114363137817556764}
+  - component: {fileID: 8455362172519023123}
   m_Layer: 5
   m_Name: GenUI
   m_TagString: Untagged
@@ -298,21 +299,33 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   controllableTargetScript: {fileID: 114445698576836282}
-  controllableBarColor: {r: 0.8773585, g: 0.2163677, b: 0.2027857, a: 1}
   controllableId: GenUI
   controllableFolder: 
   controllableDebug: 0
   controllableTargetDirectory: 
   controllableSourceScene: 
-  controllableUsePanel: 1
   controllableUsePresets: 1
-  controllableClosePanelAtStart: 0
   controllableCurrentPreset: 
   controllablePresetList: []
   IPAddress: 
   OSCInputPort: -1
   IncrementalConnect: 0
   IsConnected: 0
+--- !u!114 &8455362172519023123
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1277216160771640}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc0d1a7a555f8504ebe9755a61d8ae89, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Theoriz.GenUI.Runtime::GenUIPanelSettings
+  barColor: {r: 0.877358, g: 0.2163677, b: 0.2027857, a: 1}
+  usePanel: 1
+  closePanelAtStart: 0
 --- !u!1 &1583843473221896
 GameObject:
   m_ObjectHideFlags: 0

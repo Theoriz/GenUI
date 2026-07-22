@@ -38,7 +38,7 @@ namespace Theoriz.GenUI.Tests.Editor
         [TestCase("ControllableOpenPresetsFolder", "Open Presets Folder")]
         [TestCase("ControllableLoadWithName", "Load With Name")]
         [TestCase("controllableCurrentPreset", "Current Preset")]
-        [TestCase("controllableBarColor", "Bar Color")]
+        [TestCase("controllablePresetList", "Preset List")]
         [TestCase("controllableTargetScript", "Target Script")]
         public void PrefixedMembers_KeepTheLabelTheyHadBeforeThePrefix(string member, string expected)
         {

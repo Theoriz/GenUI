@@ -99,8 +99,8 @@ Writing the Controllable yourself is the only way to reach the [OCFProperty] opt
 5. For each method you want to expose. Add a method in the Controllable with the [OCFMethod] attribute. Then call the method from the controlled script as shown in the example below.
 6. Add the controllable script to a gameobject in your scene.
 7. Link the controllableTargetScript of the Controllable instance to the corresponding script component.
-8. Set the desired bar color, it controls color of the panel bar of this controllable in the UI.
-9. Set the desired ID, it controls the name of the panel in the UI, and the name used in the OSC address.
+8. Set the desired ID, it controls the name of the panel in the UI, and the name used in the OSC address.
+9. To choose the panel's bar color, or whether it has a panel at all, add a GenUI Panel Settings component — see [Panel settings](#panel-settings). It is optional; without it the panel is drawn with a color derived from the ID.
 
 <details><summary>CONTROLLABLE EXAMPLE</summary>
 <p>
@@ -137,6 +137,20 @@ public class MyScriptControllable : Controllable {
 
 </p>
 </details>
+
+## Panel settings
+
+How a controllable's panel looks is GenUI's business, so it lives on a **GenUI Panel Settings** component next to the Controllable rather than on the Controllable itself:
+
+| Field | Default | Effect |
+|---|---|---|
+| `barColor` | a color derived from the controllable's ID | Color of the panel's title bar. |
+| `usePanel` | on | Uncheck to give this controllable no panel at all. It stays controllable over OSC. |
+| `closePanelAtStart` | on | Uncheck to have the panel start open. |
+
+The component is optional, and nothing adds it for you: a Controllable without one draws its panel with the defaults above, and because the bar color is derived from the ID rather than left white, every panel already has its own color with no setup at all.
+
+Add it only to change one of the three. Click the three dots on the Controllable and choose **Add GenUI Panel Settings** — it starts on the color the panel already had, so adding it changes nothing until you edit it.
 
 ## Supported types
 You can expose the following types :

@@ -10,6 +10,7 @@ Requires OCF 2.0.0 or later.
 
 ### Added
 
+- An optional `GenUIPanelSettings` component holding a controllable's bar color, whether it has a panel and whether that panel starts closed, added from the Controllable's three-dots menu.
 - Enum members render as a dropdown from `[OCFExposed]` alone, with no hand-written mirror.
 - A member marked `[OCFExposed(targetList = "myList")]` renders as a dropdown over a `List<string>` on the same script.
 
@@ -20,6 +21,8 @@ Requires OCF 2.0.0 or later.
 - An enum dropdown reads its members from the field's type, so an enum in any assembly or nested in another type works.
 - A `[Flags]` enum logs a warning and draws no widget, since one dropdown cannot represent a combination of members. It stays controllable over OSC.
 - A `targetList` naming no `List<string>` logs a warning and draws no widget instead of throwing.
+- **Breaking:** The bar color, use-panel and close-at-start settings move off OCF's `Controllable` onto `GenUIPanelSettings` and are not migrated, so set them again on the controllables where they were not left at their defaults.
+- A controllable with no `GenUIPanelSettings` takes its bar color from its ID, so panels stay told apart without one.
 - **Breaking:** `UndoStack.Value` no longer carries `IsEnum`; its constructor takes only the value list.
 - **Breaking:** both `DropdownUI.CreateUI` overloads changed signature — the list route takes the `targetList` name and the enum route takes a `Type`.
 - **Breaking:** GenUI reads OCF's renamed members and attributes, so it requires OCF 2.0.0 and will not compile against an earlier version.
