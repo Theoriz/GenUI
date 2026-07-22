@@ -74,10 +74,10 @@ The field itself stays a normal text box — click it to type.
 
 ### Automatic Controllable Generation (Easy - Recommended)
 
-1. In your MonoBehaviour script, add the [OSCExposed] attribute to the fields, properties and methods you want to expose to the UI and OSC.
+1. In your MonoBehaviour script, add the [OCFExposed] attribute to the fields, properties and methods you want to expose to the UI and OSC.
 
 > [!TIP]
-> You can set some fields or properties as read only by using [OSCExposed(readOnly = true)].
+> You can set some fields or properties as read only by using [OCFExposed(readOnly = true)].
 
 > [!WARNING]
 > Do not reuse a name that "Controllable" already declares. Since OCF 2.0.0 those all carry a `controllable` prefix, so the names most often hit are Unity's own — `name` above all. The generated Controllable inherits from "Controllable", so a member of the same name shadows the real one and breaks it. The generator refuses these and tells you which member to rename. See [Reserved names](https://github.com/Theoriz/OCF#reserved-names) in the OCF documentation.
@@ -92,11 +92,11 @@ The field itself stays a normal text box — click it to type.
 
 ### Manual Controllable Generation (Advanced - More Options)
 
-Writing the Controllable yourself is the only way to reach the [OSCProperty] options that have no [OSCExposed] equivalent — `includeInPresets` and `showInUI`. (`readOnly` and `targetList` need no hand-written mirror: use [OSCExposed(readOnly = true)] or [OSCExposed(targetList = "myList")] and the generator forwards them.) They are documented in [OSCProperty options](https://github.com/Theoriz/OCF#oscproperty-options) in the OCF documentation.
+Writing the Controllable yourself is the only way to reach the [OCFProperty] options that have no [OCFExposed] equivalent — `includeInPresets` and `showInUI`. (`readOnly` and `targetList` need no hand-written mirror: use [OCFExposed(readOnly = true)] or [OCFExposed(targetList = "myList")] and the generator forwards them.) They are documented in [OCFProperty options](https://github.com/Theoriz/OCF#ocfproperty-options) in the OCF documentation.
 
 1. Create a new script inheriting from "Controllable". It will be the interface for the script you want to control.
-2. For each field or property you want to control with UI/OSC, add a field in the Controllable with the [OSCProperty] attribute and **the exact same name** as the corresponding field or property in the script you want to control.
-5. For each method you want to expose. Add a method in the Controllable with the [OSCMethod] attribute. Then call the method from the controlled script as shown in the example below.
+2. For each field or property you want to control with UI/OSC, add a field in the Controllable with the [OCFProperty] attribute and **the exact same name** as the corresponding field or property in the script you want to control.
+5. For each method you want to expose. Add a method in the Controllable with the [OCFMethod] attribute. Then call the method from the controlled script as shown in the example below.
 6. Add the controllable script to a gameobject in your scene.
 7. Link the controllableTargetScript of the Controllable instance to the corresponding script component.
 8. Set the desired bar color, it controls color of the panel bar of this controllable in the UI.
@@ -109,27 +109,27 @@ Writing the Controllable yourself is the only way to reach the [OSCProperty] opt
 public class MyScriptControllable : Controllable {
 
 	// Expose variables from MyScript to OSC by creating OSCProperties with the name of those variables
-	[OSCProperty]
+	[OCFProperty]
 	public int intParameter;
 
-	[OSCProperty]
+	[OCFProperty]
 	public float floatParameter;
 	
-	[OSCProperty][Range(0,1)]
+	[OCFProperty][Range(0,1)]
 	public float floatParameterWithRange;
 	
-	[OSCProperty(readOnly = true)]
+	[OCFProperty(readOnly = true)]
 	public bool readOnlyBoolParameter;
 
 	//Create OSC methods to call methods from myScript
-	[OSCMethod]
-	public void MyOSCMethod() {
+	[OCFMethod]
+	public void MyOCFMethod() {
 		(controllableTargetScript as MyScript).MyScriptMethod();
 	}
 
 	//You can expose methods with arguments, but they will not show in the UI
-	[OSCMethod]
-	public void MyOSCMethodWithArgs(float arg0, int arg1, string arg2) {
+	[OCFMethod]
+	public void MyOCFMethodWithArgs(float arg0, int arg1, string arg2) {
 		(controllableTargetScript as MyScript).MyScriptMethodWithArgs(arg0, arg1, arg2);
 	}
 }
@@ -153,9 +153,9 @@ You can expose the following types :
 
 - any enum
 
-An enum renders as a dropdown of its members and needs nothing beyond [OSCExposed] — see [Exposing an enum](https://github.com/Theoriz/OCF#exposing-an-enum) in the OCF documentation. A `[Flags]` enum is the one exception: it logs a warning and draws no widget, because one dropdown cannot represent a combination of members. It is controllable over OSC.
+An enum renders as a dropdown of its members and needs nothing beyond [OCFExposed] — see [Exposing an enum](https://github.com/Theoriz/OCF#exposing-an-enum) in the OCF documentation. A `[Flags]` enum is the one exception: it logs a warning and draws no widget, because one dropdown cannot represent a combination of members. It is controllable over OSC.
 
-A string member marked [OSCExposed(targetList = "myList")] also renders as a dropdown, over the entries of a `List<string>` on the same script — see [Exposing a list](https://github.com/Theoriz/OCF#exposing-a-list).
+A string member marked [OCFExposed(targetList = "myList")] also renders as a dropdown, over the entries of a `List<string>` on the same script — see [Exposing a list](https://github.com/Theoriz/OCF#exposing-a-list).
 
 Exposing a type that is not in this list logs a warning and draws no widget.
 
@@ -191,7 +191,7 @@ It is also possible to load a specific file via the OSC method "ControllableLoad
 ```
 
 ## Expose a List
-To expose a string list you have to create an index string variable which will be used by the dropdown menu as an index. It will allow you to know which element of the list is selected. Simply specify [OSCProperty(targetList = "yourListName")].
+To expose a string list you have to create an index string variable which will be used by the dropdown menu as an index. It will allow you to know which element of the list is selected. Simply specify [OCFProperty(targetList = "yourListName")].
 
 See [Exposing a list](https://github.com/Theoriz/OCF#exposing-a-list) in the OCF documentation for a full example.
 

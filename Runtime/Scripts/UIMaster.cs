@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
@@ -487,7 +487,7 @@ public class UIMaster : MonoBehaviour
         foreach (var property in newControllable.controllableFields)
         {
             var propertyType = property.Value.FieldType;
-            OSCProperty attribute = Attribute.GetCustomAttribute(property.Value, typeof(OSCProperty)) as OSCProperty;
+            OCFProperty attribute = Attribute.GetCustomAttribute(property.Value, typeof(OCFProperty)) as OCFProperty;
 
             //Check if needs to be in UI
             if (!attribute.showInUI) continue;
@@ -778,9 +778,9 @@ public class UIMaster : MonoBehaviour
 
     private void CreateButton(Transform parent, Controllable target, ClassMethodInfo method)
     {
-        //Methods marked [OSCMethod(showInUI = false)] stay OSC-callable but get no button.
-        var oscMethod = Attribute.GetCustomAttribute(method.methodInfo, typeof(OSCMethod)) as OSCMethod;
-        if (oscMethod != null && !oscMethod.showInUI)
+        //Methods marked [OCFMethod(showInUI = false)] stay OSC-callable but get no button.
+        var ocfMethod = Attribute.GetCustomAttribute(method.methodInfo, typeof(OCFMethod)) as OCFMethod;
+        if (ocfMethod != null && !ocfMethod.showInUI)
             return;
 
         //As we can't expose parameter in UI, ignore methods with arguments

@@ -10,8 +10,8 @@ Requires OCF 2.0.0 or later.
 
 ### Added
 
-- Enum members render as a dropdown from `[OSCExposed]` alone, with no hand-written mirror.
-- A member marked `[OSCExposed(targetList = "myList")]` renders as a dropdown over a `List<string>` on the same script.
+- Enum members render as a dropdown from `[OCFExposed]` alone, with no hand-written mirror.
+- A member marked `[OCFExposed(targetList = "myList")]` renders as a dropdown over a `List<string>` on the same script.
 
 ### Changed
 
@@ -22,7 +22,8 @@ Requires OCF 2.0.0 or later.
 - A `targetList` naming no `List<string>` logs a warning and draws no widget instead of throwing.
 - **Breaking:** `UndoStack.Value` no longer carries `IsEnum`; its constructor takes only the value list.
 - **Breaking:** both `DropdownUI.CreateUI` overloads changed signature — the list route takes the `targetList` name and the enum route takes a `Type`.
-- **Breaking:** GenUI reads OCF's renamed members, so it requires OCF 2.0.0 and will not compile against an earlier version.
+- **Breaking:** GenUI reads OCF's renamed members and attributes, so it requires OCF 2.0.0 and will not compile against an earlier version.
+- **Breaking:** OCF's attributes are renamed from `OSC` to `OCF`, so `[OSCExposed]`, `[OSCProperty]` and `[OSCMethod]` become `[OCFExposed]`, `[OCFProperty]` and `[OCFMethod]`; rename them in your scripts and hand-written mirrors.
 - Widget and button labels drop the `controllable` prefix OCF 2.0.0 added, so every panel reads exactly as it did before.
 
 ## [1.7.1] - 2026-07-22
