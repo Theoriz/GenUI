@@ -54,7 +54,7 @@ public class ColorUI : ControllableUI
         if (GetCurrentColorValue() == _colorBeforePicker)
             return;
 
-        RecordUndo(new UndoStack.Value(new List<object> { _colorBeforePicker }, false));
+        RecordUndo(new UndoStack.Value(new List<object> { _colorBeforePicker }));
     }
 
     public void OnColorPickerUpdated(Color newColor)

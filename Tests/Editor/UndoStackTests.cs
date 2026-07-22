@@ -57,7 +57,7 @@ namespace Theoriz.GenUI.Tests.Editor
 
         static UndoStack.Value ValueOf(float number)
         {
-            return new UndoStack.Value(new List<object> { number }, false);
+            return new UndoStack.Value(new List<object> { number });
         }
 
         static float NumberIn(UndoStack.Entry entry)

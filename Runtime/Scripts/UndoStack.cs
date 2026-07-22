@@ -15,12 +15,10 @@ public class UndoStack
     public struct Value
     {
         public List<object> Values;
-        public bool IsEnum;
 
-        public Value(List<object> values, bool isEnum)
+        public Value(List<object> values)
         {
             Values = values;
-            IsEnum = isEnum;
         }
     }
 

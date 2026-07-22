@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,76 +8,96 @@ using System;
 
 public class DropdownUI : ControllableUI
 {
-    [System.NonSerialized] public FieldInfo ListProperty;
+    //Set by whichever CreateUI ran: a list-backed dropdown carries the name of the List<string> its
+    //entries come from, an enum-backed one carries the enum's Type.
+    [System.NonSerialized] public string TargetListName;
     [System.NonSerialized] public Type enumType = null;
 
-    // Use this for initialization
-    public void CreateUI(Controllable target, FieldInfo listProperty, FieldInfo activeElement) {
+    //An enum's members never change, so its options and values are read once. The list route has to
+    //re-read its entries instead: they can be added to at runtime, as presetList is.
+    string[] _enumNames;
+    Array _enumValues;
 
-        ListProperty = listProperty;
+    #region Creation
+
+    /// <summary>A dropdown over the entries of a <c>List&lt;string&gt;</c> named by `targetList`.</summary>
+    public void CreateUI(Controllable target, string targetListName, FieldInfo activeElement) {
+
+        TargetListName = targetListName;
         Property = activeElement;
         LinkedControllable = target;
         LinkedControllable.controllableValueChanged += HandleTargetChange;
-
-        var listInObject = (List<string>)ListProperty.GetValue(LinkedControllable);
-        var activeElementIndex = TypeConverter.getIndexInEnum(listInObject, Property.GetValue(LinkedControllable).ToString());
 
         var text = this.transform.GetChild(0).GetComponent<Text>();
         text.text = ParseNameString(activeElement.Name);
 
         var dropdown = this.GetComponentInChildren<Dropdown>();
-        dropdown.AddOptions(listInObject);
+        dropdown.AddOptions(GetListEntries());
         //SetValueWithoutNotify: only a genuine user selection should fire onValueChanged (which loads
         //the selected preset). Programmatic updates here and in HandleTargetChange must not.
-        dropdown.SetValueWithoutNotify(Mathf.Max(0, activeElementIndex));
+        dropdown.SetValueWithoutNotify(Mathf.Max(0, GetSelectedListIndex()));
         dropdown.onValueChanged.AddListener((value) =>
         {
             RecordUndo();
 
-            var associatedList = (List<string>)ListProperty.GetValue(LinkedControllable);
-            string activeItem = associatedList[value];
+            var entries = GetListEntries();
+            if (value < 0 || value >= entries.Count)
+                return;
 
-            List<object> objParams = new List<object> { activeItem };
+            List<object> objParams = new List<object> { entries[value] };
             LinkedControllable.setFieldProp(Property, objParams);
         });
     }
 
-    // Use this for initialization
-    public void CreateUI(Controllable target, FieldInfo activeElement, string _enumName)
+    /// <summary>A dropdown over the members of an enum, taken from the member's own type.</summary>
+    public void CreateUI(Controllable target, FieldInfo activeElement, Type _enumType)
     {
         Property = activeElement;
         LinkedControllable = target;
         LinkedControllable.controllableValueChanged += HandleTargetChange;
 
-        enumType = Type.GetType(_enumName);
-        if (enumType == null)
-            Debug.LogError("Can't find Enum " + _enumName + ", if GenUI is in Plugin folder move it outside from it.");
+        enumType = _enumType;
+        _enumNames = Enum.GetNames(enumType);
+        _enumValues = Enum.GetValues(enumType);
 
         var text = this.transform.GetChild(0).GetComponent<Text>();
         text.text = ParseNameString(activeElement.Name);
 
         var dropdown = this.GetComponentInChildren<Dropdown>();
-        var enumNames = Enum.GetNames(enumType).ToList();
-        dropdown.AddOptions(enumNames);
-        dropdown.SetValueWithoutNotify(Mathf.Max(0, TypeConverter.getIndexInEnum(enumNames, Property.GetValue(LinkedControllable)?.ToString() ?? "")));
+        dropdown.AddOptions(_enumNames.ToList());
+        dropdown.SetValueWithoutNotify(Mathf.Max(0, GetSelectedEnumIndex()));
         dropdown.onValueChanged.AddListener((value) =>
         {
             RecordUndo();
 
-            List<object> objParams = new List<object> { Enum.GetNames(enumType)[value] };
-            LinkedControllable.setFieldProp(Property, objParams, true);
+            if (value < 0 || value >= _enumValues.Length)
+                return;
+
+            //The member itself, not its position: an enum numbered explicitly (Spot = 5) would
+            //otherwise store whichever member happens to sit at that index.
+            List<object> objParams = new List<object> { _enumValues.GetValue(value) };
+            LinkedControllable.setFieldProp(Property, objParams);
         });
     }
 
-    //setFieldProp reads an enum value back as its name, so that is what the undo stack has to carry;
-    //the list route stores a plain string and the default capture already fits it.
-    public override UndoStack.Value CaptureValue()
-    {
-        if (enumType == null)
-            return base.CaptureValue();
+    #endregion
 
+    #region Selection
+
+    List<string> GetListEntries()
+    {
+        return LinkedControllable.GetTargetList(TargetListName) ?? new List<string>();
+    }
+
+    int GetSelectedListIndex()
+    {
         var current = Property.GetValue(LinkedControllable);
-        return new UndoStack.Value(new List<object> { current == null ? "" : current.ToString() }, true);
+        return TypeConverter.getIndexInEnum(GetListEntries(), current == null ? "" : current.ToString());
+    }
+
+    int GetSelectedEnumIndex()
+    {
+        return Array.IndexOf(_enumValues, Property.GetValue(LinkedControllable));
     }
 
     public override void HandleTargetChange(string name)
@@ -85,20 +105,19 @@ public class DropdownUI : ControllableUI
         if (name != Property.Name && !String.IsNullOrEmpty(name))
             return;
 
-        if (enumType != null) //New real enum handling
+        var dropdown = this.GetComponentInChildren<Dropdown>();
+
+        if (enumType != null)
         {
-            var dropdown = this.GetComponentInChildren<Dropdown>();
-            dropdown.ClearOptions();
-            dropdown.AddOptions(Enum.GetNames(enumType).ToList());
-            dropdown.SetValueWithoutNotify(Mathf.Max(0, TypeConverter.getIndexInEnum(Enum.GetNames(enumType).ToList(), Property.GetValue(LinkedControllable).ToString())));
+            dropdown.SetValueWithoutNotify(Mathf.Max(0, GetSelectedEnumIndex()));
+            return;
         }
-        else
-        {
-            var dropdown = this.GetComponentInChildren<Dropdown>();
-            dropdown.ClearOptions();
-            dropdown.AddOptions((List<string>)ListProperty.GetValue(LinkedControllable));
-            dropdown.SetValueWithoutNotify(Mathf.Max(0, TypeConverter.getIndexInEnum((List<string>)ListProperty.GetValue(LinkedControllable), Property.GetValue(LinkedControllable).ToString())));
-        }
+
+        //The entries themselves can have changed - presetList grows every time a preset is saved.
+        dropdown.ClearOptions();
+        dropdown.AddOptions(GetListEntries());
+        dropdown.SetValueWithoutNotify(Mathf.Max(0, GetSelectedListIndex()));
     }
 
+    #endregion
 }

@@ -11,7 +11,7 @@ This plugin allows you to simply create a UI for your application, exposing scri
 |---|---|
 | **Unity 2022.3** or later | Set by the Input System dependency below. |
 | **com.unity.inputsystem** | No fallback to the legacy input backend, so set **Project Settings > Player > Active Input Handling** to *Input System Package* or *Both*. |
-| **com.theoriz.ocf** 1.5.1 or later | GenUI is the UI layer on top of OCF; the control model, OSC addressing and presets all live there. |
+| **com.theoriz.ocf** 2.0.0 or later | GenUI is the UI layer on top of OCF; the control model, OSC addressing and presets all live there. |
 | **com.theoriz.unityosc** 1.3.0 or later | OCF's transport. Earlier versions still work but declare Unity 2019.4. |
 
 The packages declare no UPM `dependencies`, so nothing installs them for you and nothing warns you when a version is too old — install all three, in the order below.
@@ -89,7 +89,7 @@ The field itself stays a normal text box — click it to type.
 
 ### Manual Controllable Generation (Advanced - More Options)
 
-Writing the Controllable yourself is the only way to reach the [OSCProperty] options that have no [OSCExposed] equivalent — `targetList`, `enumName`, `includeInPresets` and `showInUI`. (`readOnly` needs no hand-written mirror: use [OSCExposed(readOnly = true)] and the generator forwards it.) They are documented in [OSCProperty options](https://github.com/Theoriz/OCF#oscproperty-options) in the OCF documentation.
+Writing the Controllable yourself is the only way to reach the [OSCProperty] options that have no [OSCExposed] equivalent — `includeInPresets` and `showInUI`. (`readOnly` and `targetList` need no hand-written mirror: use [OSCExposed(readOnly = true)] or [OSCExposed(targetList = "myList")] and the generator forwards them.) They are documented in [OSCProperty options](https://github.com/Theoriz/OCF#oscproperty-options) in the OCF documentation.
 
 1. Create a new script inheriting from "Controllable". It will be the interface for the script you want to control.
 2. For each field or property you want to control with UI/OSC, add a field in the Controllable with the [OSCProperty] attribute and **the exact same name** as the corresponding field or property in the script you want to control.
@@ -148,7 +148,11 @@ You can expose the following types :
 - Vector4
 - Color
 
-Enums are also supported, and render as a dropdown — see [Exposing an enum](https://github.com/Theoriz/OCF#exposing-an-enum) in the OCF documentation.
+- any enum
+
+An enum renders as a dropdown of its members and needs nothing beyond [OSCExposed] — see [Exposing an enum](https://github.com/Theoriz/OCF#exposing-an-enum) in the OCF documentation. A `[Flags]` enum is the one exception: it logs a warning and draws no widget, because one dropdown cannot represent a combination of members. It is controllable over OSC.
+
+A string member marked [OSCExposed(targetList = "myList")] also renders as a dropdown, over the entries of a `List<string>` on the same script — see [Exposing a list](https://github.com/Theoriz/OCF#exposing-a-list).
 
 Exposing a type that is not in this list logs a warning and draws no widget.
 

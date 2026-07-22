@@ -36,13 +36,12 @@ public class ControllableUI : MonoBehaviour {
     /// The value the widget's member holds right now, for the undo stack.
     /// </summary>
     /// <remarks>
-    /// One boxed value is enough for every type GenUI draws: setFieldProp accepts a single Vector or
-    /// Color as well as the loose components the widgets send it. The enum dropdown is the exception
-    /// and overrides this.
+    /// One boxed value is enough for every type GenUI draws: setFieldProp accepts a single Vector,
+    /// Color or enum member as well as the loose components the widgets send it.
     /// </remarks>
     public virtual UndoStack.Value CaptureValue()
     {
-        return new UndoStack.Value(new List<object> { Property.GetValue(LinkedControllable) }, false);
+        return new UndoStack.Value(new List<object> { Property.GetValue(LinkedControllable) });
     }
 
     /// <summary>
@@ -114,7 +113,7 @@ public class ControllableUI : MonoBehaviour {
         if (Property == null || LinkedControllable == null)
             return;
 
-        LinkedControllable.setFieldProp(Property, value.Values, value.IsEnum);
+        LinkedControllable.setFieldProp(Property, value.Values);
     }
 
     #endregion

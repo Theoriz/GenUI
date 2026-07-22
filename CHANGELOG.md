@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+
+Requires OCF 2.0.0 or later.
+
+### Added
+
+- Enum members render as a dropdown from `[OSCExposed]` alone, with no hand-written mirror.
+- A member marked `[OSCExposed(targetList = "myList")]` renders as a dropdown over a `List<string>` on the same script.
+
+### Changed
+
+- Selecting a dropdown entry writes the enum member itself, so enums numbered explicitly (`Spot = 5`) no longer store the wrong member.
+- An enum dropdown reads its members from the field's type, so an enum in any assembly or nested in another type works.
+- A `[Flags]` enum logs a warning and draws no widget, since one dropdown cannot represent a combination of members. It stays controllable over OSC.
+- A `targetList` naming no `List<string>` logs a warning and draws no widget instead of throwing.
+- **Breaking:** `UndoStack.Value` no longer carries `IsEnum`; its constructor takes only the value list.
+- **Breaking:** both `DropdownUI.CreateUI` overloads changed signature — the list route takes the `targetList` name and the enum route takes a `Type`.
+
 ## [1.7.1] - 2026-07-22
 
 ### Fixed

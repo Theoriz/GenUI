@@ -507,17 +507,30 @@ public class UIMaster : MonoBehaviour
 			//Create list
 			if (!string.IsNullOrEmpty(attribute.targetList) && !propertyDrawn)
             {
-                var associatedListFieldInfo = newControllable.getFieldInfoByName(attribute.targetList);
-                CreateDropDown(newPanel.transform, newControllable, associatedListFieldInfo, property.Value);
+                //The name is passed on rather than a resolved FieldInfo: the list may live on the
+                //mirror or on the target script, and its entries are read live on every refresh.
+                if (newControllable.GetTargetList(attribute.targetList) == null)
+                    Debug.LogWarning("[GenUI] No widget created for '" + property.Value.Name + "' on "
+                        + newControllable.id + " : targetList '" + attribute.targetList
+                        + "' names no List<string> on the controllable or its target script.");
+                else
+                    CreateDropDown(newPanel.transform, newControllable, property.Value, targetListName: attribute.targetList);
 
 				propertyDrawn = true;
                 //continue;
             }
 
-            if(!string.IsNullOrEmpty(attribute.enumName) && !propertyDrawn)
+            if (propertyType.IsEnum && !propertyDrawn)
             {
-                var associatedListFieldInfo = newControllable.getFieldInfoByName(attribute.targetList);
-                CreateDropDown(newPanel.transform, newControllable, associatedListFieldInfo, property.Value, attribute.enumName);
+                //A [Flags] enum holds a combination of its members, which one dropdown cannot show.
+                //Drawing a single-select control over it would silently discard every flag it leaves
+                //out, so the member is left to OSC and presets instead.
+                if (propertyType.IsDefined(typeof(FlagsAttribute), false))
+                    Debug.LogWarning("[GenUI] No widget created for '" + property.Value.Name + "' on "
+                        + newControllable.id + " : " + propertyType.Name
+                        + " is a [Flags] enum. It stays controllable over OSC.");
+                else
+                    CreateDropDown(newPanel.transform, newControllable, property.Value, enumType: propertyType);
 
                 propertyDrawn = true;
                 //continue;
@@ -726,15 +739,17 @@ public class UIMaster : MonoBehaviour
 		parent.gameObject.GetComponent<PanelUI>().AddUIElement(tooltipText.GetComponent<TooltipUI>());
 	}
 
-    private void CreateDropDown(Transform parent, Controllable target, FieldInfo listProperty, FieldInfo activeElement, string enumName = "")
+    //One prefab, two sources for its entries: the entries of a named List<string>, or the members of
+    //the field's own enum type. Exactly one of the two is set by the caller.
+    private void CreateDropDown(Transform parent, Controllable target, FieldInfo activeElement, string targetListName = null, Type enumType = null)
     {
         var newDropdown = Instantiate(_prefabs.DropdownPrefab);
         newDropdown.transform.SetParent(parent);
         parent.gameObject.GetComponent<PanelUI>().AddUIElement(newDropdown.GetComponent<DropdownUI>());
-        if(string.IsNullOrEmpty(enumName))
-            newDropdown.GetComponent<DropdownUI>().CreateUI(target, listProperty, activeElement);
+        if (enumType != null)
+            newDropdown.GetComponent<DropdownUI>().CreateUI(target, activeElement, enumType);
         else
-            newDropdown.GetComponent<DropdownUI>().CreateUI(target, activeElement, enumName);
+            newDropdown.GetComponent<DropdownUI>().CreateUI(target, targetListName, activeElement);
     }
 
     private void CreateSlider(Transform parent, Controllable target, FieldInfo property, RangeAttribute rangeAttribut, bool isInteractible, bool isFloat = true)
