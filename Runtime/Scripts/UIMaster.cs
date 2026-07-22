@@ -778,7 +778,7 @@ public class UIMaster : MonoBehaviour
 
     private void CreateButton(Transform parent, Controllable target, ClassMethodInfo method)
     {
-        //Methods marked [OSCMethod(showInUI = false)] stay OSC-callable but get no button (e.g. Load, LoadAll).
+        //Methods marked [OSCMethod(showInUI = false)] stay OSC-callable but get no button.
         var oscMethod = Attribute.GetCustomAttribute(method.methodInfo, typeof(OSCMethod)) as OSCMethod;
         if (oscMethod != null && !oscMethod.showInUI)
             return;

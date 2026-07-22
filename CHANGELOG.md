@@ -15,6 +15,7 @@ Requires OCF 2.0.0 or later.
 
 ### Changed
 
+- The per-panel Load and global Load All buttons are back, beside the other preset buttons.
 - Selecting a dropdown entry writes the enum member itself, so enums numbered explicitly (`Spot = 5`) no longer store the wrong member.
 - An enum dropdown reads its members from the field's type, so an enum in any assembly or nested in another type works.
 - A `[Flags]` enum logs a warning and draws no widget, since one dropdown cannot represent a combination of members. It stays controllable over OSC.
