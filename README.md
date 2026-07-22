@@ -108,7 +108,7 @@ Writing the Controllable yourself is the only way to reach the [OCFProperty] opt
 ```C++
 public class MyScriptControllable : Controllable {
 
-	// Expose variables from MyScript to OSC by creating OSCProperties with the name of those variables
+	// Expose variables from MyScript to OSC by creating OCFProperties with the name of those variables
 	[OCFProperty]
 	public int intParameter;
 
@@ -196,7 +196,7 @@ OSCMaster.Receivers["myReceiver"].messageReceived += (OSCMessage m) => Debug.Log
 ## Presets
 This plugin comes with a preset system, you can save the state of a "Controllable" script. It saves each property to a file that can be loaded later so that you can create different settings for your script. To use it, click "Save", then simply select a preset in the dropdown menu — selecting it loads it immediately.
 
-Each panel has "Save", "Save As", "Load" and "Show" buttons plus the preset dropdown, and the GenUI panel has "Save All", "Save As All" and "Load All" to apply the same action to every controllable at once.
+Each panel has "Save", "Save As", "Load" and "Show" buttons plus the preset dropdown, and the GenUI panel has "Save All", "Save As All" and "Load All" to apply the same action to every controllable at once, plus "Open Presets Folder" to reveal the presets root in your file browser.
 
 It is also possible to load a specific file via the OSC method "ControllableLoadWithName", giving it the case-sensitive file name as its argument :
 
@@ -205,7 +205,7 @@ It is also possible to load a specific file via the OSC method "ControllableLoad
 ```
 
 ## Expose a List
-To expose a string list you have to create an index string variable which will be used by the dropdown menu as an index. It will allow you to know which element of the list is selected. Simply specify [OCFProperty(targetList = "yourListName")].
+To pick a value from a list of strings, keep the `List<string>` on your script and point a string member at it by name with [OCFExposed(targetList = "yourListName")]. The dropdown writes the selected entry into that member, so reading it tells you which one is selected. A hand-written mirror uses [OCFProperty(targetList = "yourListName")] instead.
 
 See [Exposing a list](https://github.com/Theoriz/OCF#exposing-a-list) in the OCF documentation for a full example.
 
