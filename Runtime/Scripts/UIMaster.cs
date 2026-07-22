@@ -237,7 +237,7 @@ public class UIMaster : MonoBehaviour
     #region Keyboard shortcuts
 
     //Puts the last value edited in the UI back to what it held before that edit. The widget restores
-    //it through setFieldProp, the same path an edit takes, so the target script and OSC follow.
+    //it through SetFieldProp, the same path an edit takes, so the target script and OSC follow.
     void UndoLastEdit()
     {
         UndoStack.Entry entry;
@@ -443,48 +443,48 @@ public class UIMaster : MonoBehaviour
 
     public void RemoveUI(Controllable dyingControllable)
     {
-        if (!dyingControllable.usePanel) return;
+        if (!dyingControllable.controllableUsePanel) return;
         
         if (showDebug)
-            Debug.Log("Removing UI for " + dyingControllable.id);
+            Debug.Log("Removing UI for " + dyingControllable.controllableId);
 
-        if (!_panels.ContainsKey(dyingControllable.id))
+        if (!_panels.ContainsKey(dyingControllable.controllableId))
             return;
 
-        if (_panels[dyingControllable.id] != null)
-            _panels[dyingControllable.id].GetComponentInChildren<PanelUI>().RemoveUI();
+        if (_panels[dyingControllable.controllableId] != null)
+            _panels[dyingControllable.controllableId].GetComponentInChildren<PanelUI>().RemoveUI();
 
-        Destroy(_panels[dyingControllable.id]);
-        _panels.Remove(dyingControllable.id);
+        Destroy(_panels[dyingControllable.controllableId]);
+        _panels.Remove(dyingControllable.controllableId);
     }
 
     public void CreateUI(Controllable newControllable)
     {
         if(showDebug)
-            Debug.Log("Adding " + newControllable.id + ", use panel : " + newControllable.usePanel);
+            Debug.Log("Adding " + newControllable.controllableId + ", use panel : " + newControllable.controllableUsePanel);
 
-        if (!newControllable.usePanel) return;
+        if (!newControllable.controllableUsePanel) return;
 
-        if (_panels.ContainsKey(newControllable.id))
+        if (_panels.ContainsKey(newControllable.controllableId))
         {
             if (showDebug)
-                Debug.LogWarning("[GenUI] A panel for '" + newControllable.id + "' already exists; skipping.");
+                Debug.LogWarning("[GenUI] A panel for '" + newControllable.controllableId + "' already exists; skipping.");
             return;
         }
 
         //First we create a panel for the controllable
         var newControllableHolder = Instantiate(_prefabs.PanelPrefab);
-        newControllableHolder.transform.GetChild(0).GetComponent<Image>().color = newControllable.BarColor;
+        newControllableHolder.transform.GetChild(0).GetComponent<Image>().color = newControllable.controllableBarColor;
         newControllableHolder.transform.SetParent(MainPanel.transform);
 
         var newPanel = newControllableHolder.transform.GetChild(1).gameObject;
-        newPanel.GetComponentInChildren<Text>().text = newControllable.id;
-        newPanel.transform.GetChild(0).GetChild(0).GetComponentInChildren<Image>().color = newControllable.BarColor;
+        newPanel.GetComponentInChildren<Text>().text = newControllable.controllableId;
+        newPanel.transform.GetChild(0).GetChild(0).GetComponentInChildren<Image>().color = newControllable.controllableBarColor;
 
-        _panels.Add(newControllable.id, newControllableHolder);
+        _panels.Add(newControllable.controllableId, newControllableHolder);
 
         //Read all properties and add associated UI
-        foreach (var property in newControllable.Fields)
+        foreach (var property in newControllable.controllableFields)
         {
             var propertyType = property.Value.FieldType;
             OSCProperty attribute = Attribute.GetCustomAttribute(property.Value, typeof(OSCProperty)) as OSCProperty;
@@ -511,7 +511,7 @@ public class UIMaster : MonoBehaviour
                 //mirror or on the target script, and its entries are read live on every refresh.
                 if (newControllable.GetTargetList(attribute.targetList) == null)
                     Debug.LogWarning("[GenUI] No widget created for '" + property.Value.Name + "' on "
-                        + newControllable.id + " : targetList '" + attribute.targetList
+                        + newControllable.controllableId + " : targetList '" + attribute.targetList
                         + "' names no List<string> on the controllable or its target script.");
                 else
                     CreateDropDown(newPanel.transform, newControllable, property.Value, targetListName: attribute.targetList);
@@ -527,7 +527,7 @@ public class UIMaster : MonoBehaviour
                 //out, so the member is left to OSC and presets instead.
                 if (propertyType.IsDefined(typeof(FlagsAttribute), false))
                     Debug.LogWarning("[GenUI] No widget created for '" + property.Value.Name + "' on "
-                        + newControllable.id + " : " + propertyType.Name
+                        + newControllable.controllableId + " : " + propertyType.Name
                         + " is a [Flags] enum. It stays controllable over OSC.");
                 else
                     CreateDropDown(newPanel.transform, newControllable, property.Value, enumType: propertyType);
@@ -611,7 +611,7 @@ public class UIMaster : MonoBehaviour
             }
 
             if (!propertyDrawn)
-                Debug.LogWarning("[GenUI] No widget created for '" + property.Value.Name + "' on " + newControllable.id + " : unsupported type " + propertyType + ".");
+                Debug.LogWarning("[GenUI] No widget created for '" + property.Value.Name + "' on " + newControllable.controllableId + " : unsupported type " + propertyType + ".");
 
             //Add tooltip if it exists
             var tooltipAttribut = (TooltipAttribute[])property.Value.GetCustomAttributes(typeof(TooltipAttribute), false);
@@ -621,7 +621,7 @@ public class UIMaster : MonoBehaviour
 		}
 
         //Read all methods and add button
-        foreach (var method in newControllable.Methods)
+        foreach (var method in newControllable.controllableMethods)
         {
             if (showDebug)
                 Debug.Log("[UI] Adding button for (" + newControllable.GetType() + ") : " + method.Value.methodInfo.Name);
@@ -631,7 +631,7 @@ public class UIMaster : MonoBehaviour
 
         AttachValueDragging(newPanel.transform);
 
-        CleanGeneratedUI(newControllable.id, newControllable);       
+        CleanGeneratedUI(newControllable.controllableId, newControllable);       
     }
 
     public void CleanGeneratedUI(string controllableId, Controllable controllable)
@@ -703,7 +703,7 @@ public class UIMaster : MonoBehaviour
         lastPanel.GetComponent<PanelUI>().Init(controllable);
 
         //Close panel if needed
-        if (controllable.closePanelAtStart)
+        if (controllable.controllableClosePanelAtStart)
             _panels[controllableId].GetComponentInChildren<PanelUI>().Close();
         else
             _panels[controllableId].GetComponentInChildren<PanelUI>().Open();

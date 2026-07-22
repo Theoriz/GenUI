@@ -13,8 +13,8 @@ public class PanelUI : ControllableUI
     public void Init(Controllable target)
     {
         LinkedControllable = target;
-        if(PlayerPrefs.HasKey(LinkedControllable.id)) {
-            IsExpanded = PlayerPrefs.GetInt(LinkedControllable.id) != 0;
+        if(PlayerPrefs.HasKey(LinkedControllable.controllableId)) {
+            IsExpanded = PlayerPrefs.GetInt(LinkedControllable.controllableId) != 0;
             HandleClickOnButton();
         }
     }
@@ -54,7 +54,7 @@ public class PanelUI : ControllableUI
             transform.GetChild(i).gameObject.SetActive(IsExpanded);
         }
         this.transform.GetChild(0).GetChild(0).rotation = Quaternion.Euler(new Vector3(0, 0, IsExpanded ? -90 : 0));
-        PlayerPrefs.SetInt(LinkedControllable.id, IsExpanded ? 0 : 1);
+        PlayerPrefs.SetInt(LinkedControllable.controllableId, IsExpanded ? 0 : 1);
     }
 
     public void Open()
@@ -70,7 +70,7 @@ public class PanelUI : ControllableUI
                 element.HandleTargetChange("");
         }
         this.transform.GetChild(0).GetChild(0).rotation = Quaternion.Euler(new Vector3(0, 0, IsExpanded ? -90 : 0));
-        PlayerPrefs.SetInt(LinkedControllable.id, IsExpanded ? 0 : 1);
+        PlayerPrefs.SetInt(LinkedControllable.controllableId, IsExpanded ? 0 : 1);
     }
     //public override void CreateUI(Controllable target)
     //{

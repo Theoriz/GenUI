@@ -61,7 +61,7 @@ public class ColorUI : ControllableUI
     {
         var list = new List<object>();
         list.Add(newColor);
-        LinkedControllable.setFieldProp(Property, list);
+        LinkedControllable.SetFieldProp(Property, list);
     }
 
     public Color GetCurrentColorValue()

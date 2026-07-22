@@ -36,7 +36,7 @@ public class ControllableUI : MonoBehaviour {
     /// The value the widget's member holds right now, for the undo stack.
     /// </summary>
     /// <remarks>
-    /// One boxed value is enough for every type GenUI draws: setFieldProp accepts a single Vector,
+    /// One boxed value is enough for every type GenUI draws: SetFieldProp accepts a single Vector,
     /// Color or enum member as well as the loose components the widgets send it.
     /// </remarks>
     public virtual UndoStack.Value CaptureValue()
@@ -73,10 +73,10 @@ public class ControllableUI : MonoBehaviour {
         if (Property == null || LinkedControllable == null || UIMaster.Instance == null)
             return false;
 
-        //Setting currentPreset loads that preset, which rewrites every member of the controllable.
+        //Setting controllableCurrentPreset loads that preset, which rewrites every member of the controllable.
         //Undoing a preset selection would mean silently reloading the previous one, so a preset
         //choice is not treated as a value edit.
-        return Property.Name != "currentPreset";
+        return Property.Name != "controllableCurrentPreset";
     }
 
     /// <summary>
@@ -104,7 +104,7 @@ public class ControllableUI : MonoBehaviour {
     /// Restores a value taken from the undo stack.
     /// </summary>
     /// <remarks>
-    /// It goes back through setFieldProp, the same path an edit takes, so the restore is clamped to
+    /// It goes back through SetFieldProp, the same path an edit takes, so the restore is clamped to
     /// [Range], written through to the target script, sent over OSC and redrawn in the widget without
     /// any of that being duplicated here.
     /// </remarks>
@@ -113,7 +113,7 @@ public class ControllableUI : MonoBehaviour {
         if (Property == null || LinkedControllable == null)
             return;
 
-        LinkedControllable.setFieldProp(Property, value.Values);
+        LinkedControllable.SetFieldProp(Property, value.Values);
     }
 
     #endregion
@@ -169,7 +169,7 @@ public class ControllableUI : MonoBehaviour {
 
     public void CopyAddressToClipboard()
     {
-        GUIUtility.systemCopyBuffer = "/" + ControllableMaster.instance.RootOSCAddress + "/" + LinkedControllable.id + "/" + (Property == null ? Method.Name : Property.Name) ;
+        GUIUtility.systemCopyBuffer = "/" + ControllableMaster.instance.RootOSCAddress + "/" + LinkedControllable.controllableId + "/" + (Property == null ? Method.Name : Property.Name) ;
     }
 
     static readonly Regex _nameRegex = new Regex(@"
@@ -177,12 +177,31 @@ public class ControllableUI : MonoBehaviour {
                  (?<=[^A-Z])(?=[A-Z]) |
                  (?<=[A-Za-z])(?=[^A-Za-z])", RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
 
+    //Every member Controllable itself declares is prefixed, so without stripping it the preset row
+    //would read "Controllable Save" and "Controllable Current Preset". Matched case-insensitively
+    //because the prefix is spelled both ways: fields are serialized and stay "controllableCurrentPreset",
+    //while methods are named "ControllableSave". The next character must be upper case, which is what
+    //keeps a user member such as "controllablething" intact - only the label is affected either way,
+    //never the OSC address.
+    const string ControllablePrefix = "controllable";
+
+    static string StripControllablePrefix(string name)
+    {
+        if (name.Length <= ControllablePrefix.Length) return name;
+        if (!name.StartsWith(ControllablePrefix, System.StringComparison.OrdinalIgnoreCase)) return name;
+        if (!char.IsUpper(name[ControllablePrefix.Length])) return name;
+
+        return name.Substring(ControllablePrefix.Length);
+    }
+
     public string ParseNameString(string name) {
 
         if (string.IsNullOrEmpty(name))
             return name;
 
-        string output = char.ToUpper(name[0]) + name.Substring(1);
+        string output = StripControllablePrefix(name);
+
+        output = char.ToUpper(output[0]) + output.Substring(1);
 
         return _nameRegex.Replace(output, " ");
 

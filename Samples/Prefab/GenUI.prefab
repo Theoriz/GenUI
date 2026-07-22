@@ -276,14 +276,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 77cc626fd7555044aaa739a8062117a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  IsConnected: 0
-  IncrementalConnect: 1
-  maxConnectAttempts: 100
-  useDocumentsDirectory: 1
-  ShowDebug: 0
   OSCReceiverName: OCF
   RootOSCAddress: OCF
+  IncrementalConnect: 1
+  maxConnectAttempts: 100
+  IsConnected: 0
   IPAddress: 
+  useDocumentsDirectory: 1
+  customPresetDirectory: 
+  ShowDebug: 0
 --- !u!114 &114363137817556764
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -296,19 +297,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 35188bee7eaa1f549865a7992492c56e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  TargetScript: {fileID: 114445698576836282}
-  BarColor: {r: 0.8773585, g: 0.2163677, b: 0.2027857, a: 1}
-  id: GenUI
-  folder: 
-  debug: 0
-  targetDirectory: 
-  sourceScene: 
-  usePanel: 1
-  usePresets: 1
-  hasPresets: 0
-  closePanelAtStart: 0
-  currentPreset: 
-  presetList: []
+  controllableTargetScript: {fileID: 114445698576836282}
+  controllableBarColor: {r: 0.8773585, g: 0.2163677, b: 0.2027857, a: 1}
+  controllableId: GenUI
+  controllableFolder: 
+  controllableDebug: 0
+  controllableTargetDirectory: 
+  controllableSourceScene: 
+  controllableUsePanel: 1
+  controllableUsePresets: 1
+  controllableClosePanelAtStart: 0
+  controllableCurrentPreset: 
+  controllablePresetList: []
   IPAddress: 
   OSCInputPort: -1
   IncrementalConnect: 0

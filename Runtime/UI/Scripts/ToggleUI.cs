@@ -28,7 +28,7 @@ public class ToggleUI : ControllableUI
 
             var list = new List<object>();
             list.Add(value);
-            target.setFieldProp(property, list);
+            target.SetFieldProp(property, list);
         });
     }
 

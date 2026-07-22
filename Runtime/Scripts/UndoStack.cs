@@ -5,13 +5,13 @@ using System.Collections.Generic;
 /// </summary>
 /// <remarks>
 /// Only edits made in the UI are recorded. Values arriving over OSC or from a preset go through
-/// <c>Controllable.setFieldProp</c> like UI edits do, but recording those would let a source writing
-/// every frame fill the stack and fight the user - which is why widgets record, and setFieldProp
+/// <c>Controllable.SetFieldProp</c> like UI edits do, but recording those would let a source writing
+/// every frame fill the stack and fight the user - which is why widgets record, and SetFieldProp
 /// does not.
 /// </remarks>
 public class UndoStack
 {
-    /// <summary>A member's value in the shape <c>setFieldProp</c> takes it.</summary>
+    /// <summary>A member's value in the shape <c>SetFieldProp</c> takes it.</summary>
     public struct Value
     {
         public List<object> Values;

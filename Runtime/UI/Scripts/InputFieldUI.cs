@@ -63,11 +63,11 @@ public class InputFieldUI : ControllableUI
             else if (propertyType.ToString() == "System.String")
                 list.Add(value);
 
-            target.setFieldProp(property, list);
+            target.SetFieldProp(property, list);
         });
 
         this.transform.GetChild(0).Find("Text").gameObject.GetComponent<Text>().color = Color.white;
-        this.transform.GetChild(0).Find("Placeholder").gameObject.GetComponent<Text>().text = target.getPropInfoForAddress(property.Name).GetValue(target).ToString();
+        this.transform.GetChild(0).Find("Placeholder").gameObject.GetComponent<Text>().text = target.GetPropInfoForAddress(property.Name).GetValue(target).ToString();
     }
 
     public override InputField[] GetInputFields()

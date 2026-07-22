@@ -14,7 +14,7 @@ public class DropdownUI : ControllableUI
     [System.NonSerialized] public Type enumType = null;
 
     //An enum's members never change, so its options and values are read once. The list route has to
-    //re-read its entries instead: they can be added to at runtime, as presetList is.
+    //re-read its entries instead: they can be added to at runtime, as controllablePresetList is.
     string[] _enumNames;
     Array _enumValues;
 
@@ -45,7 +45,7 @@ public class DropdownUI : ControllableUI
                 return;
 
             List<object> objParams = new List<object> { entries[value] };
-            LinkedControllable.setFieldProp(Property, objParams);
+            LinkedControllable.SetFieldProp(Property, objParams);
         });
     }
 
@@ -76,7 +76,7 @@ public class DropdownUI : ControllableUI
             //The member itself, not its position: an enum numbered explicitly (Spot = 5) would
             //otherwise store whichever member happens to sit at that index.
             List<object> objParams = new List<object> { _enumValues.GetValue(value) };
-            LinkedControllable.setFieldProp(Property, objParams);
+            LinkedControllable.SetFieldProp(Property, objParams);
         });
     }
 
@@ -92,7 +92,7 @@ public class DropdownUI : ControllableUI
     int GetSelectedListIndex()
     {
         var current = Property.GetValue(LinkedControllable);
-        return TypeConverter.getIndexInEnum(GetListEntries(), current == null ? "" : current.ToString());
+        return TypeConverter.GetIndexInEnum(GetListEntries(), current == null ? "" : current.ToString());
     }
 
     int GetSelectedEnumIndex()
@@ -113,7 +113,7 @@ public class DropdownUI : ControllableUI
             return;
         }
 
-        //The entries themselves can have changed - presetList grows every time a preset is saved.
+        //The entries themselves can have changed - controllablePresetList grows every time a preset is saved.
         dropdown.ClearOptions();
         dropdown.AddOptions(GetListEntries());
         dropdown.SetValueWithoutNotify(Mathf.Max(0, GetSelectedListIndex()));

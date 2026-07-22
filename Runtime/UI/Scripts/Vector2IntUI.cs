@@ -32,10 +32,10 @@ public class Vector2IntUI : ControllableUI
             RecordUndo();
 
             var list = new List<object>();
-            list.Add(TypeConverter.getInt(value.ToString()));
-            list.Add(TypeConverter.getInt(YInput.text.ToString()));
+            list.Add(TypeConverter.GetInt(value.ToString()));
+            list.Add(TypeConverter.GetInt(YInput.text.ToString()));
 
-            target.setFieldProp(property, list);
+            target.SetFieldProp(property, list);
         });
 
         YInput.onEndEdit.AddListener((value) =>
@@ -43,10 +43,10 @@ public class Vector2IntUI : ControllableUI
             RecordUndo();
 
             var list = new List<object>();
-            list.Add(TypeConverter.getInt(XInput.text.ToString()));
-            list.Add(TypeConverter.getInt(value.ToString()));
+            list.Add(TypeConverter.GetInt(XInput.text.ToString()));
+            list.Add(TypeConverter.GetInt(value.ToString()));
 
-            target.setFieldProp(property, list);
+            target.SetFieldProp(property, list);
         });
     }
 

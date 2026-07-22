@@ -14,7 +14,7 @@ public class ButtonUI : ControllableUI
         this.GetComponentInChildren<Text>().text = ParseNameString(method.methodInfo.Name);
         this.GetComponent<Button>().onClick.AddListener(() =>
         {
-            target.setMethodProp(method, null);
+            target.SetMethodProp(method, null);
         });
     }
 

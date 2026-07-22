@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [2.0.0] - 2026-07-22
 
 Requires OCF 2.0.0 or later.
 
@@ -22,6 +22,8 @@ Requires OCF 2.0.0 or later.
 - A `targetList` naming no `List<string>` logs a warning and draws no widget instead of throwing.
 - **Breaking:** `UndoStack.Value` no longer carries `IsEnum`; its constructor takes only the value list.
 - **Breaking:** both `DropdownUI.CreateUI` overloads changed signature — the list route takes the `targetList` name and the enum route takes a `Type`.
+- **Breaking:** GenUI reads OCF's renamed members, so it requires OCF 2.0.0 and will not compile against an earlier version.
+- Widget and button labels drop the `controllable` prefix OCF 2.0.0 added, so every panel reads exactly as it did before.
 
 ## [1.7.1] - 2026-07-22
 

@@ -80,7 +80,10 @@ The field itself stays a normal text box — click it to type.
 > You can set some fields or properties as read only by using [OSCExposed(readOnly = true)].
 
 > [!WARNING]
-> Do not reuse a name that "Controllable" already declares — `Save`, `id`, `debug` and `name` are the ones most often hit. The generated Controllable inherits from "Controllable", so a member of the same name shadows the real one and breaks it. The generator refuses these and tells you which member to rename. See [Reserved names](https://github.com/Theoriz/OCF#reserved-names) in the OCF documentation.
+> Do not reuse a name that "Controllable" already declares. Since OCF 2.0.0 those all carry a `controllable` prefix, so the names most often hit are Unity's own — `name` above all. The generated Controllable inherits from "Controllable", so a member of the same name shadows the real one and breaks it. The generator refuses these and tells you which member to rename. See [Reserved names](https://github.com/Theoriz/OCF#reserved-names) in the OCF documentation.
+
+> [!NOTE]
+> Widget and button labels drop a leading `controllable` when the next character is upper case, which is what keeps OCF's own members reading as **Save**, **Load** and **Current Preset**. A member of your own named `controllableFoo` is therefore labelled "Foo"; its OSC address is unaffected.
 
 2. On the script component of your script in your scene, click on the three dots on the top right and choose Add Controllable. It will prompt you to generate a Controllable script, click Generate. Once compilation finishes, the Controllable component is added and set up automatically.
 
@@ -95,7 +98,7 @@ Writing the Controllable yourself is the only way to reach the [OSCProperty] opt
 2. For each field or property you want to control with UI/OSC, add a field in the Controllable with the [OSCProperty] attribute and **the exact same name** as the corresponding field or property in the script you want to control.
 5. For each method you want to expose. Add a method in the Controllable with the [OSCMethod] attribute. Then call the method from the controlled script as shown in the example below.
 6. Add the controllable script to a gameobject in your scene.
-7. Link the TargetScript of the Controllable instance to the corresponding script component.
+7. Link the controllableTargetScript of the Controllable instance to the corresponding script component.
 8. Set the desired bar color, it controls color of the panel bar of this controllable in the UI.
 9. Set the desired ID, it controls the name of the panel in the UI, and the name used in the OSC address.
 
@@ -121,13 +124,13 @@ public class MyScriptControllable : Controllable {
 	//Create OSC methods to call methods from myScript
 	[OSCMethod]
 	public void MyOSCMethod() {
-		(TargetScript as MyScript).MyScriptMethod();
+		(controllableTargetScript as MyScript).MyScriptMethod();
 	}
 
 	//You can expose methods with arguments, but they will not show in the UI
 	[OSCMethod]
 	public void MyOSCMethodWithArgs(float arg0, int arg1, string arg2) {
-		(TargetScript as MyScript).MyScriptMethodWithArgs(arg0, arg1, arg2);
+		(controllableTargetScript as MyScript).MyScriptMethodWithArgs(arg0, arg1, arg2);
 	}
 }
 ```
@@ -163,7 +166,7 @@ You can also expose methods. Methods without parameters will show as a button in
 ## OSC Control
 To access a property or launch a method, use its address.
 
-For example : "/OCF/id/method" or "/OCF/id/floatProperty 1.5". By default the id corresponds to the script type name, but this can be changed by setting the public variable `id` on your script extending "Controllable".
+For example : "/OCF/id/method" or "/OCF/id/floatProperty 1.5". By default the id corresponds to the script type name, but this can be changed by setting the public variable `controllableId` on your script extending "Controllable".
 
 > [!TIP]
 > You can copy the OSC Control Address of any exposed parameter in the UI directly by right clicking on the parameter value.
@@ -181,10 +184,10 @@ This plugin comes with a preset system, you can save the state of a "Controllabl
 
 Each panel has "Save", "Save As", "Load" and "Show" buttons plus the preset dropdown, and the GenUI panel has "Save All", "Save As All" and "Load All" to apply the same action to every controllable at once.
 
-It is also possible to load a specific file via the OSC method "LoadWithName", giving it the case-sensitive file name as its argument :
+It is also possible to load a specific file via the OSC method "ControllableLoadWithName", giving it the case-sensitive file name as its argument :
 
 ```
-/OCF/id/LoadWithName "myPreset.pst"
+/OCF/id/ControllableLoadWithName "myPreset.pst"
 ```
 
 ## Expose a List

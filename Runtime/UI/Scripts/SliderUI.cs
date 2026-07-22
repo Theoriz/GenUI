@@ -41,11 +41,11 @@ public class SliderUI : ControllableUI
 
             var list = new List<object>();
             if (!IsFloat)
-                list.Add(Mathf.Clamp(TypeConverter.getInt(value), (int)rangeAttribut.min, (int)rangeAttribut.max));
+                list.Add(Mathf.Clamp(TypeConverter.GetInt(value), (int)rangeAttribut.min, (int)rangeAttribut.max));
             else
-                list.Add(Mathf.Clamp(TypeConverter.getFloat(value), rangeAttribut.min, rangeAttribut.max));
+                list.Add(Mathf.Clamp(TypeConverter.GetFloat(value), rangeAttribut.min, rangeAttribut.max));
 
-            target.setFieldProp(property, list);
+            target.SetFieldProp(property, list);
         });
 
         textComponent.text = ParseNameString(property.Name);
@@ -66,15 +66,15 @@ public class SliderUI : ControllableUI
 
             var list = new List<object>();
             list.Add(value);
-            LinkedControllable.setFieldProp(property, list);
+            LinkedControllable.SetFieldProp(property, list);
             inputComponent.text = FormatValue(property.GetValue(target));
         });
 
 
         if (isFloat)
-            sliderComponent.value = TypeConverter.getFloat(property.GetValue(target));
+            sliderComponent.value = TypeConverter.GetFloat(property.GetValue(target));
         else
-            sliderComponent.value = TypeConverter.getInt(property.GetValue(target));
+            sliderComponent.value = TypeConverter.GetInt(property.GetValue(target));
     }
 
     //The numeric box beside the slider. The slider itself is not a field, so Tab skips it.
@@ -108,7 +108,7 @@ public class SliderUI : ControllableUI
             var value = Property.GetValue(LinkedControllable);
 
             this.GetComponentInChildren<Slider>().value =
-                IsFloat ? TypeConverter.getFloat(value) : TypeConverter.getInt(value);
+                IsFloat ? TypeConverter.GetFloat(value) : TypeConverter.GetInt(value);
             this.GetComponentInChildren<InputField>().text = FormatValue(value);
         }
         finally

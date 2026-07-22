@@ -43,11 +43,11 @@ public class Vector3UI : ControllableUI
             RecordUndo();
 
             var list = new List<object>();
-            list.Add(TypeConverter.getFloat(value.ToString()));
-            list.Add(TypeConverter.getFloat(YInput.text.ToString()));
-            list.Add(TypeConverter.getFloat(ZInput.text.ToString()));
+            list.Add(TypeConverter.GetFloat(value.ToString()));
+            list.Add(TypeConverter.GetFloat(YInput.text.ToString()));
+            list.Add(TypeConverter.GetFloat(ZInput.text.ToString()));
 
-            target.setFieldProp(property, list);
+            target.SetFieldProp(property, list);
         });
 
         YInput.onEndEdit.AddListener((value) =>
@@ -55,11 +55,11 @@ public class Vector3UI : ControllableUI
             RecordUndo();
 
             var list = new List<object>();
-            list.Add(TypeConverter.getFloat(XInput.text.ToString()));
-            list.Add(TypeConverter.getFloat(value.ToString()));
-            list.Add(TypeConverter.getFloat(ZInput.text.ToString()));
+            list.Add(TypeConverter.GetFloat(XInput.text.ToString()));
+            list.Add(TypeConverter.GetFloat(value.ToString()));
+            list.Add(TypeConverter.GetFloat(ZInput.text.ToString()));
 
-            target.setFieldProp(property, list);
+            target.SetFieldProp(property, list);
         });
 
         ZInput.onEndEdit.AddListener((value) =>
@@ -67,11 +67,11 @@ public class Vector3UI : ControllableUI
             RecordUndo();
 
             var list = new List<object>();
-            list.Add(TypeConverter.getFloat(XInput.text.ToString()));
-            list.Add(TypeConverter.getFloat(YInput.text.ToString()));
-            list.Add(TypeConverter.getFloat(value.ToString()));
+            list.Add(TypeConverter.GetFloat(XInput.text.ToString()));
+            list.Add(TypeConverter.GetFloat(YInput.text.ToString()));
+            list.Add(TypeConverter.GetFloat(value.ToString()));
 
-            target.setFieldProp(property, list);
+            target.SetFieldProp(property, list);
         });
     }
 
