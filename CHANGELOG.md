@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [1.7.1] - 2026-07-22
+
+### Fixed
+
+- `UIMaster` clears its `Instance` between play sessions, so a destroyed panel is no longer read as a live one when Reload Domain is off.
+
+### Removed
+
+- The unused `FCP_Persistence` and `FlexibleDraggableObject` scripts from the bundled FlexibleColorPicker and FlexibleUISystems plugins.
+
 ## [1.7.0] - 2026-07-21
 
 ### Added

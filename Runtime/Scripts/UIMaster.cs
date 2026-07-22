@@ -159,6 +159,12 @@ public class UIMaster : MonoBehaviour
 
     #endregion
 
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetStatics()
+    {
+        Instance = null;
+    }
+
     #region Setup
 
     // Load the prefab set and resolve the panel + popup links without any serialized reference:
