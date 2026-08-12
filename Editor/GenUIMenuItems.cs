@@ -12,7 +12,7 @@ namespace Theoriz.GenUI.Editor
     {
         // Two independent steps, each a no-op when the scene already has what it provides, so the
         // entry is safe to run on a scene that has GenUI, an EventSystem, both or neither.
-        [MenuItem("Theoriz/GenUI/Add GenUI to Scene")]
+        [MenuItem("Theoriz/GenUI/Add GenUI to Scene", false, 3000)]
         public static void AddGenUIToScene()
         {
             var genUI = EnsureGenUI();
