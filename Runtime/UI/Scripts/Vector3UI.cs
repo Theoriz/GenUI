@@ -73,6 +73,8 @@ public class Vector3UI : ControllableUI
 
             target.SetFieldProp(property, list);
         });
+
+        ApplyReadOnlyLook();
     }
 
     //Named rather than indexed, so Tab visits x, y, z whatever order the prefab holds them in.

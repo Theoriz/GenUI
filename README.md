@@ -109,6 +109,10 @@ An enum renders as a dropdown of its members — see [Exposing an enum](https://
 
 The Header, Range, and Tooltip attributes are also supported in Controllables.
 
+### Read-only members
+
+A member marked [OCFExposed(readOnly = true)] is drawn as a display: its value with no box around it, nothing to click or type into, skipped by Tab, and no label scrubbing. A bool keeps its green/red box and a `[Range]` member keeps its bar — greyed out, but still showing where the value sits in its range. Read-only members are also left out of presets, and offer no right-click **Copy OSC Control Address**, since that address cannot control them.
+
 You can also expose methods. Methods without parameters will show as a button in the UI, methods with parameters will not show in the UI but are still exposed to OSC control.
 
 ### Expose a List
@@ -125,7 +129,7 @@ To access a property or launch a method, use its address.
 For example : "/OCF/id/method" or "/OCF/id/floatProperty 1.5". By default the id corresponds to the script type name, but this can be changed by setting the public variable `controllableId` on your script extending "Controllable".
 
 > [!TIP]
-> You can copy the OSC Control Address of any exposed parameter in the UI directly by right clicking on the parameter value.
+> You can copy the OSC Control Address of any exposed parameter in the UI directly by right clicking on the parameter value. Read-only parameters have no menu: their address cannot control them.
 
 ## Presets
 This plugin comes with a preset system, you can save the state of a "Controllable" script. It saves each property to a file that can be loaded later so that you can create different settings for your script. To use it, click "Save", then simply select a preset in the dropdown menu — selecting it loads it immediately.

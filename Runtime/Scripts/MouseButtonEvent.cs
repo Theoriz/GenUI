@@ -21,15 +21,22 @@ public class MouseButtonEvent : MonoBehaviour, IPointerUpHandler
             OnLeftButtonUp();
     }
 
+    //Both actions are about controlling the member: the menu copies the OSC address that writes it,
+    //the picker writes it directly. A read-only member cannot be written by either, so neither opens.
+    bool CanControlLinkedUI()
+    {
+        return linkedUI != null && linkedUI.IsInteractible;
+    }
+
     void OnRightButtonUp()
     {
-        if (enableRightClickMenu)
+        if (enableRightClickMenu && CanControlLinkedUI())
             UIMaster.Instance.CreateRightClickMenu(linkedUI);
     }
 
     void OnLeftButtonUp()
     {
-        if (enableColorPicker)
+        if (enableColorPicker && CanControlLinkedUI())
             UIMaster.Instance.CreateColorPicker(linkedUI);
     }
 }

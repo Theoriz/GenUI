@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [2.1.0] - 2026-08-20
+
+### Changed
+
+- Read-only members render as plain values with no input box, so sliders, vectors, colors and dropdowns look the same as the other read-only fields.
+- Read-only members no longer accept typed input, open the color picker, or offer the right-click Copy OSC Control Address menu.
+- A read-only `[Range]` member keeps its slider bar, greyed out, to show where the value sits in its range.
+
+### Fixed
+
+- Right-clicking a `Vector2`, `Vector2Int`, `Vector3Int`, `Vector4` or dropdown widget copies its OSC address instead of throwing.
+
 ## [2.0.1] - 2026-08-12
 
 ### Changed

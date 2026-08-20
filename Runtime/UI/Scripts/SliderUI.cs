@@ -75,6 +75,10 @@ public class SliderUI : ControllableUI
             sliderComponent.value = TypeConverter.GetFloat(property.GetValue(target));
         else
             sliderComponent.value = TypeConverter.GetInt(property.GetValue(target));
+
+        //The bar stays visible when read-only - greyed out by the line above - because it still shows
+        //where the value sits in its range. Only the box beside it becomes a plain value.
+        ApplyReadOnlyLook();
     }
 
     //The numeric box beside the slider. The slider itself is not a field, so Tab skips it.

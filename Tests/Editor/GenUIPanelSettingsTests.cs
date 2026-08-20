@@ -1,6 +1,7 @@
 using System.Linq;
 using NUnit.Framework;
 using Theoriz.GenUI.Editor;
+using UnityEditor;
 using UnityEngine;
 
 namespace Theoriz.GenUI.Tests.Editor
@@ -19,7 +20,10 @@ namespace Theoriz.GenUI.Tests.Editor
         [SetUp]
         public void CreateControllable()
         {
-            _go = new GameObject("panel-settings-test");
+            //Hidden and not saved so the fixture never becomes part of the scene the user has open,
+            //and so the undo system does not track it: Attach adds its component through
+            //ObjectFactory, whose undo entry would otherwise restore this object after it is destroyed.
+            _go = new GameObject("panel-settings-test") { hideFlags = HideFlags.HideAndDontSave };
             _controllable = _go.AddComponent<Controllable>();
             _controllable.controllableId = "TestScript";
         }
@@ -27,6 +31,10 @@ namespace Theoriz.GenUI.Tests.Editor
         [TearDown]
         public void DestroyControllable()
         {
+            if (_go == null)
+                return;
+
+            Undo.ClearUndo(_go);
             Object.DestroyImmediate(_go);
         }
 

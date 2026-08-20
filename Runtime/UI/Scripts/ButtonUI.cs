@@ -10,6 +10,8 @@ public class ButtonUI : ControllableUI
     {
         LinkedControllable = target;
         Method = method.methodInfo;
+        //A method has no read-only form: the button invokes it and its address is callable over OSC.
+        IsInteractible = true;
 
         this.GetComponentInChildren<Text>().text = ParseNameString(method.methodInfo.Name);
         this.GetComponent<Button>().onClick.AddListener(() =>

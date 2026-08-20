@@ -21,10 +21,11 @@ public class DropdownUI : ControllableUI
     #region Creation
 
     /// <summary>A dropdown over the entries of a <c>List&lt;string&gt;</c> named by `targetList`.</summary>
-    public void CreateUI(Controllable target, string targetListName, FieldInfo activeElement) {
+    public void CreateUI(Controllable target, string targetListName, FieldInfo activeElement, bool isInteractible) {
 
         TargetListName = targetListName;
         Property = activeElement;
+        IsInteractible = isInteractible;
         LinkedControllable = target;
         LinkedControllable.controllableValueChanged += HandleTargetChange;
 
@@ -47,12 +48,15 @@ public class DropdownUI : ControllableUI
             List<object> objParams = new List<object> { entries[value] };
             LinkedControllable.SetFieldProp(Property, objParams);
         });
+
+        ApplyReadOnlyLook(dropdown);
     }
 
     /// <summary>A dropdown over the members of an enum, taken from the member's own type.</summary>
-    public void CreateUI(Controllable target, FieldInfo activeElement, Type _enumType)
+    public void CreateUI(Controllable target, FieldInfo activeElement, Type _enumType, bool isInteractible)
     {
         Property = activeElement;
+        IsInteractible = isInteractible;
         LinkedControllable = target;
         LinkedControllable.controllableValueChanged += HandleTargetChange;
 
@@ -78,6 +82,22 @@ public class DropdownUI : ControllableUI
             List<object> objParams = new List<object> { _enumValues.GetValue(value) };
             LinkedControllable.SetFieldProp(Property, objParams);
         });
+
+        ApplyReadOnlyLook(dropdown);
+    }
+
+    //The dropdown is not one of the fields GetInputFields returns, so the base pass does not reach it.
+    //Its arrow goes with the frame: left alone it would still read as something to open.
+    void ApplyReadOnlyLook(Dropdown dropdown)
+    {
+        if (IsInteractible)
+            return;
+
+        MakeDisplayOnly(dropdown);
+
+        var arrow = dropdown.transform.Find("Arrow");
+        if (arrow != null)
+            arrow.gameObject.SetActive(false);
     }
 
     #endregion

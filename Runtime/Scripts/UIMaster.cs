@@ -441,6 +441,18 @@ public class UIMaster : MonoBehaviour
         }
     }
 
+    //The prefabs wire linkedUI unevenly - several vector prefabs and the dropdown leave it empty - and
+    //the widget a MouseButtonEvent belongs to is always the one above it, so it is bound here instead.
+    //Widgets never nest, so a subtree walk cannot reach another widget's events.
+    static void BindMouseEvents(Transform panel)
+    {
+        foreach (var widget in panel.GetComponentsInChildren<ControllableUI>(true))
+        {
+            foreach (var mouseEvent in widget.GetComponentsInChildren<MouseButtonEvent>(true))
+                mouseEvent.linkedUI = widget;
+        }
+    }
+
     public void RemoveUI(Controllable dyingControllable)
     {
         if (showDebug)
@@ -518,7 +530,7 @@ public class UIMaster : MonoBehaviour
                         + newControllable.controllableId + " : targetList '" + attribute.targetList
                         + "' names no List<string> on the controllable or its target script.");
                 else
-                    CreateDropDown(newPanel.transform, newControllable, property.Value, targetListName: attribute.targetList);
+                    CreateDropDown(newPanel.transform, newControllable, property.Value, !attribute.readOnly, targetListName: attribute.targetList);
 
 				propertyDrawn = true;
                 //continue;
@@ -534,7 +546,7 @@ public class UIMaster : MonoBehaviour
                         + newControllable.controllableId + " : " + propertyType.Name
                         + " is a [Flags] enum. It stays controllable over OSC.");
                 else
-                    CreateDropDown(newPanel.transform, newControllable, property.Value, enumType: propertyType);
+                    CreateDropDown(newPanel.transform, newControllable, property.Value, !attribute.readOnly, enumType: propertyType);
 
                 propertyDrawn = true;
                 //continue;
@@ -634,6 +646,7 @@ public class UIMaster : MonoBehaviour
         }
 
         AttachValueDragging(newPanel.transform);
+        BindMouseEvents(newPanel.transform);
 
         CleanGeneratedUI(newControllable.controllableId, newControllable);       
     }
@@ -745,15 +758,15 @@ public class UIMaster : MonoBehaviour
 
     //One prefab, two sources for its entries: the entries of a named List<string>, or the members of
     //the field's own enum type. Exactly one of the two is set by the caller.
-    private void CreateDropDown(Transform parent, Controllable target, FieldInfo activeElement, string targetListName = null, Type enumType = null)
+    private void CreateDropDown(Transform parent, Controllable target, FieldInfo activeElement, bool isInteractible, string targetListName = null, Type enumType = null)
     {
         var newDropdown = Instantiate(_prefabs.DropdownPrefab);
         newDropdown.transform.SetParent(parent);
         parent.gameObject.GetComponent<PanelUI>().AddUIElement(newDropdown.GetComponent<DropdownUI>());
         if (enumType != null)
-            newDropdown.GetComponent<DropdownUI>().CreateUI(target, activeElement, enumType);
+            newDropdown.GetComponent<DropdownUI>().CreateUI(target, activeElement, enumType, isInteractible);
         else
-            newDropdown.GetComponent<DropdownUI>().CreateUI(target, targetListName, activeElement);
+            newDropdown.GetComponent<DropdownUI>().CreateUI(target, targetListName, activeElement, isInteractible);
     }
 
     private void CreateSlider(Transform parent, Controllable target, FieldInfo property, RangeAttribute rangeAttribut, bool isInteractible, bool isFloat = true)
@@ -880,7 +893,9 @@ public class UIMaster : MonoBehaviour
 
     void OnCopyAddressClick()
     {
-        rightClickMenu.linkedUI.CopyAddressToClipboard();
+        if (rightClickMenu.linkedUI != null)
+            rightClickMenu.linkedUI.CopyAddressToClipboard();
+
         CloseRightClickMenu();
     }
 

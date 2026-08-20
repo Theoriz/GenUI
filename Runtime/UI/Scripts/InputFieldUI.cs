@@ -22,7 +22,6 @@ public class InputFieldUI : ControllableUI
         var textComponent = this.transform.GetChild(1).gameObject.GetComponent<Text>();
 
         textComponent.text = ParseNameString(property.Name);
-        this.transform.GetComponentInChildren<InputField>().interactable = isInteractible;
 
         if (property.FieldType.ToString() == "System.Int32")
             inputFieldComponent.contentType = InputField.ContentType.IntegerNumber;
@@ -68,6 +67,8 @@ public class InputFieldUI : ControllableUI
 
         this.transform.GetChild(0).Find("Text").gameObject.GetComponent<Text>().color = Color.white;
         this.transform.GetChild(0).Find("Placeholder").gameObject.GetComponent<Text>().text = target.GetPropInfoForAddress(property.Name).GetValue(target).ToString();
+
+        ApplyReadOnlyLook();
     }
 
     public override InputField[] GetInputFields()

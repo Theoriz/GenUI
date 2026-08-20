@@ -163,6 +163,41 @@ public class ControllableUI : MonoBehaviour {
         return _noInputFields;
     }
 
+    /// <summary>
+    /// Turns the widget's fields into a display when its member is read-only: they keep showing the
+    /// value and stop accepting input. Call it at the end of CreateUI.
+    /// </summary>
+    protected void ApplyReadOnlyLook()
+    {
+        if (IsInteractible)
+            return;
+
+        foreach (var field in GetInputFields())
+            MakeDisplayOnly(field);
+    }
+
+    /// <summary>
+    /// Makes a control show its value without offering to change it: not interactable, and with no
+    /// frame left around it.
+    /// </summary>
+    /// <remarks>
+    /// The frame goes by tinting the disabled state to nothing rather than by hiding the graphic, so
+    /// one call covers every widget whatever disabled colour its prefab carries - which is what makes
+    /// every read-only row read the same. Public and static because a Dropdown needs it too, and it
+    /// is not one of the fields GetInputFields returns.
+    /// </remarks>
+    public static void MakeDisplayOnly(Selectable selectable)
+    {
+        if (selectable == null)
+            return;
+
+        var colors = selectable.colors;
+        colors.disabledColor = Color.clear;
+        selectable.colors = colors;
+
+        selectable.interactable = false;
+    }
+
     #endregion
 
     #region Naming and address
