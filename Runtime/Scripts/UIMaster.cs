@@ -705,6 +705,9 @@ public class UIMaster : MonoBehaviour
             panel.LayoutSection(globalPresetSection);
         }
 
+        //After the preset buttons have left the body, so the gap lands above the first button that stays.
+        panel.AddMethodGap();
+
         panel.Init(controllable);
 
         //Close panel if needed

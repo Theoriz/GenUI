@@ -141,6 +141,46 @@ public class PanelUI : ControllableUI
         section.sizeDelta = new Vector2(section.sizeDelta.x, height);
     }
 
+    /// <summary>
+    /// Inserts an empty row above the first method button left in the panel body, so the buttons are
+    /// not stacked tight under the last member row.
+    /// </summary>
+    /// <remarks>
+    /// Called once the preset buttons have been reparented into their sections, since those are not
+    /// the block being set off. Does nothing when no member row precedes the buttons: the gap would
+    /// then only push the first button away from the title.
+    /// </remarks>
+    public void AddMethodGap()
+    {
+        Transform firstButton = null;
+        foreach (Transform child in transform)
+        {
+            if (child.GetComponent<ButtonUI>() == null) continue;
+
+            firstButton = child;
+            break;
+        }
+
+        if (firstButton == null) return;
+
+        var index = firstButton.GetSiblingIndex();
+        var hasRowAbove = false;
+        for (var i = 0; i < index; i++)
+        {
+            var sibling = transform.GetChild(i);
+            //The title is not a row, and a hidden section takes no space.
+            if (sibling == _title || !sibling.gameObject.activeSelf) continue;
+
+            hasRowAbove = true;
+            break;
+        }
+
+        if (!hasRowAbove) return;
+
+        var gap = UIFactory.CreateRect("MethodGap", transform, GenUIStyle.MethodGapHeight);
+        gap.SetSiblingIndex(index);
+    }
+
     /// <summary>Hides a section nothing landed in, and keeps unfolding the panel from showing it again.</summary>
     public void HideSection(Transform section)
     {

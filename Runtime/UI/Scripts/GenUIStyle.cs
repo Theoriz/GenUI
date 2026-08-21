@@ -82,6 +82,10 @@ public static class GenUIStyle
     /// <summary>Empty space kept under a tooltip, so it reads as belonging to the row above it.</summary>
     public const float TooltipBottomSpacing = 8f;
 
+    /// <summary>Empty space kept above the first method button, so the buttons read as a block of
+    /// their own rather than as one more member row.</summary>
+    public const float MethodGapHeight = 10f;
+
     #endregion
 
     #region Text
