@@ -57,6 +57,8 @@ public class PanelUI : ControllableUI
     void BuildTitle(string title, Color barColor)
     {
         _title = UIFactory.CreateRect("Title", transform, GenUIStyle.PanelTitleHeight);
+        UIFactory.AddImage(_title.gameObject, GenUIAssets.Instance.Background,
+            GenUIStyle.PanelTitleBackground(barColor));
 
         var arrow = UIFactory.CreateRect("Image", _title);
         arrow.anchorMin = new Vector2(0f, 0.5f);

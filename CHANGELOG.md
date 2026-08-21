@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - Vector rows lay out identically whatever their axis count, and their boxes keep their width whatever value they hold.
 - The right-click menu and the colour picker are dismissed by clicking anywhere outside them.
 - The preset buttons and the preset dropdown are drawn together as a block, separated from the parameter rows above them by a rule.
+- A panel's title sits on a backing tinted from that panel's bar colour, so the heading is told apart from the rows under it.
 
 ### Removed
 

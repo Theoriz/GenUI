@@ -36,7 +36,7 @@ public static class GenUIStyle
 
     /// <summary>Empty space kept above a preset section, holding the rule that separates it from the
     /// member rows.</summary>
-    public const int PresetSectionGap = 14;
+    public const int PresetSectionGap = 18;
 
     /// <summary>How far into that gap the rule sits. More space above it than below, so the rule reads
     /// as belonging to the block it heads rather than to the member row it follows.</summary>
@@ -107,9 +107,24 @@ public static class GenUIStyle
     public static readonly Color TooltipColor = new Color(0.7f, 0.7f, 0.7f, 1f);
     public static readonly Color PanelBackground = new Color(0.078431375f, 0.078431375f, 0.078431375f, 0.4509804f);
 
+    /// <summary>
+    /// The backing behind a panel's title, tinted from that panel's own bar colour so the heading is
+    /// told apart from the rows under it and still reads as belonging to the panel.
+    /// </summary>
+    /// <remarks>
+    /// Kept faint: the panel is translucent over whatever the scene shows, so a strong tint would
+    /// fight the bar rather than back the title.
+    /// </remarks>
+    public static Color PanelTitleBackground(Color barColor)
+    {
+        return new Color(barColor.r, barColor.g, barColor.b, PanelTitleBackgroundAlpha);
+    }
+
+    public const float PanelTitleBackgroundAlpha = 0.04f;
+
     /// <summary>The rule above a preset section. Light rather than dark: the panel is drawn over
     /// whatever the scene shows, so only a line brighter than the rows reads on every background.</summary>
-    public static readonly Color SeparatorColor = new Color(1f, 1f, 1f, 0.12f);
+    public static readonly Color SeparatorColor = new Color(1f, 1f, 1f, 0.04f);
 
     public static readonly Color ToggleOn = new Color(0.43f, 0.9f, 0.47f, 0.75f);
     public static readonly Color ToggleOff = new Color(0.9f, 0.4f, 0.4f, 0.8f);
