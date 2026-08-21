@@ -1,39 +1,36 @@
-﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using System;
-using System.Globalization;
 
 public class TooltipUI : ControllableUI, ILayoutElement
 {
     //Empty space kept under the text, so a tooltip reads as belonging to the widget above it rather
     //than to the one below. Reported as part of the preferred height (see below).
-    public float bottomSpacing = 8f;
+    public float bottomSpacing = GenUIStyle.TooltipBottomSpacing;
 
     private Text _label;
+
+    protected override float WidgetHeight { get { return GenUIStyle.TooltipHeight; } }
+
+    protected override void BuildHierarchy()
+    {
+        //Anchored to the top, so the extra height the fitter adds all lands under the text instead
+        //of being split above and below it.
+        _label = UIFactory.AddText(gameObject, string.Empty, GenUIStyle.TooltipFontSize,
+            TextAnchor.UpperLeft, GenUIStyle.TooltipColor);
+
+        //The panel's layout group leaves child heights alone, so the tooltip would keep its row
+        //height and cut off anything that wraps or follows a line break. The fitter grows it to the
+        //height reported below instead.
+        _label.verticalOverflow = VerticalWrapMode.Overflow;
+
+        var fitter = gameObject.AddComponent<ContentSizeFitter>();
+        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+    }
 
     public void CreateUI(Controllable target, string text)
     {
         LinkedControllable = target;
-
-        _label = this.GetComponent<Text>();
         _label.text = text;
-
-        //The panel's layout group leaves child heights alone, so the tooltip would keep the prefab's
-        //single-line height and cut off anything that wraps or follows a line break. The fitter grows
-        //it to the height reported below instead.
-        _label.verticalOverflow = VerticalWrapMode.Overflow;
-
-        //Anchored to the top, so the extra height all lands under the text instead of being split
-        //above and below it.
-        _label.alignment = TextAnchor.UpperLeft;
-
-        var fitter = this.GetComponent<ContentSizeFitter>();
-        if (fitter == null)
-            fitter = this.gameObject.AddComponent<ContentSizeFitter>();
-
-        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
     }
 
     public override void RemoveUI()

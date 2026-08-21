@@ -1,15 +1,33 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Reflection;
 using System;
-using System.Globalization;
 
 public class ToggleUI : ControllableUI
 {
     public Toggle toggle;
 
-    // Use this for initialization
+    Text _label;
+
+    protected override void BuildHierarchy()
+    {
+        _label = UIFactory.CreateLabel(transform);
+
+        //The box sits at the left of the control half, the width of the row it stands in.
+        var box = UIFactory.CreateSlice("Background", transform, GenUIStyle.LabelWidthRatio, GenUIStyle.LabelWidthRatio + 0.13f);
+        var background = UIFactory.AddImage(box.gameObject, GenUIAssets.Instance.Box, Color.white);
+
+        var checkRect = UIFactory.CreateCentered("Checkmark", box, GenUIStyle.CheckboxSize, GenUIStyle.CheckboxSize);
+        var checkmark = UIFactory.AddImage(checkRect.gameObject, GenUIAssets.Instance.Checkmark, Color.white, Image.Type.Simple);
+
+        //On the row, not on the box: the label is a raycast target too, so clicking the name toggles
+        //the value as well.
+        toggle = gameObject.AddComponent<Toggle>();
+        toggle.targetGraphic = background;
+        toggle.graphic = checkmark;
+    }
+
     public void CreateUI(Controllable target, FieldInfo property, bool isInteractible)
     {
         Property = property;
@@ -18,8 +36,8 @@ public class ToggleUI : ControllableUI
         target.controllableValueChanged += HandleTargetChange;
         HandleTargetChange(property.Name); //To set color
 
-        this.GetComponentInChildren<Text>().text = ParseNameString(property.Name);
-        
+        _label.text = ParseNameString(property.Name);
+
         toggle.isOn = (bool)property.GetValue(target);
         toggle.interactable = isInteractible;
         toggle.onValueChanged.AddListener((value) =>
@@ -42,17 +60,11 @@ public class ToggleUI : ControllableUI
         //Without notify: this is the widget catching up with a value that has already been written,
         //so raising onValueChanged would write it straight back and record an edit the user never made.
         toggle.SetIsOnWithoutNotify(newValue);
-        if (newValue)
-        { //GREEN
-            var blockColors = toggle.colors;
-            blockColors.disabledColor = new Color(0.43f, 0.9f, 0.47f, 0.75f);
-            toggle.colors = blockColors;
-        }
-        else //RED
-        {
-            var blockColors = toggle.colors;
-            blockColors.disabledColor = new Color(0.9f, 0.4f, 0.4f, 0.8f);
-            toggle.colors = blockColors;
-        }
+
+        //The disabled tint is the read-only look of a bool: a member that cannot be edited still
+        //reads at a glance as green for true, red for false.
+        var blockColors = toggle.colors;
+        blockColors.disabledColor = newValue ? GenUIStyle.ToggleOn : GenUIStyle.ToggleOff;
+        toggle.colors = blockColors;
     }
 }

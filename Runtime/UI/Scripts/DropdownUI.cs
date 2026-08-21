@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
@@ -18,6 +17,160 @@ public class DropdownUI : ControllableUI
     string[] _enumNames;
     Array _enumValues;
 
+    Text _label;
+    Dropdown _dropdown;
+    Image _arrow;
+
+    #region Building
+
+    //Unity's stock dropdown template, reproduced: a scrolling list under the closed control, whose
+    //single Item the Dropdown clones once per option. The numbers are that template's, not GenUI's,
+    //so they live here beside the code that lays them out rather than in GenUIStyle.
+    const float TemplateHeight = 150f;
+    const float TemplateGap = 2f;
+    const float ItemHeight = 20f;
+    const float ContentHeight = 28f;
+    const float ScrollbarWidth = 20f;
+    const float ViewportInset = 18f;
+    const float ArrowSize = 20f;
+    const float ArrowInset = -15f;
+    const float CheckmarkSize = 20f;
+    const float CheckmarkInset = 10f;
+
+    protected override void BuildHierarchy()
+    {
+        _label = UIFactory.CreateLabel(transform, "Text");
+
+        var rect = UIFactory.CreateSlice("Dropdown", transform, GenUIStyle.LabelWidthRatio, 1f);
+        var background = UIFactory.AddImage(rect.gameObject, GenUIAssets.Instance.Box, Color.white);
+
+        var caption = UIFactory.CreateChild("Label", rect);
+        caption.anchoredPosition = new Vector2(-7.5f, 0f);
+        caption.sizeDelta = new Vector2(-35f, 0f);
+        var captionText = UIFactory.AddText(caption.gameObject, string.Empty, GenUIStyle.LabelFontSize,
+            TextAnchor.MiddleLeft, GenUIStyle.LabelColor);
+
+        var arrow = UIFactory.CreateRect("Arrow", rect);
+        arrow.anchorMin = new Vector2(1f, 0.5f);
+        arrow.anchorMax = new Vector2(1f, 0.5f);
+        arrow.anchoredPosition = new Vector2(ArrowInset, 0f);
+        arrow.sizeDelta = new Vector2(ArrowSize, ArrowSize);
+        _arrow = UIFactory.AddImage(arrow.gameObject, GenUIAssets.Instance.DropdownArrow, Color.white, Image.Type.Simple);
+
+        Text itemText;
+        var template = BuildTemplate(rect, out itemText);
+
+        _dropdown = rect.gameObject.AddComponent<Dropdown>();
+        _dropdown.targetGraphic = background;
+        _dropdown.colors = GenUIStyle.ControlColors();
+        _dropdown.template = template;
+        _dropdown.captionText = captionText;
+        _dropdown.itemText = itemText;
+
+        //Only now: the Dropdown clones the template every time it opens, so it must not be a live
+        //part of the panel in between.
+        template.gameObject.SetActive(false);
+
+        UIFactory.AddMouseEvent(rect.gameObject, this);
+    }
+
+    RectTransform BuildTemplate(Transform parent, out Text itemText)
+    {
+        var template = UIFactory.CreateRect("Template", parent);
+        template.anchorMin = Vector2.zero;
+        template.anchorMax = new Vector2(1f, 0f);
+        template.pivot = new Vector2(0.5f, 1f);
+        template.anchoredPosition = new Vector2(0f, TemplateGap);
+        template.sizeDelta = new Vector2(0f, TemplateHeight);
+        UIFactory.AddImage(template.gameObject, GenUIAssets.Instance.Box, GenUIStyle.DropdownTemplateBackground);
+
+        var viewport = UIFactory.CreateChild("Viewport", template);
+        viewport.pivot = new Vector2(0f, 1f);
+        viewport.sizeDelta = new Vector2(-ViewportInset, 0f);
+        UIFactory.AddImage(viewport.gameObject, GenUIAssets.Instance.UIMask, Color.white);
+        viewport.gameObject.AddComponent<Mask>().showMaskGraphic = false;
+
+        var content = UIFactory.CreateRect("Content", viewport);
+        content.anchorMin = new Vector2(0f, 1f);
+        content.anchorMax = Vector2.one;
+        content.pivot = new Vector2(0.5f, 1f);
+        content.sizeDelta = new Vector2(0f, ContentHeight);
+
+        itemText = BuildItem(content);
+
+        var scrollbar = BuildScrollbar(template);
+
+        var scroll = template.gameObject.AddComponent<ScrollRect>();
+        scroll.content = content;
+        scroll.viewport = viewport;
+        scroll.horizontal = false;
+        scroll.vertical = true;
+        scroll.movementType = ScrollRect.MovementType.Clamped;
+        scroll.verticalScrollbar = scrollbar;
+        scroll.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHideAndExpandViewport;
+        scroll.verticalScrollbarSpacing = -3f;
+
+        return template;
+    }
+
+    Text BuildItem(Transform content)
+    {
+        var item = UIFactory.CreateRect("Item", content);
+        item.anchorMin = new Vector2(0f, 0.5f);
+        item.anchorMax = new Vector2(1f, 0.5f);
+        item.sizeDelta = new Vector2(0f, ItemHeight);
+
+        var itemBackground = UIFactory.CreateChild("Item Background", item);
+        var backgroundImage = UIFactory.AddImage(itemBackground.gameObject, null, GenUIStyle.DropdownItemBackground, Image.Type.Simple);
+
+        var checkmark = UIFactory.CreateRect("Item Checkmark", item);
+        checkmark.anchorMin = new Vector2(0f, 0.5f);
+        checkmark.anchorMax = new Vector2(0f, 0.5f);
+        checkmark.anchoredPosition = new Vector2(CheckmarkInset, 0f);
+        checkmark.sizeDelta = new Vector2(CheckmarkSize, CheckmarkSize);
+        var checkmarkImage = UIFactory.AddImage(checkmark.gameObject, GenUIAssets.Instance.Checkmark, Color.white, Image.Type.Simple);
+
+        var label = UIFactory.CreateChild("Item Label", item);
+        label.anchoredPosition = new Vector2(5f, -0.5f);
+        label.sizeDelta = new Vector2(-30f, -3f);
+        var text = UIFactory.AddText(label.gameObject, string.Empty, GenUIStyle.LabelFontSize,
+            TextAnchor.MiddleLeft, GenUIStyle.DropdownItemLabel);
+
+        var toggle = item.gameObject.AddComponent<Toggle>();
+        toggle.targetGraphic = backgroundImage;
+        toggle.graphic = checkmarkImage;
+
+        return text;
+    }
+
+    Scrollbar BuildScrollbar(Transform template)
+    {
+        var rect = UIFactory.CreateRect("Scrollbar", template);
+        rect.anchorMin = new Vector2(1f, 0f);
+        rect.anchorMax = Vector2.one;
+        rect.pivot = Vector2.one;
+        rect.sizeDelta = new Vector2(ScrollbarWidth, 0f);
+        UIFactory.AddImage(rect.gameObject, GenUIAssets.Instance.Background, Color.white);
+
+        var slidingArea = UIFactory.CreateChild("Sliding Area", rect);
+        slidingArea.sizeDelta = new Vector2(-ScrollbarWidth, -ScrollbarWidth);
+
+        var handle = UIFactory.CreateRect("Handle", slidingArea);
+        handle.anchorMin = Vector2.zero;
+        handle.anchorMax = new Vector2(1f, 0.2f);
+        handle.sizeDelta = new Vector2(ScrollbarWidth, ScrollbarWidth);
+        var handleImage = UIFactory.AddImage(handle.gameObject, GenUIAssets.Instance.Box, Color.white);
+
+        var scrollbar = rect.gameObject.AddComponent<Scrollbar>();
+        scrollbar.targetGraphic = handleImage;
+        scrollbar.handleRect = handle;
+        scrollbar.direction = Scrollbar.Direction.BottomToTop;
+        scrollbar.size = 0.2f;
+        return scrollbar;
+    }
+
+    #endregion
+
     #region Creation
 
     /// <summary>A dropdown over the entries of a <c>List&lt;string&gt;</c> named by `targetList`.</summary>
@@ -29,15 +182,13 @@ public class DropdownUI : ControllableUI
         LinkedControllable = target;
         LinkedControllable.controllableValueChanged += HandleTargetChange;
 
-        var text = this.transform.GetChild(0).GetComponent<Text>();
-        text.text = ParseNameString(activeElement.Name);
+        _label.text = ParseNameString(activeElement.Name);
 
-        var dropdown = this.GetComponentInChildren<Dropdown>();
-        dropdown.AddOptions(GetListEntries());
+        _dropdown.AddOptions(GetListEntries());
         //SetValueWithoutNotify: only a genuine user selection should fire onValueChanged (which loads
         //the selected preset). Programmatic updates here and in HandleTargetChange must not.
-        dropdown.SetValueWithoutNotify(Mathf.Max(0, GetSelectedListIndex()));
-        dropdown.onValueChanged.AddListener((value) =>
+        _dropdown.SetValueWithoutNotify(Mathf.Max(0, GetSelectedListIndex()));
+        _dropdown.onValueChanged.AddListener((value) =>
         {
             RecordUndo();
 
@@ -49,7 +200,7 @@ public class DropdownUI : ControllableUI
             LinkedControllable.SetFieldProp(Property, objParams);
         });
 
-        ApplyReadOnlyLook(dropdown);
+        ApplyReadOnlyLook(_dropdown);
     }
 
     /// <summary>A dropdown over the members of an enum, taken from the member's own type.</summary>
@@ -64,13 +215,11 @@ public class DropdownUI : ControllableUI
         _enumNames = Enum.GetNames(enumType);
         _enumValues = Enum.GetValues(enumType);
 
-        var text = this.transform.GetChild(0).GetComponent<Text>();
-        text.text = ParseNameString(activeElement.Name);
+        _label.text = ParseNameString(activeElement.Name);
 
-        var dropdown = this.GetComponentInChildren<Dropdown>();
-        dropdown.AddOptions(_enumNames.ToList());
-        dropdown.SetValueWithoutNotify(Mathf.Max(0, GetSelectedEnumIndex()));
-        dropdown.onValueChanged.AddListener((value) =>
+        _dropdown.AddOptions(_enumNames.ToList());
+        _dropdown.SetValueWithoutNotify(Mathf.Max(0, GetSelectedEnumIndex()));
+        _dropdown.onValueChanged.AddListener((value) =>
         {
             RecordUndo();
 
@@ -83,7 +232,7 @@ public class DropdownUI : ControllableUI
             LinkedControllable.SetFieldProp(Property, objParams);
         });
 
-        ApplyReadOnlyLook(dropdown);
+        ApplyReadOnlyLook(_dropdown);
     }
 
     //The dropdown is not one of the fields GetInputFields returns, so the base pass does not reach it.
@@ -95,9 +244,7 @@ public class DropdownUI : ControllableUI
 
         MakeDisplayOnly(dropdown);
 
-        var arrow = dropdown.transform.Find("Arrow");
-        if (arrow != null)
-            arrow.gameObject.SetActive(false);
+        _arrow.gameObject.SetActive(false);
     }
 
     #endregion
@@ -125,18 +272,16 @@ public class DropdownUI : ControllableUI
         if (name != Property.Name && !String.IsNullOrEmpty(name))
             return;
 
-        var dropdown = this.GetComponentInChildren<Dropdown>();
-
         if (enumType != null)
         {
-            dropdown.SetValueWithoutNotify(Mathf.Max(0, GetSelectedEnumIndex()));
+            _dropdown.SetValueWithoutNotify(Mathf.Max(0, GetSelectedEnumIndex()));
             return;
         }
 
         //The entries themselves can have changed - controllablePresetList grows every time a preset is saved.
-        dropdown.ClearOptions();
-        dropdown.AddOptions(GetListEntries());
-        dropdown.SetValueWithoutNotify(Mathf.Max(0, GetSelectedListIndex()));
+        _dropdown.ClearOptions();
+        _dropdown.AddOptions(GetListEntries());
+        _dropdown.SetValueWithoutNotify(Mathf.Max(0, GetSelectedListIndex()));
     }
 
     #endregion

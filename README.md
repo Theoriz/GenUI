@@ -129,7 +129,7 @@ To access a property or launch a method, use its address.
 For example : "/OCF/id/method" or "/OCF/id/floatProperty 1.5". By default the id corresponds to the script type name, but this can be changed by setting the public variable `controllableId` on your script extending "Controllable".
 
 > [!TIP]
-> You can copy the OSC Control Address of any exposed parameter in the UI directly by right clicking on the parameter value. Read-only parameters have no menu: their address cannot control them.
+> You can copy the OSC Control Address of any exposed parameter in the UI directly by right clicking anywhere on its row — its name, its value, or the space beside them. Read-only parameters have no menu: their address cannot control them.
 
 ## Presets
 This plugin comes with a preset system, you can save the state of a "Controllable" script. It saves each property to a file that can be loaded later so that you can create different settings for your script. To use it, click "Save", then simply select a preset in the dropdown menu — selecting it loads it immediately.
@@ -191,6 +191,12 @@ public class MyScriptControllable : Controllable {
 
 </p>
 </details>
+
+### Changing the look
+
+The interface is built from code, not from prefabs. Every size and colour comes from `GenUIStyle`, and the sprites and fonts come from the `GenUIAssets` asset in `Resources`. Changing a row height, a tint or the font is a change in one of those two places and applies to every widget at once.
+
+A widget's structure lives in its own script, in a `BuildHierarchy` method beside the code that reads it — `SliderUI`, `DropdownUI`, `VectorUIBase` and so on, under `Runtime/UI/Scripts`.
 
 ### Handling your own OSC messages
 

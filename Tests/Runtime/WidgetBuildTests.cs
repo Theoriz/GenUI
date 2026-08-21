@@ -1,0 +1,191 @@
+using System;
+using System.Reflection;
+using NUnit.Framework;
+using UnityEngine;
+using UnityEngine.UI;
+
+namespace Theoriz.GenUI.Tests
+{
+    /// <summary>
+    /// PlayMode tests for the hierarchies the widgets build themselves.
+    /// </summary>
+    /// <remarks>
+    /// These could not exist while the structure lived in prefabs: a widget only became whole once a
+    /// prefab was instantiated, and the prefabs were what the assertions would have had to trust.
+    /// Now the structure is created by the same file that reads it back, so what a built widget
+    /// reports is testable without a scene, a Controllable or a UIMaster.
+    /// </remarks>
+    public class WidgetBuildTests
+    {
+        GameObject _parent;
+
+        [SetUp]
+        public void SetUp()
+        {
+            //Hidden and not saved, so the fixture never becomes part of the scene the user has open.
+            _parent = new GameObject("WidgetBuildTests", typeof(RectTransform)) { hideFlags = HideFlags.HideAndDontSave };
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            //Qualified: this file also uses System, where Object means something else.
+            if (_parent != null)
+                UnityEngine.Object.DestroyImmediate(_parent);
+        }
+
+        T Build<T>() where T : ControllableUI
+        {
+            return ControllableUI.Create<T>(_parent.transform);
+        }
+
+        //Create is generic on the widget type, which a [TestCase] cannot express; this is the only
+        //way to run one case per widget rather than thirteen near-identical test methods.
+        ControllableUI Build(Type widgetType)
+        {
+            var create = typeof(ControllableUI).GetMethod("Create", BindingFlags.Public | BindingFlags.Static);
+            return (ControllableUI)create.MakeGenericMethod(widgetType).Invoke(null, new object[] { _parent.transform });
+        }
+
+        #region Editable fields
+
+        //The counts Tab navigation walks and the read-only pass covers. A widget that silently built
+        //one field too few would still look right and would drop out of the Tab sequence.
+        [TestCase(typeof(HeaderUI), 0)]
+        [TestCase(typeof(TooltipUI), 0)]
+        [TestCase(typeof(ButtonUI), 0)]
+        [TestCase(typeof(ToggleUI), 0)]
+        [TestCase(typeof(ColorUI), 0)]
+        [TestCase(typeof(DropdownUI), 0)]
+        [TestCase(typeof(InputFieldUI), 1)]
+        [TestCase(typeof(SliderUI), 1)]
+        [TestCase(typeof(Vector2UI), 2)]
+        [TestCase(typeof(Vector2IntUI), 2)]
+        [TestCase(typeof(Vector3UI), 3)]
+        [TestCase(typeof(Vector3IntUI), 3)]
+        [TestCase(typeof(Vector4UI), 4)]
+        public void Build_ReportsItsEditableFields(Type widgetType, int expected)
+        {
+            var fields = Build(widgetType).GetInputFields();
+
+            Assert.AreEqual(expected, fields.Length, widgetType.Name + " built the wrong number of fields.");
+            CollectionAssert.DoesNotContain(fields, null, widgetType.Name + " left a field unbuilt.");
+        }
+
+        //Tab and the scrub labels both depend on this order; nothing else pins it now that the axes
+        //are built in a loop rather than found by name.
+        [Test]
+        public void Vector4_ReportsItsAxesInOrder()
+        {
+            var targets = Build<Vector4UI>().GetScrubTargets();
+
+            Assert.AreEqual(4, targets.Length);
+            Assert.AreEqual("x", targets[0].Label.text);
+            Assert.AreEqual("y", targets[1].Label.text);
+            Assert.AreEqual("z", targets[2].Label.text);
+            Assert.AreEqual("w", targets[3].Label.text);
+        }
+
+        //Every field is built with the transparent disabled state ApplyReadOnlyLook relies on. This
+        //used to come from one prefab happening to carry it, which is how read-only sliders and
+        //vectors ended up framed like editable ones.
+        [Test]
+        public void Fields_AreBuiltWithATransparentDisabledTint()
+        {
+            foreach (var field in Build<Vector3UI>().GetInputFields())
+                Assert.AreEqual(0f, field.colors.disabledColor.a);
+        }
+
+        #endregion
+
+        #region Mouse events
+
+        //The invariant UIMaster.BindMouseEvents used to repair after the fact: a MouseButtonEvent
+        //whose linkedUI is empty silently does nothing when right-clicked.
+        [TestCase(typeof(ButtonUI))]
+        [TestCase(typeof(ToggleUI))]
+        [TestCase(typeof(ColorUI))]
+        [TestCase(typeof(InputFieldUI))]
+        [TestCase(typeof(SliderUI))]
+        [TestCase(typeof(DropdownUI))]
+        [TestCase(typeof(Vector3UI))]
+        public void Build_LinksEveryMouseEventToItsWidget(Type widgetType)
+        {
+            var built = Build(widgetType);
+
+            var events = built.GetComponentsInChildren<MouseButtonEvent>(true);
+
+            Assert.IsNotEmpty(events, widgetType.Name + " has nothing to right-click.");
+            foreach (var mouseEvent in events)
+                Assert.AreSame(built, mouseEvent.linkedUI, widgetType.Name + " left a MouseButtonEvent unlinked.");
+        }
+
+        //What makes the right-click menu behave the same on every row, whatever the member type: the
+        //event is on the row itself, over a graphic covering it, so it catches the presses the
+        //widget's own controls do not take - over the label, or over the gap beside it. While each
+        //widget added its own, a bool row had none that ever fired and a slider's label had one that
+        //could not: pointer-up only reaches the object that took the press.
+        [TestCase(typeof(HeaderUI))]
+        [TestCase(typeof(TooltipUI))]
+        [TestCase(typeof(ButtonUI))]
+        [TestCase(typeof(ToggleUI))]
+        [TestCase(typeof(ColorUI))]
+        [TestCase(typeof(InputFieldUI))]
+        [TestCase(typeof(SliderUI))]
+        [TestCase(typeof(DropdownUI))]
+        [TestCase(typeof(Vector3UI))]
+        public void Build_PutsAMouseEventOnTheRowItself(Type widgetType)
+        {
+            var built = Build(widgetType);
+
+            Assert.IsNotNull(built.GetComponent<MouseButtonEvent>(),
+                widgetType.Name + " leaves its own row unclickable.");
+            Assert.IsNotNull(built.GetComponent<Graphic>(),
+                widgetType.Name + " has no graphic on its row, so its bare parts are not raycast.");
+        }
+
+        [Test]
+        public void ColorWidget_OpensThePicker()
+        {
+            var events = Build<ColorUI>().GetComponentsInChildren<MouseButtonEvent>(true);
+
+            Assert.IsTrue(Array.Exists(events, e => e.enableColorPicker),
+                "Nothing on the colour row would open the picker on a left click.");
+        }
+
+        #endregion
+
+        #region Dropdown template
+
+        //The Dropdown clones its template every time it opens, so a template left active would draw
+        //an open list permanently over the panel below it.
+        [Test]
+        public void Dropdown_BuildsATemplateAndLeavesItInactive()
+        {
+            var dropdown = Build<DropdownUI>().GetComponentInChildren<Dropdown>(true);
+
+            Assert.IsNotNull(dropdown.template, "The dropdown has no template to clone.");
+            Assert.IsFalse(dropdown.template.gameObject.activeSelf, "The template must not be a live part of the panel.");
+            Assert.IsNotNull(dropdown.captionText);
+            Assert.IsNotNull(dropdown.itemText);
+        }
+
+        #endregion
+
+        #region Panel
+
+        [Test]
+        public void Panel_BuildsItsRootAndPresetRow()
+        {
+            var panel = PanelUI.Build(_parent.transform, "Test Panel", Color.red);
+
+            Assert.AreSame(_parent.transform, panel.Root.transform.parent,
+                "The panel's root is what the caller parents, orders and destroys.");
+            Assert.IsNotNull(panel.PresetHolder, "The preset controls have nowhere to be gathered.");
+            Assert.AreSame(panel.transform, panel.PresetHolder.parent,
+                "The preset row belongs to the panel body, which is what folding hides.");
+        }
+
+        #endregion
+    }
+}

@@ -1,89 +1,13 @@
-﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
-using System.Reflection;
-using System;
-using System.Globalization;
 
-public class Vector2IntUI : ControllableUI
+public class Vector2IntUI : VectorUIBase
 {
-    // Use this for initialization
-    public void CreateUI(Controllable target, FieldInfo property, bool isInteractible)
+    protected override string[] AxisNames { get { return XY; } }
+    protected override bool IsInteger { get { return true; } }
+
+    protected override string[] ReadAxisValues()
     {
-        Property = property;
-        IsInteractible = isInteractible;
-        LinkedControllable = target;
-        target.controllableValueChanged += HandleTargetChange;
-
-        this.transform.GetChild(1).GetComponent<Text>().text = ParseNameString(property.Name);
-        var XInput = this.transform.GetChild(0).Find("XInput").GetChild(0).GetComponent<InputField>();
-        var YInput = this.transform.GetChild(0).Find("YInput").GetChild(0).GetComponent<InputField>();
-
-        XInput.contentType = InputField.ContentType.IntegerNumber;
-        YInput.contentType = InputField.ContentType.IntegerNumber;
-
-        var scriptValue = (Vector2Int)property.GetValue(target);
-
-        XInput.text = scriptValue.x.ToString();
-        YInput.text = scriptValue.y.ToString();
-
-        XInput.onEndEdit.AddListener((value) =>
-        {
-            RecordUndo();
-
-            var list = new List<object>();
-            list.Add(TypeConverter.GetInt(value.ToString()));
-            list.Add(TypeConverter.GetInt(YInput.text.ToString()));
-
-            target.SetFieldProp(property, list);
-        });
-
-        YInput.onEndEdit.AddListener((value) =>
-        {
-            RecordUndo();
-
-            var list = new List<object>();
-            list.Add(TypeConverter.GetInt(XInput.text.ToString()));
-            list.Add(TypeConverter.GetInt(value.ToString()));
-
-            target.SetFieldProp(property, list);
-        });
-
-        ApplyReadOnlyLook();
+        var value = (Vector2Int)Property.GetValue(LinkedControllable);
+        return new[] { FormatAxis(value.x), FormatAxis(value.y) };
     }
-
-    //Named rather than indexed, so Tab visits x then y whatever order the prefab holds them in.
-    public override InputField[] GetInputFields()
-    {
-        return new[] { FindInput("XInput"), FindInput("YInput") };
-    }
-
-    InputField FindInput(string childName)
-    {
-        return this.transform.GetChild(0).Find(childName).GetChild(0).GetComponent<InputField>();
-    }
-
-    //Each axis carries its own label beside the box, so a scrub knows which component it moves.
-    public override ScrubTarget[] GetScrubTargets()
-    {
-        return new[] { MakeScrubTarget("XInput"), MakeScrubTarget("YInput") };
-    }
-
-    ScrubTarget MakeScrubTarget(string childName)
-    {
-        var axis = this.transform.GetChild(0).Find(childName);
-        return new ScrubTarget(axis.GetChild(0).GetComponent<InputField>(),
-                               axis.Find("Text").GetComponent<Text>());
-    }
-
-    public override void HandleTargetChange(string name)
-    { 
-        if (name != Property.Name && !String.IsNullOrEmpty(name))
-            return;
-
-        var vector = (Vector2Int)Property.GetValue(LinkedControllable);
-
-		this.transform.GetChild(0).Find("XInput").GetChild(0).GetComponent<InputField>().text = vector.x.ToString();
-		this.transform.GetChild(0).Find("YInput").GetChild(0).GetComponent<InputField>().text = vector.y.ToString();
-	}
 }

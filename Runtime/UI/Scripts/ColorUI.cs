@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using System.Reflection;
 using System;
@@ -11,9 +11,23 @@ public class ColorUI : ControllableUI
     private Color _colorBeforePicker;
     private bool _picking;
 
+    Text _label;
+    Image _swatch;
+
     #region Widget
 
-    // Use this for initialization
+    //The row's own click target opens the picker: there is nothing else on this row to click, so a
+    //left click has to work wherever on it it lands.
+    protected override bool OpensColorPicker { get { return true; } }
+
+    protected override void BuildHierarchy()
+    {
+        _label = UIFactory.CreateLabel(transform);
+
+        var swatchRect = UIFactory.CreateSlice("Swatch", transform, GenUIStyle.LabelWidthRatio, 1f);
+        _swatch = UIFactory.AddImage(swatchRect.gameObject, GenUIAssets.Instance.Box, Color.white);
+    }
+
     public void CreateUI(Controllable target, FieldInfo property, bool isInteractible)
     {
         Property = property;
@@ -21,8 +35,8 @@ public class ColorUI : ControllableUI
         LinkedControllable = target;
         target.controllableValueChanged += HandleTargetChange;
 
-        this.GetComponentInChildren<Text>().text = ParseNameString(property.Name);
-        this.GetComponentInChildren<Image>().color = GetCurrentColorValue();
+        _label.text = ParseNameString(property.Name);
+        _swatch.color = GetCurrentColorValue();
     }
 
     public override void HandleTargetChange(string name)
@@ -30,7 +44,7 @@ public class ColorUI : ControllableUI
         if (name != Property.Name && !String.IsNullOrEmpty(name))
             return;
 
-        this.GetComponentInChildren<Image>().color = GetCurrentColorValue();
+        _swatch.color = GetCurrentColorValue();
     }
 
     #endregion

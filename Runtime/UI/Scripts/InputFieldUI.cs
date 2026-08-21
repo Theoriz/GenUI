@@ -1,4 +1,3 @@
-﻿using System.Collections;
 using System;
 using System.Globalization;
 using System.Collections.Generic;
@@ -8,9 +7,18 @@ using System.Reflection;
 
 public class InputFieldUI : ControllableUI
 {
+    Text _label;
+    InputField _input;
 
+    protected override void BuildHierarchy()
+    {
+        _label = UIFactory.CreateLabel(transform);
 
-    // Use this for initialization
+        var fieldRect = UIFactory.CreateSlice("InputField", transform, GenUIStyle.LabelWidthRatio, 1f);
+        _input = UIFactory.AddInputField(fieldRect);
+        UIFactory.AddMouseEvent(fieldRect.gameObject, this);
+    }
+
     public void CreateUI(Controllable target, FieldInfo property, bool isInteractible) {
 
         LinkedControllable = target;
@@ -18,23 +26,20 @@ public class InputFieldUI : ControllableUI
         Property = property;
         target.controllableValueChanged += HandleTargetChange;
 
-        var inputFieldComponent = this.transform.GetComponentInChildren<InputField>();
-        var textComponent = this.transform.GetChild(1).gameObject.GetComponent<Text>();
-
-        textComponent.text = ParseNameString(property.Name);
+        _label.text = ParseNameString(property.Name);
 
         if (property.FieldType.ToString() == "System.Int32")
-            inputFieldComponent.contentType = InputField.ContentType.IntegerNumber;
+            _input.contentType = InputField.ContentType.IntegerNumber;
         if (property.FieldType.ToString() == "System.Single")
-            inputFieldComponent.contentType = InputField.ContentType.DecimalNumber;
+            _input.contentType = InputField.ContentType.DecimalNumber;
         if (property.FieldType.ToString() == "System.String")
-            inputFieldComponent.contentType = InputField.ContentType.Standard;
+            _input.contentType = InputField.ContentType.Standard;
 
         var str = "" + property.GetValue(target).ToString();
         str = str.Replace(",", ".");
-        inputFieldComponent.text = "" + str; 
+        _input.text = "" + str;
 
-        inputFieldComponent.onEndEdit.AddListener((value) =>
+        _input.onEndEdit.AddListener((value) =>
         {
             RecordUndo();
 
@@ -65,37 +70,32 @@ public class InputFieldUI : ControllableUI
             target.SetFieldProp(property, list);
         });
 
-        this.transform.GetChild(0).Find("Text").gameObject.GetComponent<Text>().color = Color.white;
-        this.transform.GetChild(0).Find("Placeholder").gameObject.GetComponent<Text>().text = target.GetPropInfoForAddress(property.Name).GetValue(target).ToString();
+        //The value the member started with, shown behind an emptied field.
+        ((Text)_input.placeholder).text = target.GetPropInfoForAddress(property.Name).GetValue(target).ToString();
 
         ApplyReadOnlyLook();
     }
 
     public override InputField[] GetInputFields()
     {
-        var field = this.transform.GetComponentInChildren<InputField>();
-        return field != null ? new[] { field } : base.GetInputFields();
+        return new[] { _input };
     }
 
     //Only the int and float widgets scrub; the string one has nothing to scrub to.
     public override ScrubTarget[] GetScrubTargets()
     {
-        var field = this.transform.GetComponentInChildren<InputField>();
-        if (field == null || field.contentType == InputField.ContentType.Standard)
+        if (_input.contentType == InputField.ContentType.Standard)
             return base.GetScrubTargets();
 
-        var label = this.transform.GetChild(1).GetComponent<Text>();
-        return label != null ? new[] { new ScrubTarget(field, label) } : base.GetScrubTargets();
+        return new[] { new ScrubTarget(_input, _label) };
     }
 
     public override void HandleTargetChange(string name)
     {
         if (name != Property.Name && !String.IsNullOrEmpty(name))
             return;
-        
+
         var str = "" + Property.GetValue(LinkedControllable);
-        str = str.Replace(",", ".");
-        this.transform.GetComponentInChildren<InputField>().text = "" + str;
-        
+        _input.text = str.Replace(",", ".");
     }
 }

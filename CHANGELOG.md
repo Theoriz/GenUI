@@ -4,6 +4,29 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [3.0.0] - 2026-08-21
+
+### Changed
+
+- The interface is built entirely from code, each widget creating its own hierarchy in the script that reads it.
+- Every size and colour comes from `GenUIStyle`, and the sprites and fonts from the `GenUIAssets` asset in `Resources`.
+- Labels use Roboto everywhere instead of a mix of Roboto and Unity's builtin Arial.
+- Placeholders in empty fields are white at half opacity instead of dark grey.
+- A checkbox row is the same height as every other row.
+- A slider's bar spans exactly the distance its handle travels.
+- Vector rows lay out identically whatever their axis count, and their boxes keep their width whatever value they hold.
+- The right-click menu and the colour picker are dismissed by clicking anywhere outside them.
+
+### Removed
+
+- Removed the `UIPrefabs` ScriptableObject, the `GenUIPrefabs` asset and the fifteen widget prefabs.
+- Customise the interface in `GenUIStyle`, `GenUIAssets` or a widget's `BuildHierarchy` instead of by editing prefabs.
+
+### Fixed
+
+- Right-clicking a member copies its OSC address from anywhere on its row, including its label and a bool's checkbox.
+- A color row is drawn on the same background as every other row.
+
 ## [2.1.0] - 2026-08-20
 
 ### Changed

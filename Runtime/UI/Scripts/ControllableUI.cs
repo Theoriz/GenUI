@@ -17,6 +17,73 @@ public class ControllableUI : MonoBehaviour {
 
     #region Widget lifetime
 
+    /// <summary>
+    /// Creates the widget's row and everything in it, then hands it to the panel it belongs to.
+    /// </summary>
+    /// <remarks>
+    /// The caller follows this with the widget's own CreateUI, which binds it to a member. Splitting
+    /// the two keeps every widget's structure in the file that reads it back: BuildHierarchy creates
+    /// the children and caches them, so nothing has to find them again by index or by name.
+    /// </remarks>
+    public static T Create<T>(Transform parent) where T : ControllableUI
+    {
+        var rect = UIFactory.CreateRect(typeof(T).Name, parent);
+
+        var widget = rect.gameObject.AddComponent<T>();
+        rect.sizeDelta = new Vector2(0f, widget.WidgetHeight);
+        widget.BuildHierarchy();
+        widget.AddRowMouseEvent();
+
+        var panel = parent.GetComponent<PanelUI>();
+        if (panel != null)
+            panel.AddUIElement(widget);
+
+        return widget;
+    }
+
+    /// <summary>
+    /// How tall the widget's row is. The panel's layout group does not control child heights, so
+    /// this is what the row gets.
+    /// </summary>
+    protected virtual float WidgetHeight { get { return GenUIStyle.RowHeight; } }
+
+    /// <summary>
+    /// Creates the widget's children and caches them. Called once, before CreateUI.
+    /// </summary>
+    /// <remarks>
+    /// A part that answers the mouse is given its MouseButtonEvent here, through
+    /// UIFactory.AddMouseEvent, so linkedUI is never left to be repaired afterwards. Only the parts
+    /// that take the press away from the row need one - a Selectable does, a plain graphic does not,
+    /// since <see cref="AddRowMouseEvent"/> covers the row itself.
+    /// </remarks>
+    protected virtual void BuildHierarchy()
+    {
+    }
+
+    /// <summary>Whether a left click on the row opens the colour picker.</summary>
+    protected virtual bool OpensColorPicker { get { return false; } }
+
+    /// <summary>
+    /// Makes the whole row answer the mouse, so a right click copies the OSC address wherever it
+    /// lands: over the label, over the control, or over the gap between them.
+    /// </summary>
+    /// <remarks>
+    /// Added here rather than by each widget, so no member type can answer the mouse differently
+    /// from another. A Selectable takes the press over its own area, so the widgets that build one
+    /// add their own event as well and this one catches everything they do not.
+    /// The backing graphic is what makes the bare parts of the row raycastable at all. It goes on the
+    /// row itself, behind every child, so it cannot swallow a click meant for a control - which a
+    /// child overlay, drawn in front, would. A widget that already draws a row-wide graphic keeps it:
+    /// a GameObject holds only one Graphic.
+    /// </remarks>
+    void AddRowMouseEvent()
+    {
+        if (GetComponent<Graphic>() == null)
+            UIFactory.AddImage(gameObject, null, Color.clear);
+
+        UIFactory.AddMouseEvent(gameObject, this, OpensColorPicker);
+    }
+
     public virtual void RemoveUI()
     {
         LinkedControllable.controllableValueChanged -= HandleTargetChange;
@@ -201,6 +268,15 @@ public class ControllableUI : MonoBehaviour {
     #endregion
 
     #region Naming and address
+
+    /// <summary>
+    /// Whether the widget stands for a member at all. A header and a tooltip are rows like any
+    /// other, but there is nothing about them to control or to copy an address for.
+    /// </summary>
+    public bool HasAddress
+    {
+        get { return LinkedControllable != null && (Property != null || Method != null); }
+    }
 
     public void CopyAddressToClipboard()
     {
