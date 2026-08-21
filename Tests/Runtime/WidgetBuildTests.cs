@@ -175,15 +175,29 @@ namespace Theoriz.GenUI.Tests
         #region Panel
 
         [Test]
-        public void Panel_BuildsItsRootAndPresetRow()
+        public void Panel_BuildsItsRootAndPresetSection()
         {
             var panel = PanelUI.Build(_parent.transform, "Test Panel", Color.red);
 
             Assert.AreSame(_parent.transform, panel.Root.transform.parent,
                 "The panel's root is what the caller parents, orders and destroys.");
             Assert.IsNotNull(panel.PresetHolder, "The preset controls have nowhere to be gathered.");
-            Assert.AreSame(panel.transform, panel.PresetHolder.parent,
-                "The preset row belongs to the panel body, which is what folding hides.");
+            Assert.AreSame(panel.PresetSection, panel.PresetHolder.parent,
+                "The preset row is drawn inside the preset section.");
+            Assert.AreSame(panel.transform, panel.PresetSection.parent,
+                "The preset section belongs to the panel body, which is what folding hides.");
+        }
+
+        [Test]
+        public void Panel_SizesAPresetSectionToItsRows()
+        {
+            var panel = PanelUI.Build(_parent.transform, "Test Panel", Color.red);
+
+            //The separator sits in the section's gap and must not be counted as a row of its own.
+            var expected = GenUIStyle.PresetRowHeight + GenUIStyle.PresetSectionGap
+                + 2f * GenUIStyle.PresetSectionPadding;
+            Assert.AreEqual(expected, panel.PresetSection.rect.height, 0.01f,
+                "A section holding one row is as tall as that row plus its gap and padding.");
         }
 
         #endregion

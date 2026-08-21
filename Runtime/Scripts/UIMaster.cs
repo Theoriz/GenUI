@@ -633,24 +633,20 @@ public class UIMaster : MonoBehaviour
         var presetHolder = panel.PresetHolder;
         var isGlobalPresetPanel = controllable is ControllableMasterControllable;
 
-        //Create the global holders up front, while PresetHolder is still empty. Cloning them
-        //lazily once the first SaveAll button appears would copy the Save/Load buttons already
-        //reparented into PresetHolder, stacking them into these top rows too.
-        Transform globalPresetHolder = null;
-        Transform globalActionHolder = null;
+        //The global buttons get sections of their own, at the top of the panel.
+        RectTransform globalPresetSection = null;
+        RectTransform globalPresetHolder = null;
+        RectTransform globalActionSection = null;
+        RectTransform globalActionHolder = null;
         if (isGlobalPresetPanel)
         {
-            globalPresetHolder = Instantiate(presetHolder);
-            globalPresetHolder.name = "AllPresetHolder";
-            globalPresetHolder.SetParent(lastPanel);
-            globalPresetHolder.SetSiblingIndex(1); //Set first
+            globalPresetSection = panel.CreatePresetSection("AllPresetSection", out globalPresetHolder);
+            globalPresetSection.SetSiblingIndex(1); //Set first
 
             //Own row, directly under the preset row: these buttons have long labels and do not fit
             //alongside Save All / Save As All.
-            globalActionHolder = Instantiate(presetHolder);
-            globalActionHolder.name = "GlobalActionHolder";
-            globalActionHolder.SetParent(lastPanel);
-            globalActionHolder.SetSiblingIndex(2);
+            globalActionSection = panel.CreatePresetSection("GlobalActionSection", out globalActionHolder);
+            globalActionSection.SetSiblingIndex(2);
         }
 
         var allButtons = lastPanel.GetComponentsInChildren<ButtonUI>();
@@ -679,16 +675,35 @@ public class UIMaster : MonoBehaviour
             }
         }
 
-        //Nothing landed in it, so it would otherwise render as an empty strip.
-        if (globalActionHolder != null && globalActionHolder.childCount == 0)
-            globalActionHolder.gameObject.SetActive(false);
-
+        //The preset dropdown belongs to the same block as the buttons, so it joins them in the section.
         if (usePreset)
         {
-            presetHolder.SetSiblingIndex(lastPanel.transform.childCount - 2); //last index being the preset list
+            foreach (var dropdown in lastPanel.GetComponentsInChildren<DropdownUI>())
+            {
+                if (dropdown.Property == null
+                    || dropdown.Property.Name != nameof(Controllable.controllableCurrentPreset)) continue;
+
+                dropdown.transform.SetParent(panel.PresetSection);
+                dropdown.transform.SetAsLastSibling();
+                break;
+            }
+
+            panel.PresetSection.SetAsLastSibling();
+            panel.LayoutSection(panel.PresetSection);
         }
         else
-            presetHolder.gameObject.SetActive(false);
+            panel.HideSection(panel.PresetSection);
+
+        if (isGlobalPresetPanel)
+        {
+            //Nothing landed in it, so it would otherwise render as an empty block.
+            if (globalActionHolder.childCount == 0)
+                panel.HideSection(globalActionSection);
+            else
+                panel.LayoutSection(globalActionSection);
+
+            panel.LayoutSection(globalPresetSection);
+        }
 
         panel.Init(controllable);
 

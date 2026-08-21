@@ -31,6 +31,19 @@ public static class GenUIStyle
 
     public const int PanelPadding = 3;
 
+    /// <summary>Inset of the preset rows inside their section's backing.</summary>
+    public const int PresetSectionPadding = 3;
+
+    /// <summary>Empty space kept above a preset section, holding the rule that separates it from the
+    /// member rows.</summary>
+    public const int PresetSectionGap = 14;
+
+    /// <summary>How far into that gap the rule sits. More space above it than below, so the rule reads
+    /// as belonging to the block it heads rather than to the member row it follows.</summary>
+    public const float SeparatorSpaceAbove = 10f;
+
+    public const float SeparatorThickness = 1f;
+
     /// <summary>Gap between a panel's colour bar and its body.</summary>
     public const float PanelBarGap = 4f;
 
@@ -93,6 +106,10 @@ public static class GenUIStyle
 
     public static readonly Color TooltipColor = new Color(0.7f, 0.7f, 0.7f, 1f);
     public static readonly Color PanelBackground = new Color(0.078431375f, 0.078431375f, 0.078431375f, 0.4509804f);
+
+    /// <summary>The rule above a preset section. Light rather than dark: the panel is drawn over
+    /// whatever the scene shows, so only a line brighter than the rows reads on every background.</summary>
+    public static readonly Color SeparatorColor = new Color(1f, 1f, 1f, 0.12f);
 
     public static readonly Color ToggleOn = new Color(0.43f, 0.9f, 0.47f, 0.75f);
     public static readonly Color ToggleOff = new Color(0.9f, 0.4f, 0.4f, 0.8f);

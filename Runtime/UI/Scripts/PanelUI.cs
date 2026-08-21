@@ -11,18 +11,27 @@ public class PanelUI : ControllableUI
     /// <summary>The whole panel, colour bar included. What the caller parents, orders and destroys.</summary>
     public GameObject Root { get { return transform.parent.gameObject; } }
 
-    /// <summary>The row the preset controls are gathered into.</summary>
+    /// <summary>The row the preset buttons are gathered into, inside <see cref="PresetSection"/>.</summary>
     public RectTransform PresetHolder { get { return _presetHolder; } }
+
+    /// <summary>The panel's own preset section: the block the preset buttons and the preset dropdown
+    /// are gathered into. What the caller orders and hides.</summary>
+    public RectTransform PresetSection { get { return _presetSection; } }
 
     RectTransform _title;
     RectTransform _presetHolder;
+    RectTransform _presetSection;
     Transform _arrow;
     Text _titleText;
+
+    //Sections CleanGeneratedUI turned off because nothing landed in them. Unfolding the panel shows
+    //every other child again, so it has to know which ones were never meant to be shown.
+    readonly List<Transform> _hiddenSections = new List<Transform>();
 
     #region Building
 
     /// <summary>
-    /// Creates an empty panel: a colour bar, a foldable title, and the row the preset controls end
+    /// Creates an empty panel: a colour bar, a foldable title, and the section the preset controls end
     /// up in. Its widgets are then parented to the returned PanelUI's own transform.
     /// </summary>
     public static PanelUI Build(Transform parent, string title, Color barColor)
@@ -41,7 +50,7 @@ public class PanelUI : ControllableUI
 
         var panel = control.gameObject.AddComponent<PanelUI>();
         panel.BuildTitle(title, barColor);
-        panel.BuildPresetHolder();
+        panel._presetSection = panel.CreatePresetSection("PresetSection", out panel._presetHolder);
         return panel;
     }
 
@@ -76,10 +85,66 @@ public class PanelUI : ControllableUI
         button.onClick.AddListener(HandleClickOnButton);
     }
 
-    void BuildPresetHolder()
+    /// <summary>
+    /// Creates a preset section - a block set off from the member rows by a rule and the space around
+    /// it - and hands back the button row inside it. Further rows are parented to the section itself.
+    /// </summary>
+    /// <remarks>
+    /// Called once per block rather than cloning the panel's own: a clone would copy the separator and
+    /// whatever has already been reparented into it.
+    /// </remarks>
+    public RectTransform CreatePresetSection(string name, out RectTransform holder)
     {
-        _presetHolder = UIFactory.CreateRect("PresetHolder", transform, GenUIStyle.PresetRowHeight);
-        UIFactory.AddHorizontalLayout(_presetHolder.gameObject, expandHeight: true);
+        var section = UIFactory.CreateRect(name, transform);
+        var layout = UIFactory.AddVerticalLayout(section.gameObject, controlHeight: false);
+        //The gap is part of the section's own height and holds the separator, so the block keeps its
+        //distance from the row above whatever ends up in it.
+        layout.padding = new RectOffset(GenUIStyle.PresetSectionPadding, GenUIStyle.PresetSectionPadding,
+            GenUIStyle.PresetSectionPadding + GenUIStyle.PresetSectionGap, GenUIStyle.PresetSectionPadding);
+
+        //Placed in the gap rather than laid out as a row of its own, so the space around it stays the
+        //same whatever the section holds.
+        var separator = UIFactory.CreateChild("Separator", section);
+        separator.anchorMin = new Vector2(0f, 1f);
+        separator.anchorMax = new Vector2(1f, 1f);
+        separator.sizeDelta = new Vector2(0f, GenUIStyle.SeparatorThickness);
+        separator.anchoredPosition = new Vector2(0f, -GenUIStyle.SeparatorSpaceAbove);
+        UIFactory.AddImage(separator.gameObject, null, GenUIStyle.SeparatorColor, Image.Type.Simple);
+        UIFactory.AddLayoutElement(separator.gameObject, ignoreLayout: true);
+
+        holder = UIFactory.CreateRect("PresetHolder", section, GenUIStyle.PresetRowHeight);
+        UIFactory.AddHorizontalLayout(holder.gameObject, expandHeight: true);
+
+        LayoutSection(section);
+        return section;
+    }
+
+    /// <summary>
+    /// Sizes a preset section to the rows it holds. The panel's layout group does not control child
+    /// heights, so a section that has just been filled has to be given its own.
+    /// </summary>
+    public void LayoutSection(RectTransform section)
+    {
+        var height = GenUIStyle.PresetSectionGap + 2f * GenUIStyle.PresetSectionPadding;
+        foreach (Transform child in section)
+        {
+            //Same two exclusions the layout group itself makes: the separator is placed in the gap
+            //rather than stacked, and a hidden row takes no space.
+            var element = child.GetComponent<LayoutElement>();
+            if (!child.gameObject.activeSelf || (element != null && element.ignoreLayout)) continue;
+
+            height += ((RectTransform)child).rect.height;
+        }
+
+        section.sizeDelta = new Vector2(section.sizeDelta.x, height);
+    }
+
+    /// <summary>Hides a section nothing landed in, and keeps unfolding the panel from showing it again.</summary>
+    public void HideSection(Transform section)
+    {
+        section.gameObject.SetActive(false);
+        if (!_hiddenSections.Contains(section))
+            _hiddenSections.Add(section);
     }
 
     #endregion
@@ -152,7 +217,7 @@ public class PanelUI : ControllableUI
     {
         foreach (Transform child in transform)
         {
-            if (child != _title)
+            if (child != _title && !_hiddenSections.Contains(child))
                 child.gameObject.SetActive(IsExpanded);
         }
 

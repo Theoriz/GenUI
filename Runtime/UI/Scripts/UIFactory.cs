@@ -254,9 +254,11 @@ public static class UIFactory
     }
 
     public static LayoutElement AddLayoutElement(GameObject go, float minWidth = -1f, float minHeight = -1f,
-        float preferredWidth = -1f, float preferredHeight = -1f, float flexibleWidth = -1f, float flexibleHeight = -1f)
+        float preferredWidth = -1f, float preferredHeight = -1f, float flexibleWidth = -1f, float flexibleHeight = -1f,
+        bool ignoreLayout = false)
     {
         var element = go.AddComponent<LayoutElement>();
+        element.ignoreLayout = ignoreLayout;
         element.minWidth = minWidth;
         element.minHeight = minHeight;
         element.preferredWidth = preferredWidth;
