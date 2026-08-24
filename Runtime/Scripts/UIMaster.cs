@@ -641,12 +641,12 @@ public class UIMaster : MonoBehaviour
         if (isGlobalPresetPanel)
         {
             globalPresetSection = panel.CreatePresetSection("AllPresetSection", out globalPresetHolder);
-            globalPresetSection.SetSiblingIndex(1); //Set first
+            globalPresetSection.SetSiblingIndex(panel.FirstRowIndex); //Set first
 
             //Own row, directly under the preset row: these buttons have long labels and do not fit
             //alongside Save All / Save As All.
             globalActionSection = panel.CreatePresetSection("GlobalActionSection", out globalActionHolder);
-            globalActionSection.SetSiblingIndex(2);
+            globalActionSection.SetSiblingIndex(panel.FirstRowIndex + 1);
         }
 
         var allButtons = lastPanel.GetComponentsInChildren<ButtonUI>();
@@ -707,6 +707,9 @@ public class UIMaster : MonoBehaviour
 
         //After the preset buttons have left the body, so the gap lands above the first button that stays.
         panel.AddMethodGap();
+
+        //After the sections have been ordered, since one of them can be the panel's first row.
+        panel.TrimTitleGap();
 
         panel.Init(controllable);
 

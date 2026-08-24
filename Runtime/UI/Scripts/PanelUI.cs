@@ -18,7 +18,12 @@ public class PanelUI : ControllableUI
     /// are gathered into. What the caller orders and hides.</summary>
     public RectTransform PresetSection { get { return _presetSection; } }
 
+    /// <summary>Sibling index of the first row: what a caller moving a section to the top of the panel
+    /// body sets, so it lands under the title and the space kept beneath it.</summary>
+    public int FirstRowIndex { get { return _titleGap.GetSiblingIndex() + 1; } }
+
     RectTransform _title;
+    RectTransform _titleGap;
     RectTransform _presetHolder;
     RectTransform _presetSection;
     Transform _arrow;
@@ -75,6 +80,8 @@ public class PanelUI : ControllableUI
         //Both halves of the title fold the panel, so the whole bar is clickable and not just the arrow.
         AddFoldButton(arrow.gameObject);
         AddFoldButton(titleRect.gameObject);
+
+        _titleGap = UIFactory.CreateRect("TitleGap", transform, GenUIStyle.PanelTitleBottomSpacing);
     }
 
     void AddFoldButton(GameObject go)
@@ -168,8 +175,8 @@ public class PanelUI : ControllableUI
         for (var i = 0; i < index; i++)
         {
             var sibling = transform.GetChild(i);
-            //The title is not a row, and a hidden section takes no space.
-            if (sibling == _title || !sibling.gameObject.activeSelf) continue;
+            //The title and its gap are not rows, and a hidden section takes no space.
+            if (sibling == _title || sibling == _titleGap || !sibling.gameObject.activeSelf) continue;
 
             hasRowAbove = true;
             break;
@@ -179,6 +186,27 @@ public class PanelUI : ControllableUI
 
         var gap = UIFactory.CreateRect("MethodGap", transform, GenUIStyle.MethodGapHeight);
         gap.SetSiblingIndex(index);
+    }
+
+    /// <summary>
+    /// Drops the space under the title when the panel opens on a header, which is taller than a row
+    /// and so already carries space of its own - stacked, the two read as a hole under the heading.
+    /// </summary>
+    /// <remarks>
+    /// Called once the sections have been ordered, since one of them can be the first row. The space
+    /// is a row rather than a margin, so it cannot collapse into the header's on its own.
+    /// </remarks>
+    public void TrimTitleGap()
+    {
+        foreach (Transform child in transform)
+        {
+            if (child == _title || child == _titleGap || !child.gameObject.activeSelf) continue;
+
+            if (child.GetComponent<HeaderUI>() != null)
+                HideSection(_titleGap);
+
+            return;
+        }
     }
 
     /// <summary>Hides a section nothing landed in, and keeps unfolding the panel from showing it again.</summary>

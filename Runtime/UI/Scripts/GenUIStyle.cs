@@ -86,6 +86,11 @@ public static class GenUIStyle
     /// their own rather than as one more member row.</summary>
     public const float MethodGapHeight = 10f;
 
+    /// <summary>Empty space kept under a panel's title, so the first row does not sit tight against
+    /// the heading. A row of its own rather than extra title height, which would grow the tinted
+    /// backing behind the title text.</summary>
+    public const float PanelTitleBottomSpacing = 10f;
+
     #endregion
 
     #region Text
