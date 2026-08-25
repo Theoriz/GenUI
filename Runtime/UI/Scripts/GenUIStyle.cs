@@ -1,3 +1,5 @@
+using System.Globalization;
+using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -228,6 +230,154 @@ public static class GenUIStyle
 
     public static readonly Color PickerCheckerLight = new Color(0.8f, 0.8f, 0.8f, 1f);
     public static readonly Color PickerCheckerDark = new Color(0.55f, 0.55f, 0.55f, 1f);
+
+    #endregion
+
+    #region CSS export
+
+    /// <summary>Name of the CSS custom property carrying <paramref name="token"/>, so a caller naming a
+    /// single token spells it the same way this class emits it.</summary>
+    public static string CssVariable(string token)
+    {
+        return "--genui-" + token;
+    }
+
+    /// <summary>
+    /// Every value above as a `:root` block of `--genui-*` custom properties, for the web mirror to
+    /// draw its rows with.
+    /// </summary>
+    /// <remarks>
+    /// Generated rather than hand-written so the browser cannot drift from the panel: changing a
+    /// metric here moves both. Ratios become percentages and lengths pixels, which is what the client
+    /// uses them as; a colour that a panel's own bar tints (the title backing) is emitted as its alpha
+    /// alone, since the bar colour is per-controllable and arrives with the schema.
+    /// </remarks>
+    public static string ToCss()
+    {
+        var css = new StringBuilder();
+        css.Append(":root {\n");
+
+        Length(css, "row-height", RowHeight);
+        Length(css, "header-height", HeaderHeight);
+        Length(css, "tooltip-height", TooltipHeight);
+        Length(css, "panel-title-height", PanelTitleHeight);
+        Length(css, "preset-row-height", PresetRowHeight);
+        Length(css, "checkbox-size", CheckboxSize);
+        Length(css, "panel-arrow-size", PanelArrowSize);
+        Length(css, "panel-arrow-inset", PanelArrowInset);
+        Length(css, "color-bar-width", ColorBarWidth);
+        Length(css, "panel-padding", PanelPadding);
+        Length(css, "preset-section-padding", PresetSectionPadding);
+        Length(css, "preset-section-gap", PresetSectionGap);
+        Length(css, "separator-space-above", SeparatorSpaceAbove);
+        Length(css, "separator-thickness", SeparatorThickness);
+        Length(css, "panel-bar-gap", PanelBarGap);
+        Length(css, "axis-spacing", AxisSpacing);
+        Length(css, "axis-label-gap", AxisLabelGap);
+        Percent(css, "slider-track-start", SliderTrackStart);
+        Percent(css, "slider-track-end", SliderTrackEnd);
+        Percent(css, "slider-value-start", SliderValueStart);
+        Length(css, "slider-track-inset", SliderTrackInset);
+        Length(css, "slider-handle-width", SliderHandleWidth);
+        Percent(css, "slider-band-min", SliderBandMin);
+        Percent(css, "slider-band-max", SliderBandMax);
+        Percent(css, "label-width-ratio", LabelWidthRatio);
+        Length(css, "input-text-inset-x", InputTextInset.x);
+        Length(css, "input-text-inset-y", InputTextInset.y);
+        Length(css, "tooltip-bottom-spacing", TooltipBottomSpacing);
+        Length(css, "method-gap-height", MethodGapHeight);
+        Length(css, "panel-title-bottom-spacing", PanelTitleBottomSpacing);
+
+        Length(css, "label-font-size", LabelFontSize);
+        Length(css, "panel-title-font-size", PanelTitleFontSize);
+        Length(css, "tooltip-font-size", TooltipFontSize);
+        Length(css, "label-min-font-size", LabelMinFontSize);
+
+        Rgba(css, "label-color", LabelColor);
+        Rgba(css, "input-text-color", InputTextColor);
+        Rgba(css, "placeholder-color", PlaceholderColor);
+        Rgba(css, "tooltip-color", TooltipColor);
+        Rgba(css, "panel-background", PanelBackground);
+        Number(css, "panel-title-background-alpha", PanelTitleBackgroundAlpha);
+        Rgba(css, "separator-color", SeparatorColor);
+        Rgba(css, "toggle-on", ToggleOn);
+        Rgba(css, "toggle-off", ToggleOff);
+        Rgba(css, "dropdown-template-background", DropdownTemplateBackground);
+        Rgba(css, "dropdown-item-background", DropdownItemBackground);
+        Rgba(css, "dropdown-item-label", DropdownItemLabel);
+        Rgba(css, "popup-backdrop", PopupBackdrop);
+        Rgba(css, "caret-color", CaretColor);
+        Rgba(css, "selection-color", SelectionColor);
+
+        var controls = ControlColors();
+        Rgba(css, "control-normal", controls.normalColor);
+        Rgba(css, "control-highlighted", controls.highlightedColor);
+        Rgba(css, "control-pressed", controls.pressedColor);
+        Rgba(css, "control-selected", controls.selectedColor);
+        Rgba(css, "control-disabled", controls.disabledColor);
+        Seconds(css, "control-fade-duration", controls.fadeDuration);
+
+        Length(css, "picker-padding", PickerPadding);
+        Length(css, "picker-content-width", PickerContentWidth);
+        Length(css, "picker-sv-height", PickerSvHeight);
+        Length(css, "picker-bar-thickness", PickerBarThickness);
+        Length(css, "picker-bar-spacing", PickerBarSpacing);
+        Length(css, "picker-field-row-height", PickerFieldRowHeight);
+        Length(css, "picker-width", PickerWidth);
+        Length(css, "picker-height", PickerHeight);
+        Length(css, "picker-marker-size", PickerMarkerSize);
+        Length(css, "picker-marker-thickness", PickerMarkerThickness);
+        Length(css, "picker-checker-cell-size", PickerCheckerCellSize);
+        Rgba(css, "picker-background", PickerBackground);
+        Rgba(css, "picker-marker-color", PickerMarkerColor);
+        Rgba(css, "picker-checker-light", PickerCheckerLight);
+        Rgba(css, "picker-checker-dark", PickerCheckerDark);
+
+        css.Append("}\n");
+        return css.ToString();
+    }
+
+    static void Declaration(StringBuilder css, string token, string value)
+    {
+        css.Append("  ").Append(CssVariable(token)).Append(": ").Append(value).Append(";\n");
+    }
+
+    static void Length(StringBuilder css, string token, float value)
+    {
+        Declaration(css, token, Format(value) + "px");
+    }
+
+    static void Percent(StringBuilder css, string token, float ratio)
+    {
+        Declaration(css, token, Format(ratio * 100f) + "%");
+    }
+
+    static void Seconds(StringBuilder css, string token, float value)
+    {
+        Declaration(css, token, Format(value) + "s");
+    }
+
+    static void Number(StringBuilder css, string token, float value)
+    {
+        Declaration(css, token, Format(value));
+    }
+
+    static void Rgba(StringBuilder css, string token, Color color)
+    {
+        Declaration(css, token, "rgba(" + Channel(color.r) + ", " + Channel(color.g) + ", " + Channel(color.b)
+            + ", " + Format(color.a) + ")");
+    }
+
+    static int Channel(float value)
+    {
+        return Mathf.Clamp(Mathf.RoundToInt(value * 255f), 0, 255);
+    }
+
+    //Invariant culture throughout: a French editor would otherwise emit "0,5", which is not a CSS number.
+    static string Format(float value)
+    {
+        return value.ToString("0.###", CultureInfo.InvariantCulture);
+    }
 
     #endregion
 }
