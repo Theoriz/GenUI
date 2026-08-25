@@ -7,9 +7,6 @@ using UnityEngine;
 /// Serves the panel to a browser on the local network, when it is switched on.
 /// </summary>
 /// <remarks>
-/// Off is the default and costs nothing: no listener, no thread, no subscription, no allocation -
-/// <see cref="OnEnable"/> returns before any of it exists.
-///
 /// Everything a browser causes happens here, on the main thread: the socket threads only fill
 /// <c>WebSocketServer.Inbound</c>, which <see cref="Update"/> drains. Inbound values go through
 /// <c>ControllableMaster.UpdateValue</c>, the entry point OSC uses, so clamping, read-only refusal,
@@ -22,19 +19,24 @@ using UnityEngine;
 /// No authentication and no TLS: anyone who can reach the port drives every exposed member. The
 /// mitigation is this component being off unless someone switches it on.
 /// </remarks>
-[AddComponentMenu("Theoriz/GenUI Web Server")]
 public class GenUIWebServer : MonoBehaviour
 {
-    [Tooltip("Serve the panel to a browser on the local network. While this is off, nothing is started at all.")]
+    [OCFExposed]
     public bool enableWebServer = false;
 
-    [Tooltip("Port the browser connects to: http://<this machine's IP>:<port>.")]
+    [OCFExposed]
     public int port = 6080;
 
-    [Tooltip("Log connections and the messages they send.")]
     public bool showDebug = false;
 
     WebSocketServer _server;
+
+    //The last value of enableWebServer that was acted on. Comparing against it - rather than against
+    //_server being null - is what stops a start that failed from being retried every frame.
+    bool _serverRequested;
+
+    //The port the running listener was opened on, so a change to the field is noticed the same way.
+    int _portRequested;
 
     //The delegate each controllable was subscribed with, kept so it can be unsubscribed again.
     readonly Dictionary<Controllable, Controllable.ControllableValueChangedEvent> _subscriptions
@@ -48,10 +50,49 @@ public class GenUIWebServer : MonoBehaviour
 
     void OnEnable()
     {
-        //The zero-cost guarantee: nothing below this line runs unless the option is on.
-        if (!enableWebServer)
+        _serverRequested = enableWebServer;
+        _portRequested = port;
+
+        //The zero-cost guarantee: while the option is off, no listener, thread or subscription exists.
+        if (enableWebServer)
+            StartServer();
+    }
+
+    void Update()
+    {
+        //enableWebServer and port are plain fields, so nothing announces that either moved: this is
+        //where ticking the option or editing the port at runtime - from the inspector, a script, the
+        //panel or OSC - is noticed. A port change restarts the listener, which drops the connected
+        //browsers: they have to be reloaded on the new port.
+        if (enableWebServer != _serverRequested || (enableWebServer && port != _portRequested))
+        {
+            _serverRequested = enableWebServer;
+            _portRequested = port;
+
+            StopServer();
+
+            if (enableWebServer)
+                StartServer();
+        }
+
+        if (_server == null)
             return;
 
+        DrainInbound();
+        SendDirtyValues();
+    }
+
+    void OnDisable()
+    {
+        StopServer();
+    }
+
+    #endregion
+
+    #region Server lifetime
+
+    void StartServer()
+    {
         _server = new WebSocketServer(port);
 
         //The other half of the port: a plain GET is answered with the client files, which then open
@@ -73,20 +114,15 @@ public class GenUIWebServer : MonoBehaviour
         foreach (var registered in ControllableMaster.RegisteredControllables)
             Subscribe(registered.Value);
 
-        var address = ControllableMaster.instance != null ? ControllableMaster.instance.IPAddress : "<this machine's IP>";
+        //ControllableMaster caches the address in its Start, which may not have run yet - resolving it
+        //ourselves is what keeps a real address in the URL whatever the script order.
+        var address = ControllableMaster.instance != null && !string.IsNullOrEmpty(ControllableMaster.instance.IPAddress)
+            ? ControllableMaster.instance.IPAddress
+            : ControllableMaster.GetLocalIPAddress();
         Debug.Log("[GenUI] Web mirror listening on http://" + address + ":" + _server.Port + "/");
     }
 
-    void Update()
-    {
-        if (_server == null)
-            return;
-
-        DrainInbound();
-        SendDirtyValues();
-    }
-
-    void OnDisable()
+    void StopServer()
     {
         if (_server == null)
             return;
@@ -102,6 +138,8 @@ public class GenUIWebServer : MonoBehaviour
 
         _server.Stop();
         _server = null;
+
+        Debug.Log("[GenUI] Web mirror stopped.");
     }
 
     #endregion
