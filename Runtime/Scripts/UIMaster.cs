@@ -709,8 +709,9 @@ public class UIMaster : MonoBehaviour
         //As we can't expose parameter in UI, ignore methods with arguments
         if (method.methodInfo.GetParameters().Length == 0)
         {
+            //Appended after the member rows, wherever they end. CleanGeneratedUI is what moves the
+            //preset buttons out of the body afterwards and sets the gap above the first one left.
             var newButton = ControllableUI.Create<ButtonUI>(parent);
-            newButton.transform.SetSiblingIndex(parent.childCount-2);
             newButton.CreateUI(target, method);
         }
         else

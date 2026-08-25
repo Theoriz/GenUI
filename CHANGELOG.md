@@ -6,14 +6,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [3.2.0] - 2026-08-25
 
-**Requires com.theoriz.ocf 2.3.2 or later**, which carries the `[OCFMethod]` options this reads.
+**Requires com.theoriz.ocf 2.4.0 or later**, which carries the `[OCFMethod]` options and the `selfBound` binding this reads.
 The packages declare no UPM dependencies, so update OCF yourself.
 
 ### Added
 
 - A `GenUIWebServer` component, off by default, serves the panel to a browser on the local network, with panel, browsers and target scripts kept in sync in all directions.
 - The component is on the sample GenUI prefab, so switching the option on is all that is needed.
-- Its option and port are exposed, so the server can be switched on and moved to another port during Play; connected browsers must be reloaded after a port change.
+- Its option and port appear in the GenUI panel as **Enable Web Server** and **Web Server Port**, so the server can be switched on and moved to another port during Play; connected browsers must be reloaded after a port change.
 
 ### Changed
 
@@ -23,6 +23,7 @@ The packages declare no UPM dependencies, so update OCF yourself.
 ### Fixed
 
 - A method marked `[OCFMethod(showInUI = false)]` on a generated mirror no longer draws a button.
+- Method buttons are placed after the last member row instead of one row above it.
 
 ## [3.1.0] - 2026-08-25
 

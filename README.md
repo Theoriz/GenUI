@@ -11,7 +11,7 @@ This plugin allows you to simply create a UI for your application, exposing scri
 |---|---|
 | **Unity 2022.3** or later | Set by the Input System dependency below. |
 | **com.unity.inputsystem** | No fallback to the legacy input backend, so set **Project Settings > Player > Active Input Handling** to *Input System Package* or *Both*. |
-| [**com.theoriz.ocf**](https://github.com/Theoriz/OCF) 2.3.2 or later | GenUI is the UI layer on top of OCF; the control model, OSC addressing and presets all live there. |
+| [**com.theoriz.ocf**](https://github.com/Theoriz/OCF) 2.4.0 or later | GenUI is the UI layer on top of OCF; the control model, OSC addressing and presets all live there. |
 | [**com.theoriz.unityosc**](https://github.com/Theoriz/UnityOSC) 1.3.0 or later | OCF's transport. Earlier versions still work but declare Unity 2019.4. |
 
 The packages declare no UPM `dependencies`, so nothing installs them for you and nothing warns you when a version is too old — install all three, in the order below.
@@ -149,6 +149,8 @@ It is also possible to load a specific file via the OSC method "ControllableLoad
 ## Web mirror
 
 The panel can also be served to a browser, so a phone or a laptop on the same network drives the same values. On the GenUI object, tick **Enable Web Server** on the **GenUI Web Server** component, press Play, and open `http://<the machine's IP>:6080` — the port is printed in the Console at start. The page needs no internet connection. Ticking the option during Play starts and stops the server there and then, and editing the port restarts it on the new one — connected browsers have to be reloaded.
+
+The same two options sit in the GenUI panel and answer to OSC as `/OCF/GenUI/enableWebServer` and `/OCF/GenUI/webServerPort`, so the server can be switched on while the app runs. They are saved in the GenUI panel's presets like any other value — loading a preset that has the server on will start it. They also appear in the browser, where switching the server off ends that browser's own connection.
 
 Panel, browsers and the target script stay in sync in all directions: whatever changes anywhere shows everywhere.
 

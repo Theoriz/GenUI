@@ -21,10 +21,11 @@ using UnityEngine;
 /// </remarks>
 public class GenUIWebServer : MonoBehaviour
 {
-    [OCFExposed]
+    //Exposed to the panel and to OSC by GenUIMasterControllable, which mirrors them beside OCF's own
+    //settings so they appear in the GenUI panel rather than in one of their own. They carry no
+    //[OCFExposed]: generating a mirror for this script would produce a second, competing one.
     public bool enableWebServer = false;
 
-    [OCFExposed]
     public int port = 6080;
 
     public bool showDebug = false;
