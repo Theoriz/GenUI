@@ -222,9 +222,9 @@ GameObject:
   - component: {fileID: 4679437618935694}
   - component: {fileID: 114736921750431862}
   - component: {fileID: 114445698576836282}
+  - component: {fileID: 8853104251410626814}
   - component: {fileID: 114363137817556764}
   - component: {fileID: 8455362172519023123}
-  - component: {fileID: 8853104251410626814}
   m_Layer: 5
   m_Name: GenUI
   m_TagString: Untagged
@@ -287,6 +287,21 @@ MonoBehaviour:
   useDocumentsDirectory: 1
   customPresetDirectory: 
   ShowDebug: 0
+--- !u!114 &8853104251410626814
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1277216160771640}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1723257cbf4fb0f40a1532b60e4d2f46, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enableWebServer: 0
+  port: 6080
+  showDebug: 0
 --- !u!114 &114363137817556764
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -766,18 +781,3 @@ RectTransform:
   m_AnchoredPosition: {x: -4.998, y: 0}
   m_SizeDelta: {x: -9.996, y: -20}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &8853104251410626814
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1277216160771640}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1723257cbf4fb0f40a1532b60e4d2f46, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  enableWebServer: 0
-  port: 6080
-  showDebug: 0
