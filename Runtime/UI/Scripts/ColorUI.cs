@@ -16,16 +16,17 @@ public class ColorUI : ControllableUI
 
     #region Widget
 
-    //The row's own click target opens the picker: there is nothing else on this row to click, so a
-    //left click has to work wherever on it it lands.
-    protected override bool OpensColorPicker { get { return true; } }
-
     protected override void BuildHierarchy()
     {
         _label = UIFactory.CreateLabel(transform);
 
         var swatchRect = UIFactory.CreateSlice("Swatch", transform, GenUIStyle.LabelWidthRatio, 1f);
         _swatch = UIFactory.AddImage(swatchRect.gameObject, GenUIAssets.Instance.Box, Color.white);
+
+        //The swatch is the control of this row, so it is the only part that opens the picker - the
+        //label and the gap beside it behave like every other row's, right click only. It is drawn in
+        //front of the row's own graphic, so it takes the press before the row does.
+        UIFactory.AddMouseEvent(swatchRect.gameObject, this, true);
     }
 
     public void CreateUI(Controllable target, FieldInfo property, bool isInteractible)

@@ -179,7 +179,7 @@ public class UIMaster : MonoBehaviour
         rightClickMenu = RightClickMenu.Build(_rootCanvas.transform);
         rightClickMenu.transform.SetAsLastSibling();
 
-        colorPicker = ColorPicker.Build(_rootCanvas.transform, GenUIAssets.Instance.ColorPickerPrefab);
+        colorPicker = ColorPicker.Build(_rootCanvas.transform);
         colorPicker.transform.SetAsLastSibling();
     }
 
@@ -844,7 +844,7 @@ public class UIMaster : MonoBehaviour
     {
         rightClickMenu.gameObject.SetActive(true);
         //Only the menu moves: the root covers the screen so that clicking anywhere else closes it.
-        rightClickMenu.Content.position = Mouse.current.position.value;
+        UIFactory.PlacePopup(rightClickMenu.Content, Mouse.current.position.value);
         rightClickMenu.linkedUI = controllableUI;
     }
 
@@ -877,9 +877,11 @@ public class UIMaster : MonoBehaviour
         //never explicitly closed still records its single undo.
         EndColorPickerEdit();
 
-        colorPicker.Content.position = Mouse.current.position.value;
         colorPicker.linkedUI = controllableUI as ColorUI;
         colorPicker.gameObject.SetActive(true);
+
+        //Placed after activation: a disabled rect reports no size, so it could not be kept on screen.
+        UIFactory.PlacePopup(colorPicker.Content, Mouse.current.position.value);
 
         if (colorPicker.linkedUI != null)
             colorPicker.linkedUI.BeginPickerEdit();

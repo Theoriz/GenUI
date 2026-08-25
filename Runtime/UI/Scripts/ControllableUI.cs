@@ -52,16 +52,13 @@ public class ControllableUI : MonoBehaviour {
     /// </summary>
     /// <remarks>
     /// A part that answers the mouse is given its MouseButtonEvent here, through
-    /// UIFactory.AddMouseEvent, so linkedUI is never left to be repaired afterwards. Only the parts
-    /// that take the press away from the row need one - a Selectable does, a plain graphic does not,
-    /// since <see cref="AddRowMouseEvent"/> covers the row itself.
+    /// UIFactory.AddMouseEvent, so linkedUI is never left to be repaired afterwards. A part needs one
+    /// only when it takes the press away from the row - every Selectable does - or when it answers a
+    /// click the row must not, since <see cref="AddRowMouseEvent"/> covers the row itself.
     /// </remarks>
     protected virtual void BuildHierarchy()
     {
     }
-
-    /// <summary>Whether a left click on the row opens the colour picker.</summary>
-    protected virtual bool OpensColorPicker { get { return false; } }
 
     /// <summary>
     /// Makes the whole row answer the mouse, so a right click copies the OSC address wherever it
@@ -81,7 +78,7 @@ public class ControllableUI : MonoBehaviour {
         if (GetComponent<Graphic>() == null)
             UIFactory.AddImage(gameObject, null, Color.clear);
 
-        UIFactory.AddMouseEvent(gameObject, this, OpensColorPicker);
+        UIFactory.AddMouseEvent(gameObject, this);
     }
 
     public virtual void RemoveUI()

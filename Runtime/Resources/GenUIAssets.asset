@@ -22,5 +22,3 @@ MonoBehaviour:
   UIMask: {fileID: 10917, guid: 0000000000000000f000000000000000, type: 0}
   DropdownArrow: {fileID: 10915, guid: 0000000000000000f000000000000000, type: 0}
   PanelArrow: {fileID: 21300000, guid: 8c441ba4f83c07c45bd8abb7a253070e, type: 3}
-  ColorPickerPrefab: {fileID: 2130943084915617138, guid: 4214b57e615806c448ba9d993d629531,
-    type: 3}

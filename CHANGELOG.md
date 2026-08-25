@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [3.1.0] - 2026-08-25
+
+### Added
+
+- The colour picker is built from code like every widget: a saturation/value square, a hue bar, an alpha bar over a checkerboard, an RGBA row and a hex field.
+- Added `THIRD-PARTY-NOTICES.md`, naming Roboto and its Apache-2.0 licence.
+
+### Changed
+
+- The colour picker opens from the swatch instead of from anywhere on the colour row.
+
+### Fixed
+
+- The colour picker and the right-click menu stay inside the screen when opened near an edge.
+
+### Removed
+
+- Removed the vendored FlexibleColorPicker asset, with its prefab, sprites, materials and shader.
+- Removed `GenUIAssets.ColorPickerPrefab`; `ColorPicker.Build` no longer takes a prefab.
+
 ## [3.0.1] - 2026-08-24
 
 ### Changed

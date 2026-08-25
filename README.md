@@ -50,11 +50,9 @@ https://github.com/Theoriz/GenUI.git
 - PageUp / PageDown, or Ctrl + Plus/Minus (numpad included) : Scale up/down the UI, only when the UI is visible.
 - Ctrl + Left/Right/Up/Down arrow : Move the UI, only when the UI is visible.
 - F2 : Reset the UI, only when the UI is visible.
-- Tab / Shift + Tab : Move to the next/previous input field, selecting its text so you can type over it. Wraps around, skips read-only fields and collapsed panels, and scrolls the panel to keep the field visible.
-- Ctrl + Z : Undo the last value you changed in the UI, whichever member it was. A whole slider drag, label scrub or colour pick undoes in one press, and unlike the other shortcuts this one also works while you are typing in a field.
+- Tab / Shift + Tab : Move to the next/previous input field, selecting its text so you can type over it.
+- Ctrl + Z : Undo the last value you changed in the UI. A whole slider drag, label scrub or colour pick undoes in one press. Values arriving over OSC, and members restored by loading a preset, are not undone.
 - Drag a numeric member's label left/right : Scrub its value, one label per vector axis, with Shift for coarse steps and Ctrl for fine ones.
-
-Undo covers edits made in the UI only: values arriving over OSC, and members restored by loading a preset, are not undone. Selecting a preset is not undone either.
 
 Scaling is ignored while you are typing in an input field.
 
@@ -89,7 +87,7 @@ To control the look of a Controllable's panel in GenUI, add a **GenUI Panel Sett
 | `usePanel` | on | Uncheck to give this controllable no panel at all. It stays controllable over OSC. |
 | `closePanelAtStart` | on | Uncheck to have the panel start open. |
 
-The component is optional: a Controllable without one draws its panel with the defaults above, and because the bar color is derived from the ID rather than left white, every panel already has its own color.
+The component is optional: a Controllable without one draws its panel with the defaults above, already colored from its ID.
 
 ## Supported types
 You can expose the following types :
@@ -109,17 +107,23 @@ An enum renders as a dropdown of its members — see [Exposing an enum](https://
 
 The Header, Range, and Tooltip attributes are also supported in Controllables.
 
-### Read-only members
+### The color picker
 
-A member marked [OCFExposed(readOnly = true)] is drawn as a display: its value with no box around it, nothing to click or type into, skipped by Tab, and no label scrubbing. A bool keeps its green/red box and a `[Range]` member keeps its bar — greyed out, but still showing where the value sits in its range. Read-only members are also left out of presets, and offer no right-click **Copy OSC Control Address**, since that address cannot control them.
+A Color member is drawn as a swatch; left-clicking the swatch opens the picker. It holds a saturation/value square, a hue bar, an alpha bar, an R/G/B/A row and a hex field.
 
-You can also expose methods. Methods without parameters will show as a button in the UI, methods with parameters will not show in the UI but are still exposed to OSC control.
+The channel boxes and the hex field are both 0–255. The hex field accepts `#RGB`, `#RRGGBB` and `#RRGGBBAA`, with or without the leading `#`.
 
-### Expose a List
+## Read-only members
 
-A string member marked [OCFExposed(targetList = "myList")] also renders as a dropdown, over the entries of a `List<string>` on the same script.
+A member marked [OCFExposed(readOnly = true)] is drawn as a display: its value with no box around it, nothing to click or type into. Read-only members are also left out of presets, and have no **Copy OSC Control Address** menu, since that address cannot control them.
 
-To pick a value from a list of strings, keep the `List<string>` on your script and point a string member at it by name with [OCFExposed(targetList = "yourListName")]. The dropdown writes the selected entry into that member, so reading it tells you which one is selected.
+## Exposing methods
+
+A method without parameters shows as a button in the UI. A method with parameters gets no button, but is still callable over OSC.
+
+## Exposing a list
+
+To pick a value from a list of strings, keep the `List<string>` on your script and point a string member at it by name with [OCFExposed(targetList = "myList")]. It renders as a dropdown that writes the selected entry into that member.
 
 See [Exposing a list](https://github.com/Theoriz/OCF#exposing-a-list) in the OCF documentation for a full example.
 
@@ -129,12 +133,12 @@ To access a property or launch a method, use its address.
 For example : "/OCF/id/method" or "/OCF/id/floatProperty 1.5". By default the id corresponds to the script type name, but this can be changed by setting the public variable `controllableId` on your script extending "Controllable".
 
 > [!TIP]
-> You can copy the OSC Control Address of any exposed parameter in the UI directly by right clicking anywhere on its row — its name, its value, or the space beside them. Read-only parameters have no menu: their address cannot control them.
+> You can copy the OSC Control Address of any exposed parameter by right clicking anywhere on its row.
 
 ## Presets
 This plugin comes with a preset system, you can save the state of a "Controllable" script. It saves each property to a file that can be loaded later so that you can create different settings for your script. To use it, click "Save", then simply select a preset in the dropdown menu — selecting it loads it immediately.
 
-Each panel has "Save", "Save As", "Load" and "Show" buttons plus the preset dropdown, drawn together at the bottom of the panel under a separator, so they read apart from the parameters above them. The GenUI panel has "Save All", "Save As All" and "Load All" to apply the same action to every controllable at once, plus "Open Presets Folder" to reveal the presets root in your file browser — the same blocks, at the top of that panel.
+Each panel has "Save", "Save As", "Load" and "Show" buttons plus the preset dropdown, at the bottom of the panel. The GenUI panel has "Save All", "Save As All" and "Load All" to apply the same action to every controllable at once, plus "Open Presets Folder" to reveal the presets root in your file browser.
 
 It is also possible to load a specific file via the OSC method "ControllableLoadWithName", giving it the case-sensitive file name as its argument :
 
@@ -144,59 +148,9 @@ It is also possible to load a specific file via the OSC method "ControllableLoad
 
 ## Advanced
 
-### Manual Controllable Generation
-
-Writing the Controllable yourself is the only way to reach the [OCFProperty] options that have no [OCFExposed] equivalent — `includeInPresets` and `showInUI`. (`readOnly` and `targetList` need no hand-written mirror: use [OCFExposed(readOnly = true)] or [OCFExposed(targetList = "myList")] and the generator forwards them.) They are documented in [OCFProperty options](https://github.com/Theoriz/OCF#ocfproperty-options) in the OCF documentation.
-
-1. Create a new script inheriting from "Controllable". It will be the interface for the script you want to control.
-2. For each field or property you want to control with UI/OSC, add a field in the Controllable with the [OCFProperty] attribute and **the exact same name** as the corresponding field or property in the script you want to control.
-5. For each method you want to expose. Add a method in the Controllable with the [OCFMethod] attribute. Then call the method from the controlled script as shown in the example below.
-6. Add the controllable script to a gameobject in your scene.
-7. Link the controllableTargetScript of the Controllable instance to the corresponding script component.
-8. Set the desired ID, it controls the name of the panel in the UI, and the name used in the OSC address.
-9. To choose the panel's bar color, or whether it has a panel at all, add a GenUI Panel Settings component — see [Panel settings](#panel-settings). It is optional; without it the panel is drawn with a color derived from the ID.
-
-<details><summary>CONTROLLABLE EXAMPLE</summary>
-<p>
-
-```C++
-public class MyScriptControllable : Controllable {
-
-	// Expose variables from MyScript to OSC by creating OCFProperties with the name of those variables
-	[OCFProperty]
-	public int intParameter;
-
-	[OCFProperty]
-	public float floatParameter;
-	
-	[OCFProperty][Range(0,1)]
-	public float floatParameterWithRange;
-	
-	[OCFProperty(readOnly = true)]
-	public bool readOnlyBoolParameter;
-
-	//Create OSC methods to call methods from myScript
-	[OCFMethod]
-	public void MyOCFMethod() {
-		(controllableTargetScript as MyScript).MyScriptMethod();
-	}
-
-	//You can expose methods with arguments, but they will not show in the UI
-	[OCFMethod]
-	public void MyOCFMethodWithArgs(float arg0, int arg1, string arg2) {
-		(controllableTargetScript as MyScript).MyScriptMethodWithArgs(arg0, arg1, arg2);
-	}
-}
-```
-
-</p>
-</details>
-
 ### Changing the look
 
-The interface is built from code, not from prefabs. Every size and colour comes from `GenUIStyle`, and the sprites and fonts come from the `GenUIAssets` asset in `Resources`. Changing a row height, a tint or the font is a change in one of those two places and applies to every widget at once.
-
-A widget's structure lives in its own script, in a `BuildHierarchy` method beside the code that reads it — `SliderUI`, `DropdownUI`, `VectorUIBase` and so on, under `Runtime/UI/Scripts`.
+The interface is built from code, not from prefabs. Every size and colour comes from `GenUIStyle`, and the sprites and fonts come from the `GenUIAssets` asset in `Resources`. Changing a row height, a tint or the font in one of those two places applies to every widget at once.
 
 ### Handling your own OSC messages
 
@@ -212,8 +166,8 @@ OSCMaster.Receivers["myReceiver"].messageReceived += (OSCMessage m) => Debug.Log
 
 Do not reuse a name that "Controllable" already declares. The generated Controllable inherits from "Controllable", so a member of the same name shadows the real one and breaks it. The generator refuses these and tells you which member to rename. See [Reserved names](https://github.com/Theoriz/OCF#reserved-names) in the OCF documentation.
 
-### Label naming
+## License
 
-Widget and button labels drop a leading `controllable` when the next character is upper case, which is what keeps OCF's own members reading as **Save**, **Load** and **Current Preset**. A member of your own named `controllableFoo` is therefore labelled "Foo"; its OSC address is unaffected.
+GenUI is GPL-3.0; see `LICENSE`. The fonts it ships are third-party — see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
 
 

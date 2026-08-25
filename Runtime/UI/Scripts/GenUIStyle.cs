@@ -178,4 +178,56 @@ public static class GenUIStyle
     }
 
     #endregion
+
+    #region Colour picker
+
+    /// <summary>Inset of the picker's parts from its own edge. An int because it is handed straight
+    /// to the layout group's RectOffset.</summary>
+    public const int PickerPadding = 8;
+
+    /// <summary>Width of every part of the picker. Set by the RGBA row, which is the widest thing it
+    /// has to hold: four boxes each fitting "255" beside its letter.</summary>
+    public const float PickerContentWidth = 216f;
+
+    /// <summary>Height of the saturation/value square. A little less than its width, which costs
+    /// nothing: neither axis is a measurement, both are just 0..1.</summary>
+    public const float PickerSvHeight = 184f;
+
+    public const float PickerBarThickness = 14f;
+    public const float PickerBarSpacing = 6f;
+
+    /// <summary>Height of the RGBA row and of the hex field: a member row's, since they hold the same
+    /// label-sized text inset by the same amount. A shorter box leaves less room than one line needs,
+    /// and Text truncates a line that does not fit rather than clipping it - the field draws empty.</summary>
+    public const float PickerFieldRowHeight = RowHeight;
+
+    public const float PickerWidth = PickerContentWidth + 2f * PickerPadding;
+
+    //Derived from the parts rather than fixed, so adding or resizing one cannot leave a gap or clip
+    //the bottom row.
+    public const float PickerHeight = 2f * PickerPadding + PickerSvHeight
+        + 2f * (PickerBarSpacing + PickerBarThickness)
+        + 2f * (PickerBarSpacing + PickerFieldRowHeight);
+
+    /// <summary>Diameter of the ring marking the picked point in the SV square.</summary>
+    public const float PickerMarkerSize = 12f;
+
+    /// <summary>Width of the line marking the picked point on the hue and alpha bars.</summary>
+    public const float PickerMarkerThickness = 3f;
+
+    /// <summary>Side of one square of the checkerboard the alpha bar is drawn over.</summary>
+    public const float PickerCheckerCellSize = 5f;
+
+    /// <summary>Opaque, unlike the panel: the picker is a popup over the panel and its own SV square
+    /// has to be read as a colour, which a translucent backing would tint.</summary>
+    public static readonly Color PickerBackground = new Color(0.13f, 0.13f, 0.13f, 1f);
+
+    /// <summary>White, so a marker reads over the whole of the SV square and both bars. Nothing
+    /// else in the picker is guaranteed to contrast with every colour it can be moved over.</summary>
+    public static readonly Color PickerMarkerColor = Color.white;
+
+    public static readonly Color PickerCheckerLight = new Color(0.8f, 0.8f, 0.8f, 1f);
+    public static readonly Color PickerCheckerDark = new Color(0.55f, 0.55f, 0.55f, 1f);
+
+    #endregion
 }

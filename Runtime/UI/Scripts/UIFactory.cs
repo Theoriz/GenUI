@@ -221,6 +221,56 @@ public static class UIFactory
 
     #endregion
 
+    #region Popups
+
+    /// <summary>
+    /// Puts a popup at a screen point, moved back inside the screen when it would hang over an edge.
+    /// </summary>
+    /// <remarks>
+    /// The canvas is a screen-space overlay, so a rect's world coordinates are screen pixels and the
+    /// point can be used as a position directly. The size is read after a forced layout pass: a popup
+    /// sized by a ContentSizeFitter has no size yet on the frame it is re-enabled, and would be
+    /// clamped as if it were empty.
+    /// </remarks>
+    public static void PlacePopup(RectTransform content, Vector2 screenPoint)
+    {
+        LayoutRebuilder.ForceRebuildLayoutImmediate(content);
+
+        content.position = screenPoint;
+
+        var corners = new Vector3[4];
+        content.GetWorldCorners(corners);
+
+        content.position += (Vector3)ScreenNudge(corners[0], corners[2], new Vector2(Screen.width, Screen.height));
+    }
+
+    /// <summary>
+    /// How far a rect spanning min..max has to move to sit inside a screen of the given size.
+    /// </summary>
+    /// <remarks>
+    /// Each axis resolves the opposite edge last, so a popup bigger than the screen keeps its
+    /// top-left corner visible - where its title and first control are - rather than hanging off the
+    /// other side.
+    /// </remarks>
+    public static Vector2 ScreenNudge(Vector2 min, Vector2 max, Vector2 screen)
+    {
+        var nudge = Vector2.zero;
+
+        if (max.x > screen.x)
+            nudge.x = screen.x - max.x;
+        if (min.x + nudge.x < 0f)
+            nudge.x = -min.x;
+
+        if (min.y < 0f)
+            nudge.y = -min.y;
+        if (max.y + nudge.y > screen.y)
+            nudge.y = screen.y - max.y;
+
+        return nudge;
+    }
+
+    #endregion
+
     #region Layout
 
     public static HorizontalLayoutGroup AddHorizontalLayout(GameObject go, float spacing = 0f, int padding = 0,

@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// The sprites, fonts and vendored prefab the generated UI is built from.
+/// The sprites and fonts the generated UI is built from.
 /// </summary>
 /// <remarks>
 /// The widgets create their own hierarchies in code, so nothing else in GenUI holds a serialized
@@ -25,9 +25,6 @@ public class GenUIAssets : ScriptableObject
     public Sprite UIMask;
     public Sprite DropdownArrow;
     public Sprite PanelArrow;
-
-    /// <summary>The vendored FlexibleColorPicker, the one prefab GenUI still instantiates.</summary>
-    public GameObject ColorPickerPrefab;
 
     private static GenUIAssets _instance;
 

@@ -144,13 +144,18 @@ namespace Theoriz.GenUI.Tests
                 widgetType.Name + " has no graphic on its row, so its bare parts are not raycast.");
         }
 
+        //The swatch is the control of the colour row, so it is the only part that opens the picker: a
+        //left click on the label or beside it must do nothing, like it does on every other row.
         [Test]
-        public void ColorWidget_OpensThePicker()
+        public void ColorWidget_OpensThePickerFromTheSwatchOnly()
         {
-            var events = Build<ColorUI>().GetComponentsInChildren<MouseButtonEvent>(true);
+            var built = Build<ColorUI>();
+            var events = built.GetComponentsInChildren<MouseButtonEvent>(true);
 
-            Assert.IsTrue(Array.Exists(events, e => e.enableColorPicker),
-                "Nothing on the colour row would open the picker on a left click.");
+            Assert.IsTrue(Array.Exists(events, e => e.enableColorPicker && e.name == "Swatch"),
+                "The colour swatch would not open the picker on a left click.");
+            Assert.IsFalse(built.GetComponent<MouseButtonEvent>().enableColorPicker,
+                "A left click anywhere on the colour row opens the picker, not just on the swatch.");
         }
 
         #endregion
@@ -168,6 +173,58 @@ namespace Theoriz.GenUI.Tests
             Assert.IsFalse(dropdown.template.gameObject.activeSelf, "The template must not be a live part of the panel.");
             Assert.IsNotNull(dropdown.captionText);
             Assert.IsNotNull(dropdown.itemText);
+        }
+
+        #endregion
+
+        #region Colour picker
+
+        //The picker is built from UIFactory like every widget rather than instantiated from a prefab,
+        //so what it is made of is testable here too.
+        [Test]
+        public void ColorPicker_BuildsItsBackdropAndItsParts()
+        {
+            var picker = ColorPicker.Build(_parent.transform);
+
+            Assert.IsNotNull(picker.closeButton, "Nothing behind the picker would dismiss it.");
+            Assert.IsNotNull(picker.colorPicker, "The picker itself was not built.");
+            Assert.AreSame(picker.colorPicker.transform, picker.Content,
+                "Content is what UIMaster moves to the pointer.");
+
+            //The SV square, the hue ramp, the alpha checkerboard and the alpha ramp.
+            var images = picker.GetComponentsInChildren<RawImage>(true);
+            Assert.AreEqual(4, images.Length, "The picker draws its areas from procedural textures.");
+            foreach (var image in images)
+                Assert.IsNotNull(image.texture, "An area was built with no texture behind it.");
+
+            //Four channel boxes and the hex field.
+            Assert.AreEqual(5, picker.GetComponentsInChildren<InputField>(true).Length,
+                "The picker builds an RGBA row and a hex field.");
+        }
+
+        [Test]
+        public void ColorPicker_RoundTripsAColorThroughItsHsvState()
+        {
+            var picker = ColorPicker.Build(_parent.transform).colorPicker;
+            var color = new Color(0.2f, 0.6f, 0.9f, 0.4f);
+
+            picker.SetColor(color);
+
+            Assert.AreEqual(color.r, picker.GetColor().r, 1e-3f);
+            Assert.AreEqual(color.g, picker.GetColor().g, 1e-3f);
+            Assert.AreEqual(color.b, picker.GetColor().b, 1e-3f);
+            Assert.AreEqual(color.a, picker.GetColor().a, 1e-6f);
+        }
+
+        //Its textures are created in code, so nothing else releases them when the picker goes.
+        [Test]
+        public void ColorPicker_DestroysCleanly()
+        {
+            var picker = ColorPicker.Build(_parent.transform);
+
+            UnityEngine.Object.DestroyImmediate(picker.gameObject);
+
+            Assert.IsTrue(picker == null, "The picker survived being destroyed.");
         }
 
         #endregion
