@@ -13,6 +13,13 @@ namespace Theoriz.GenUI.Tests.Editor
     /// </remarks>
     public class GenUIWebAssetsTests
     {
+        //ResponseFor serves what Preload loaded: the server does this on the main thread at startup.
+        [SetUp]
+        public void SetUp()
+        {
+            GenUIWebAssets.Preload();
+        }
+
         [TestCase("/", "text/html")]
         [TestCase("/index.html", "text/html")]
         [TestCase("/client.css", "text/css")]

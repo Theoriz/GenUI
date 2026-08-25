@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -19,48 +20,70 @@ public class GenUIWebAssets : ScriptableObject
 
     private static GenUIWebAssets _instance;
 
-    /// <summary>The asset, loaded from Resources on first use.</summary>
+    //The finished responses, built once on the main thread: bytes, holding no Unity object.
+    private static Dictionary<string, WebHttpResponse> _responses;
+
+    /// <summary>The asset, or null until <see cref="Preload"/> has run.</summary>
     public static GenUIWebAssets Instance
     {
-        get
+        get { return _instance; }
+    }
+
+    /// <summary>
+    /// Loads the client files and turns them into the responses they are served as. Must be called
+    /// from the main thread, before the server starts serving.
+    /// </summary>
+    /// <remarks>
+    /// Every Unity asset access happens here, and none in <see cref="ResponseFor"/>: that one runs on
+    /// a socket thread, where loading an asset - Resources.Load, or a TextAsset resolved through a
+    /// serialized reference - throws "Load can only be called from the main thread" and serves nothing.
+    /// </remarks>
+    public static void Preload()
+    {
+        if (_responses != null)
+            return;
+
+        _responses = new Dictionary<string, WebHttpResponse>();
+        _instance = Resources.Load<GenUIWebAssets>(ResourcePath);
+
+        if (_instance == null)
         {
-            if (_instance == null)
-            {
-                _instance = Resources.Load<GenUIWebAssets>(ResourcePath);
-
-                if (_instance == null)
-                {
-                    Debug.LogError("[GenUI] Could not load the GenUIWebAssets asset from Resources. The web mirror will serve nothing.");
-
-                    //An empty stand-in rather than null: every path then answers 404, which is what a
-                    //browser can report, instead of a null reference on a socket thread.
-                    _instance = CreateInstance<GenUIWebAssets>();
-                }
-            }
-
-            return _instance;
+            //Every path then answers 404, which is what a browser can report.
+            Debug.LogError("[GenUI] Could not load the GenUIWebAssets asset from Resources. The web mirror will serve nothing.");
+            return;
         }
+
+        Add("/", _instance.Html, "text/html");
+        Add("/client.css", _instance.Css, "text/css");
+        Add("/client.js", _instance.Script, "application/javascript");
+    }
+
+    static void Add(string path, TextAsset asset, string contentType)
+    {
+        if (asset == null)
+        {
+            Debug.LogError("[GenUI] The GenUIWebAssets asset is missing the file served at '" + path + "'.");
+            return;
+        }
+
+        _responses[path] = WebHttpResponse.Ok(contentType, asset.text);
     }
 
     /// <summary>
     /// The client file a plain GET for <paramref name="path"/> is answered with, or null for a 404.
     /// </summary>
     /// <remarks>
-    /// Given to <c>WebSocketServer.HttpHandler</c>, so it runs on a socket thread: it reads the
-    /// already-loaded TextAssets and touches nothing else of Unity's.
+    /// Given to <c>WebSocketServer.HttpHandler</c>, so it runs on a socket thread: it hands back the
+    /// bytes <see cref="Preload"/> built and touches nothing of Unity's.
     /// </remarks>
     public static WebHttpResponse? ResponseFor(string path)
     {
-        var assets = Instance;
+        var responses = _responses;
+        if (responses == null)
+            return null;
 
-        switch (Normalize(path))
-        {
-            case "/": return Serve(assets.Html, "text/html");
-            case "/client.css": return Serve(assets.Css, "text/css");
-            case "/client.js": return Serve(assets.Script, "application/javascript");
-        }
-
-        return null;
+        WebHttpResponse response;
+        return responses.TryGetValue(Normalize(path), out response) ? response : (WebHttpResponse?)null;
     }
 
     /// <summary>The path a request is routed by: no query string, and the page under its own name too.</summary>
@@ -76,14 +99,10 @@ public class GenUIWebAssets : ScriptableObject
         return path == "/index.html" ? "/" : path;
     }
 
-    static WebHttpResponse? Serve(TextAsset asset, string contentType)
-    {
-        return asset == null ? (WebHttpResponse?)null : WebHttpResponse.Ok(contentType, asset.text);
-    }
-
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     private static void ResetStatics()
     {
         _instance = null;
+        _responses = null;
     }
 }

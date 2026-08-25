@@ -55,7 +55,9 @@ public class GenUIWebServer : MonoBehaviour
         _server = new WebSocketServer(port);
 
         //The other half of the port: a plain GET is answered with the client files, which then open
-        //the WebSocket back to it.
+        //the WebSocket back to it. Loading the assets here and not on first request is what keeps
+        //Resources.Load - main thread only - off the socket thread that serves the page.
+        GenUIWebAssets.Preload();
         _server.HttpHandler = GenUIWebAssets.ResponseFor;
 
         if (!_server.Start())
