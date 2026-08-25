@@ -1,7 +1,7 @@
 # GenUI
 Generative UI and OSC Control for Unity.
 
-This plugin allows you to simply create a UI for your application, exposing script sliders, input fields and methods. This UI is also fully controllable via OSC.
+This plugin allows you to simply create a UI for your application, exposing script sliders, input fields and methods. This UI is also fully controllable via OSC, and accessible locally via a web browser.
 
 ![Demo](https://github.com/Theoriz/GenUI-Demo/blob/master/gif/genui.gif) 
 
