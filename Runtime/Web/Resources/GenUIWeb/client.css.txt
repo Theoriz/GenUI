@@ -1,0 +1,497 @@
+/*
+The browser mirror of the in-game panel.
+
+Every metric and colour comes from the --genui-* custom properties GenUIStyle.ToCss() emits, which
+the schema message installs into the page: changing a token in Unity moves both interfaces. Only
+what has no token of its own is written here, and each one says where its value comes from.
+*/
+
+:root {
+  /* The panel's width, from the sample prefab's scroll view rather than from GenUIStyle. */
+  --genui-panel-width: 323px;
+
+  /* Space between panels: the scroll view content's layout spacing. */
+  --genui-panel-spacing: 4.5px;
+
+  /* The checkbox's box, ToggleUI's own 0.13 of the row beside the label half. */
+  --genui-toggle-box-width: 13%;
+
+  /* The 9-sliced sprites become rounded rectangles; see the deviations in the README. */
+  --genui-corner-radius: 3px;
+
+  --genui-page-background: #101010;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 8px;
+  background: var(--genui-page-background);
+  color: var(--genui-label-color, #fff);
+  font-family: Roboto, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  font-size: var(--genui-label-font-size, 14px);
+  -webkit-text-size-adjust: 100%;
+}
+
+.status {
+  margin-bottom: 8px;
+  font-size: var(--genui-tooltip-font-size, 12px);
+  color: var(--genui-tooltip-color, #b3b3b3);
+}
+
+.status[hidden] {
+  display: none;
+}
+
+/* Panels
+   ------------------------------------------------------------------------------------------- */
+
+.panels {
+  display: flex;
+  flex-direction: column;
+  gap: var(--genui-panel-spacing);
+  width: var(--genui-panel-width);
+  max-width: 100%;
+}
+
+.panel {
+  display: flex;
+  gap: var(--genui-panel-bar-gap);
+}
+
+.panel-bar {
+  flex: 0 0 var(--genui-color-bar-width);
+}
+
+.panel-body {
+  flex: 1;
+  min-width: 0;
+  padding: var(--genui-panel-padding);
+  background: var(--genui-panel-background);
+}
+
+.panel-title {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--genui-panel-title-height);
+  font-size: var(--genui-panel-title-font-size);
+  font-weight: bold;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* The fold arrow: its centre sits the inset in from the panel's left edge, as PanelUI anchors it. */
+.panel-arrow {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--genui-panel-arrow-inset) - var(--genui-panel-arrow-size) / 2);
+  width: var(--genui-panel-arrow-size);
+  height: var(--genui-panel-arrow-size);
+  transform: translateY(-50%);
+}
+
+/* A triangle rather than the sprite, tinted with the panel's bar colour through currentColor. */
+.panel-arrow::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border-style: solid;
+  border-width: calc(var(--genui-panel-arrow-size) / 3) 0 calc(var(--genui-panel-arrow-size) / 3) calc(var(--genui-panel-arrow-size) / 2);
+  border-color: transparent transparent transparent currentColor;
+  transform: translate(-50%, -50%);
+}
+
+.panel.open .panel-arrow {
+  transform: translateY(-50%) rotate(90deg);
+}
+
+.panel:not(.open) .panel-body > :not(.panel-title) {
+  display: none;
+}
+
+.title-gap {
+  height: var(--genui-panel-title-bottom-spacing);
+}
+
+.title-gap[hidden] {
+  display: none;
+}
+
+/* Rows
+   ------------------------------------------------------------------------------------------- */
+
+.row {
+  position: relative;
+  height: var(--genui-row-height);
+}
+
+/* The label takes the left half of the row and the control the rest, as every widget lays it out.
+   Unity shrinks a long name to its minimum font size; here it is ellipsised instead. */
+.row > .label {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: var(--genui-label-width-ratio);
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.row > .control {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--genui-label-width-ratio);
+  right: 0;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--genui-header-height);
+  font-weight: bold;
+}
+
+.tooltip {
+  min-height: var(--genui-tooltip-height);
+  padding-bottom: var(--genui-tooltip-bottom-spacing);
+  font-size: var(--genui-tooltip-font-size);
+  line-height: 1.25;
+  color: var(--genui-tooltip-color);
+  white-space: pre-wrap;
+}
+
+/* Controls
+   ------------------------------------------------------------------------------------------- */
+
+input,
+select,
+button {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  border: 0;
+  border-radius: var(--genui-corner-radius);
+  background: var(--genui-control-normal);
+  color: var(--genui-input-text-color);
+  font-family: inherit;
+  font-size: var(--genui-label-font-size);
+  transition: background-color var(--genui-control-fade-duration);
+}
+
+input,
+select {
+  padding: 0 var(--genui-input-text-inset-x);
+}
+
+input:hover:enabled,
+select:hover:enabled,
+button:hover:enabled {
+  background: var(--genui-control-highlighted);
+}
+
+input:focus,
+select:focus {
+  background: var(--genui-control-selected);
+  outline: none;
+}
+
+button:active {
+  background: var(--genui-control-pressed);
+}
+
+button {
+  cursor: pointer;
+  color: var(--genui-label-color);
+}
+
+/* Read-only: the value stays readable and the frame around it goes, as MakeDisplayOnly does. */
+input:disabled,
+select:disabled {
+  background: var(--genui-control-disabled);
+  color: var(--genui-input-text-color);
+  opacity: 1;
+  -webkit-text-fill-color: var(--genui-input-text-color);
+}
+
+select:disabled {
+  appearance: none;
+}
+
+/* Toggle */
+
+.toggle-box {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--genui-label-width-ratio);
+  width: var(--genui-toggle-box-width);
+  border-radius: var(--genui-corner-radius);
+  background: var(--genui-control-normal);
+  cursor: pointer;
+}
+
+.row.read-only .toggle-box {
+  cursor: default;
+}
+
+/* The disabled tint is the read-only look of a bool: green for true, red for false. */
+.row.read-only .toggle-box.on {
+  background: var(--genui-toggle-on);
+}
+
+.row.read-only .toggle-box.off {
+  background: var(--genui-toggle-off);
+}
+
+.toggle-box::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: calc(var(--genui-checkbox-size) * 0.55);
+  height: calc(var(--genui-checkbox-size) * 0.3);
+  border: 0 solid var(--genui-label-color);
+  border-width: 0 0 2px 2px;
+  transform: translate(-50%, -70%) rotate(-45deg);
+  opacity: 0;
+}
+
+.toggle-box.on::after {
+  opacity: 1;
+}
+
+/* Slider */
+
+.slider {
+  position: absolute;
+  top: calc(var(--genui-slider-track-inset) / 2);
+  bottom: calc(var(--genui-slider-track-inset) / 2);
+  left: var(--genui-slider-track-start);
+  right: calc(100% - var(--genui-slider-track-end));
+  touch-action: none;
+  cursor: pointer;
+}
+
+/* The track and the fill are inset by half a handle at each end, which is how far the handle's
+   centre travels - so the handle reaches both ends and the fill stops under it. */
+.slider-track,
+.slider-fill {
+  position: absolute;
+  top: var(--genui-slider-band-min);
+  bottom: calc(100% - var(--genui-slider-band-max));
+  left: calc(var(--genui-slider-handle-width) / 2);
+  border-radius: var(--genui-corner-radius);
+}
+
+.slider-track {
+  right: calc(var(--genui-slider-handle-width) / 2);
+  background: var(--genui-control-normal);
+}
+
+.slider-fill {
+  background: var(--genui-label-color);
+}
+
+.slider-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: var(--genui-slider-handle-width);
+  border-radius: 50%;
+  background: var(--genui-label-color);
+  transform: translateX(-50%);
+}
+
+.row.read-only .slider {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.slider-value {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--genui-slider-value-start);
+  right: 0;
+}
+
+/* Vectors: the cells share the control half evenly, each holding its axis letter and its box. */
+
+.axes {
+  display: flex;
+  gap: var(--genui-axis-spacing);
+}
+
+.axis {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--genui-axis-label-gap);
+}
+
+.axis > .letter {
+  flex: 0 0 auto;
+}
+
+.axis > input {
+  flex: 1;
+  padding: 0 calc(var(--genui-input-text-inset-x) / 2);
+}
+
+/* Colour */
+
+.swatch {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--genui-label-width-ratio);
+  right: 0;
+  border-radius: var(--genui-corner-radius);
+  cursor: pointer;
+}
+
+/* What a translucent colour is judged against, on a swatch and on the picker's alpha bar alike. */
+.checkerboard {
+  background-image:
+    linear-gradient(45deg, var(--genui-picker-checker-dark) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--genui-picker-checker-dark) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--genui-picker-checker-dark) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--genui-picker-checker-dark) 75%);
+  background-size: calc(var(--genui-picker-checker-cell-size) * 2) calc(var(--genui-picker-checker-cell-size) * 2);
+  background-position:
+    0 0,
+    0 var(--genui-picker-checker-cell-size),
+    var(--genui-picker-checker-cell-size) calc(var(--genui-picker-checker-cell-size) * -1),
+    calc(var(--genui-picker-checker-cell-size) * -1) 0;
+  background-color: var(--genui-picker-checker-light);
+}
+
+/* The colour itself, drawn over the checkerboard behind it. */
+.overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.row.read-only .swatch {
+  cursor: default;
+}
+
+/* Buttons and sections
+   ------------------------------------------------------------------------------------------- */
+
+.method-gap {
+  height: var(--genui-method-gap-height);
+}
+
+.button-row {
+  height: var(--genui-row-height);
+}
+
+/* A block set off from the member rows by a rule centred in the space above it. */
+.section {
+  position: relative;
+  padding: var(--genui-preset-section-padding);
+  padding-top: calc(var(--genui-preset-section-padding) + var(--genui-preset-section-gap));
+}
+
+.section::before {
+  content: "";
+  position: absolute;
+  top: var(--genui-separator-space-above);
+  left: 0;
+  right: 0;
+  height: var(--genui-separator-thickness);
+  background: var(--genui-separator-color);
+}
+
+.button-strip {
+  display: flex;
+  height: var(--genui-preset-row-height);
+}
+
+.button-strip > button {
+  flex: 1;
+}
+
+/* Colour picker
+   ------------------------------------------------------------------------------------------- */
+
+.popup-backdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--genui-popup-backdrop);
+}
+
+.popup-backdrop[hidden] {
+  display: none;
+}
+
+.popup {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: var(--genui-picker-bar-spacing);
+  width: var(--genui-picker-width);
+  padding: var(--genui-picker-padding);
+  background: var(--genui-picker-background);
+  border-radius: var(--genui-corner-radius);
+}
+
+.picker-sv,
+.picker-bar {
+  position: relative;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.picker-sv {
+  height: var(--genui-picker-sv-height);
+}
+
+.picker-bar {
+  height: var(--genui-picker-bar-thickness);
+}
+
+/* A ring showing the colour it sits on through its middle, so it never hides the pixel it points at. */
+.picker-sv-marker {
+  position: absolute;
+  width: var(--genui-picker-marker-size);
+  height: var(--genui-picker-marker-size);
+  border: var(--genui-picker-marker-thickness) solid var(--genui-picker-marker-color);
+  border-radius: 50%;
+  transform: translate(-50%, 50%);
+  pointer-events: none;
+}
+
+.picker-bar-marker {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: var(--genui-picker-marker-thickness);
+  background: var(--genui-picker-marker-color);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.picker-channels {
+  display: flex;
+  gap: var(--genui-axis-spacing);
+  height: var(--genui-picker-field-row-height);
+}
+
+.picker-hex {
+  height: var(--genui-picker-field-row-height);
+}

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GenUI</title>
+<link rel="stylesheet" href="/client.css">
+</head>
+<body>
+<!-- The style tokens GenUIStyle.ToCss() emits are installed here when the schema arrives. -->
+<style id="genui-tokens"></style>
+
+<div id="status" class="status">Connecting…</div>
+<div id="panels" class="panels"></div>
+
+<div id="popup" class="popup-backdrop" hidden><div id="popup-content" class="popup"></div></div>
+
+<script src="/client.js"></script>
+</body>
+</html>

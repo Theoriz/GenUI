@@ -11,7 +11,7 @@ This plugin allows you to simply create a UI for your application, exposing scri
 |---|---|
 | **Unity 2022.3** or later | Set by the Input System dependency below. |
 | **com.unity.inputsystem** | No fallback to the legacy input backend, so set **Project Settings > Player > Active Input Handling** to *Input System Package* or *Both*. |
-| [**com.theoriz.ocf**](https://github.com/Theoriz/OCF) 2.0.0 or later | GenUI is the UI layer on top of OCF; the control model, OSC addressing and presets all live there. |
+| [**com.theoriz.ocf**](https://github.com/Theoriz/OCF) 2.3.2 or later | GenUI is the UI layer on top of OCF; the control model, OSC addressing and presets all live there. |
 | [**com.theoriz.unityosc**](https://github.com/Theoriz/UnityOSC) 1.3.0 or later | OCF's transport. Earlier versions still work but declare Unity 2019.4. |
 
 The packages declare no UPM `dependencies`, so nothing installs them for you and nothing warns you when a version is too old — install all three, in the order below.
@@ -146,11 +146,26 @@ It is also possible to load a specific file via the OSC method "ControllableLoad
 /OCF/id/ControllableLoadWithName "myPreset.pst"
 ```
 
+## Web mirror
+
+The panel can also be served to a browser, so a phone or a laptop on the same network drives the same values. On the GenUI object, tick **Enable Web Server** on the **GenUI Web Server** component, press Play, and open `http://<the machine's IP>:8080` — the port is printed in the Console at start. The page needs no internet connection.
+
+Panel, browsers and the target script stay in sync in all directions: whatever changes anywhere shows everywhere.
+
+> [!WARNING]
+> There is no password and no HTTPS. Anyone who can reach that port can change every exposed value and press every button, so leave the option off unless you are on a network you trust.
+
+The browser is a mirror, not a copy. It draws the same rows from the same style values, with these differences:
+
+- No label scrubbing, Ctrl + Z, Tab traversal or **Copy OSC Control Address**.
+- Each browser keeps its own folded/unfolded panels.
+- Text falls back to your system font unless Roboto is installed, and a long member name is cut short with an ellipsis rather than shrunk.
+
 ## Advanced
 
 ### Changing the look
 
-The interface is built from code, not from prefabs. Every size and colour comes from `GenUIStyle`, and the sprites and fonts come from the `GenUIAssets` asset in `Resources`. Changing a row height, a tint or the font in one of those two places applies to every widget at once.
+The interface is built from code, not from prefabs. Every size and colour comes from `GenUIStyle`, and the sprites and fonts come from the `GenUIAssets` asset in `Resources`. Changing a row height, a tint or the font in one of those two places applies to every widget at once, and to the web mirror with it.
 
 ### Handling your own OSC messages
 

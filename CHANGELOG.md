@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [3.2.0] - 2026-08-25
+
+**Requires com.theoriz.ocf 2.3.2 or later**, which carries the `[OCFMethod]` options this reads.
+The packages declare no UPM dependencies, so update OCF yourself.
+
+### Added
+
+- A `GenUIWebServer` component, off by default, serves the panel to a browser on the local network, with panel, browsers and target scripts kept in sync in all directions.
+- The component is on the sample GenUI prefab, so switching the option on is all that is needed.
+
+### Changed
+
+- Which widget a member gets is decided in `MemberDescriptor.Describe`, so the panel and the browser cannot disagree.
+- `GenUIStyle.ToCss()` emits every size and colour as CSS custom properties, which is what the browser draws from.
+
+### Fixed
+
+- A method marked `[OCFMethod(showInUI = false)]` on a generated mirror no longer draws a button.
+
 ## [3.1.0] - 2026-08-25
 
 ### Added

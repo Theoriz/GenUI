@@ -700,8 +700,9 @@ public class UIMaster : MonoBehaviour
 
     private void CreateButton(Transform parent, Controllable target, ClassMethodInfo method)
     {
-        //Methods marked [OCFMethod(showInUI = false)] stay OSC-callable but get no button.
-        var ocfMethod = Attribute.GetCustomAttribute(method.methodInfo, typeof(OCFMethod)) as OCFMethod;
+        //Methods marked [OCFMethod(showInUI = false)] stay OSC-callable but get no button. The
+        //options come from ClassMethodInfo, which knows which method they were declared on.
+        var ocfMethod = method.Options;
         if (ocfMethod != null && !ocfMethod.showInUI)
             return;
 

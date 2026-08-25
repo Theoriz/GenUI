@@ -1,0 +1,909 @@
+/*
+The browser mirror of the GenUI panel.
+
+One renderer per WidgetKind, mirroring the widget classes one for one: which widget a member gets is
+never decided here, it arrives in the schema from MemberDescriptor.Describe. Every size and colour
+comes from the --genui-* tokens the same message carries.
+
+A value echoed back from the server must not fight the control that sent it - the same discipline the
+Unity widgets keep with SetValueWithoutNotify and SliderUI._updating.
+*/
+(function () {
+  "use strict";
+
+  //The global panel sits on top, as UIMaster.CleanGeneratedUI orders the panels.
+  var FIRST_PANEL = "GenUI";
+  var PRESET_MEMBER = "controllableCurrentPreset";
+  var RECONNECT_MS = 1000;
+
+  var statusEl = document.getElementById("status");
+  var tokensEl = document.getElementById("genui-tokens");
+  var panelsEl = document.getElementById("panels");
+  var popupEl = document.getElementById("popup");
+  var popupContentEl = document.getElementById("popup-content");
+
+  var socket = null;
+
+  //"id/member" -> the row that draws it. The key is the OSC address's tail, which is how the server
+  //keys a values message too.
+  var rows = {};
+
+  //The last value seen per key, which is what the colour picker opens on.
+  var values = {};
+
+  /* Connection
+     ----------------------------------------------------------------------------------------- */
+
+  function connect() {
+    socket = new WebSocket("ws://" + location.host + "/");
+
+    socket.onopen = function () {
+      setStatus(null);
+    };
+
+    socket.onmessage = function (event) {
+      var message;
+      try {
+        message = JSON.parse(event.data);
+      } catch (e) {
+        return;
+      }
+
+      handle(message);
+    };
+
+    //onclose follows an error too, so the reconnect is scheduled in one place.
+    socket.onclose = function () {
+      socket = null;
+      setStatus("Disconnected. Reconnecting…");
+      setTimeout(connect, RECONNECT_MS);
+    };
+
+    socket.onerror = function () {};
+  }
+
+  function send(message) {
+    if (socket && socket.readyState === WebSocket.OPEN)
+      socket.send(JSON.stringify(message));
+  }
+
+  function handle(message) {
+    switch (message.t) {
+      case "schema":
+        applySchema(message);
+        break;
+
+      case "values":
+        applyValues(message.v);
+        break;
+
+      case "added":
+      case "removed":
+        //The panels are rebuilt from a fresh schema rather than patched.
+        send({ t: "schema" });
+        break;
+    }
+  }
+
+  function setStatus(text) {
+    statusEl.hidden = text === null;
+    statusEl.textContent = text || "";
+  }
+
+  /* Schema
+     ----------------------------------------------------------------------------------------- */
+
+  function applySchema(message) {
+    tokensEl.textContent = message.css || "";
+
+    rows = {};
+    values = {};
+    closePopup();
+    panelsEl.innerHTML = "";
+
+    var controllables = (message.controllables || []).slice();
+    controllables.sort(function (a, b) {
+      if (a.id === b.id) return 0;
+      if (a.id === FIRST_PANEL) return -1;
+      if (b.id === FIRST_PANEL) return 1;
+      return a.id < b.id ? -1 : 1;
+    });
+
+    for (var i = 0; i < controllables.length; i++)
+      panelsEl.appendChild(buildPanel(controllables[i]));
+  }
+
+  function buildPanel(c) {
+    var barColor = cssColor(c.barColor);
+
+    var panel = element("div", "panel");
+    element("div", "panel-bar", panel).style.background = barColor;
+
+    var body = element("div", "panel-body", panel);
+
+    var title = element("div", "panel-title", body);
+    //Faint, as PanelTitleBackground tints it: the panel is translucent over whatever is behind it.
+    title.style.background = cssColor(c.barColor, cssNumber("--genui-panel-title-background-alpha"));
+    element("span", "panel-arrow", title).style.color = barColor;
+    element("span", null, title).textContent = c.id;
+
+    var titleGap = element("div", "title-gap", body);
+
+    var content = document.createDocumentFragment();
+    var firstIsHeader = null;
+    var presetRow = null;
+
+    var members = c.members || [];
+    for (var i = 0; i < members.length; i++) {
+      var member = members[i];
+
+      if (member.header !== undefined)
+        add(text("header", member.header));
+
+      var memberRow = buildRow(c.id, member);
+      if (memberRow) {
+        //The preset dropdown belongs to the preset block, not among the member rows.
+        if (member.name === PRESET_MEMBER)
+          presetRow = memberRow;
+        else
+          add(memberRow);
+      }
+
+      if (member.tooltip !== undefined)
+        add(text("tooltip", member.tooltip));
+    }
+
+    var groups = { preset: [], allPreset: [], globalAction: [], body: [] };
+    var methods = c.methods || [];
+    for (var m = 0; m < methods.length; m++) {
+      var group = groups[methods[m].group] || groups.body;
+      group.push(buildButton(c.id, methods[m]));
+    }
+
+    //The global blocks go to the top of the body, the panel's own preset block to the bottom.
+    if (groups.allPreset.length)
+      body.appendChild(section(strip(groups.allPreset)));
+
+    if (groups.globalAction.length)
+      body.appendChild(section(strip(groups.globalAction)));
+
+    //An empty row above the first button that stays in the body - unless nothing precedes it, where
+    //the gap would only push the button away from the title.
+    var hasRowAbove = firstIsHeader !== null || groups.allPreset.length > 0 || groups.globalAction.length > 0;
+    if (groups.body.length && hasRowAbove)
+      content.appendChild(element("div", "method-gap"));
+
+    for (var b = 0; b < groups.body.length; b++) {
+      var buttonRow = element("div", "button-row");
+      buttonRow.appendChild(groups.body[b]);
+      content.appendChild(buttonRow);
+    }
+
+    body.appendChild(content);
+
+    if (groups.preset.length) {
+      var presetSection = section(strip(groups.preset));
+      if (presetRow)
+        presetSection.appendChild(presetRow);
+
+      body.appendChild(presetSection);
+    } else if (presetRow) {
+      //No preset buttons, so there is no block to gather it into: it stays a member row.
+      body.appendChild(presetRow);
+    }
+
+    //A header is taller than a row and carries space of its own; stacked with the gap under the
+    //title, the two read as a hole.
+    titleGap.hidden = firstIsHeader === true;
+
+    setFolded(panel, c.id, foldedAtStart(c));
+    title.addEventListener("click", function () {
+      setFolded(panel, c.id, panel.classList.contains("open"));
+    });
+
+    return panel;
+
+    function add(node) {
+      if (firstIsHeader === null)
+        firstIsHeader = node.classList.contains("header");
+
+      content.appendChild(node);
+    }
+  }
+
+  function strip(buttons) {
+    var holder = element("div", "button-strip");
+    for (var i = 0; i < buttons.length; i++)
+      holder.appendChild(buttons[i]);
+
+    return holder;
+  }
+
+  //A block set off from the member rows by a rule and the space around it.
+  function section(child) {
+    var block = element("div", "section");
+    block.appendChild(child);
+    return block;
+  }
+
+  /* Folding
+     ----------------------------------------------------------------------------------------- */
+
+  //The panel keeps its fold state in PlayerPrefs; the browser keeps its own, per controllable.
+  function foldedAtStart(c) {
+    var stored = null;
+    try {
+      stored = localStorage.getItem(foldKey(c.id));
+    } catch (e) {
+      //Private browsing, or storage switched off: the schema's own answer is used instead.
+    }
+
+    return stored === null ? !!c.closeAtStart : stored === "1";
+  }
+
+  function setFolded(panel, id, folded) {
+    panel.classList.toggle("open", !folded);
+
+    try {
+      localStorage.setItem(foldKey(id), folded ? "1" : "0");
+    } catch (e) {
+      //The fold still works, it is only not remembered.
+    }
+  }
+
+  function foldKey(id) {
+    return "genui.folded." + id;
+  }
+
+  /* Rows
+     ----------------------------------------------------------------------------------------- */
+
+  function buildRow(id, member) {
+    var key = id + "/" + member.name;
+
+    var row = element("div", "row" + (member.readOnly ? " read-only" : ""));
+    var label = element("div", "label", row);
+    label.textContent = member.label;
+    label.title = member.tooltip || member.label;
+
+    var apply;
+    switch (member.kind) {
+      case "Slider": apply = buildSlider(row, key, member); break;
+      case "Input": apply = buildInput(row, key, member); break;
+      case "Toggle": apply = buildToggle(row, key, member); break;
+      case "Dropdown": apply = buildDropdown(row, key, member); break;
+      case "Color": apply = buildColor(row, key, member); break;
+      case "Vector2": apply = buildVector(row, key, member, ["x", "y"], true); break;
+      case "Vector2Int": apply = buildVector(row, key, member, ["x", "y"], false); break;
+      case "Vector3": apply = buildVector(row, key, member, ["x", "y", "z"], true); break;
+      case "Vector3Int": apply = buildVector(row, key, member, ["x", "y", "z"], false); break;
+      case "Vector4": apply = buildVector(row, key, member, ["x", "y", "z", "w"], true); break;
+
+      //Kind None: the panel draws no widget either, and the member's header and tooltip still do.
+      default: return null;
+    }
+
+    rows[key] = apply;
+    values[key] = member.value;
+    apply(member.value);
+
+    return row;
+  }
+
+  function buildButton(id, method) {
+    var button = element("button");
+    button.type = "button";
+    button.textContent = method.label;
+    button.addEventListener("click", function () {
+      send({ t: "invoke", id: id, method: method.name });
+    });
+
+    return button;
+  }
+
+  function buildInput(row, key, member) {
+    //A string member and a float one are both kind Input; what tells them apart is the value's own
+    //JSON type, which is also what has to be sent back.
+    var isText = typeof member.value === "string";
+
+    var input = field(member, isText ? undefined : member.isFloat);
+    element("div", "control", row).appendChild(input);
+
+    bindCommit(input, key, member, function () {
+      return isText ? input.value : readNumber(input, member.isFloat);
+    });
+
+    return function (value) {
+      writeField(input, format(value));
+    };
+  }
+
+  function buildSlider(row, key, member) {
+    var slider = element("div", "slider", row);
+    element("div", "slider-track", slider);
+    var fill = element("div", "slider-fill", slider);
+    var handle = element("div", "slider-handle", slider);
+
+    var input = field(member, member.isFloat);
+    element("div", "slider-value", row).appendChild(input);
+
+    var dragging = false;
+
+    if (!member.readOnly) {
+      onDrag(slider, function (point) {
+        dragging = point.down;
+
+        var value = member.min + point.x * (member.max - member.min);
+        if (!member.isFloat)
+          value = Math.round(value);
+
+        draw(value);
+        writeField(input, format(value));
+        setValue(key, value);
+      });
+    }
+
+    bindCommit(input, key, member, function () {
+      return clamp(readNumber(input, member.isFloat), member.min, member.max);
+    });
+
+    return function (value) {
+      //The drag is the authority while it lasts; its own echoes would only fight it.
+      if (dragging)
+        return;
+
+      draw(value);
+      writeField(input, format(value));
+    };
+
+    function draw(value) {
+      var span = member.max - member.min;
+      var fraction = span > 0 ? clamp((value - member.min) / span, 0, 1) : 0;
+
+      //The travel is the track minus one handle, which is exactly how far the handle's centre moves.
+      var travel = "(100% - var(--genui-slider-handle-width)) * " + fraction;
+      fill.style.width = "calc(" + travel + ")";
+      handle.style.left = "calc(var(--genui-slider-handle-width) / 2 + " + travel + ")";
+    }
+  }
+
+  function buildToggle(row, key, member) {
+    var box = element("div", "toggle-box", row);
+
+    if (!member.readOnly) {
+      box.addEventListener("click", function () {
+        var on = !box.classList.contains("on");
+        paint(on);
+        setValue(key, on);
+      });
+    }
+
+    return paint;
+
+    function paint(value) {
+      box.classList.toggle("on", !!value);
+      box.classList.toggle("off", !value);
+    }
+  }
+
+  function buildDropdown(row, key, member) {
+    var select = element("select");
+    select.disabled = !!member.readOnly;
+    element("div", "control", row).appendChild(select);
+
+    var options = member.options || [];
+    for (var i = 0; i < options.length; i++) {
+      var option = element("option", null, select);
+      option.value = options[i];
+      option.textContent = options[i];
+    }
+
+    select.addEventListener("change", function () {
+      setValue(key, select.value);
+    });
+
+    return function (value) {
+      var name = value === null || value === undefined ? "" : String(value);
+
+      //The entries of a list-backed dropdown grow at runtime - controllablePresetList does, every
+      //time a preset is saved - and only the schema carries them, so a value that is not among them
+      //means this page is holding a stale list. Asked for once per value, since a schema that comes
+      //back without it must not start the exchange again.
+      if (name !== "" && !contains(select, name)) {
+        askForSchemaOnce(key + "=" + name);
+        return;
+      }
+
+      select.value = name;
+    };
+  }
+
+  function buildColor(row, key, member) {
+    var swatch = element("div", "swatch checkerboard", row);
+    var fill = element("div", "overlay", swatch);
+
+    if (!member.readOnly) {
+      swatch.addEventListener("click", function (event) {
+        openPicker(key, event);
+      });
+    }
+
+    return function (value) {
+      fill.style.background = cssColor(value);
+    };
+  }
+
+  function buildVector(row, key, member, axes, isFloat) {
+    var control = element("div", "control axes", row);
+    var inputs = [];
+
+    for (var i = 0; i < axes.length; i++) {
+      var cell = element("div", "axis", control);
+      element("span", "letter", cell).textContent = axes[i];
+
+      var input = field(member, isFloat);
+      cell.appendChild(input);
+      inputs.push(input);
+
+      //Editing one axis sends the whole vector, as VectorUIBase does: SetFieldProp takes all of it.
+      bindCommit(input, key, member, readAll);
+    }
+
+    return function (value) {
+      var components = value || [];
+      for (var i = 0; i < inputs.length; i++)
+        writeField(inputs[i], format(components[i]));
+    };
+
+    function readAll() {
+      var read = [];
+      for (var i = 0; i < inputs.length; i++)
+        read.push(readNumber(inputs[i], isFloat));
+
+      return read;
+    }
+  }
+
+  /* Editing
+     ----------------------------------------------------------------------------------------- */
+
+  function field(member, isFloat) {
+    var input = element("input");
+    input.type = "text";
+    input.disabled = !!member.readOnly;
+
+    //A phone should offer the right keyboard; the value is still parsed here, as the panel does.
+    if (isFloat === true) input.inputMode = "decimal";
+    else if (isFloat === false) input.inputMode = "numeric";
+
+    return input;
+  }
+
+  //Committed on change, which is what the panel's onEndEdit is: leaving the field, or pressing Enter.
+  function bindCommit(input, key, member, read) {
+    if (member.readOnly)
+      return;
+
+    input.addEventListener("change", function () {
+      input.dataset.awaitingEcho = "1";
+      setValue(key, read());
+    });
+
+    //Typing again makes the field the user's once more, whatever it last sent.
+    input.addEventListener("input", function () {
+      delete input.dataset.awaitingEcho;
+    });
+  }
+
+  //Never over a field being typed into. The one exception is the answer to what that field itself
+  //just sent: the server may have clamped it, and that is what it has to end up showing.
+  function writeField(input, value) {
+    if (document.activeElement === input && input.dataset.awaitingEcho !== "1")
+      return;
+
+    delete input.dataset.awaitingEcho;
+    input.value = value;
+  }
+
+  function readNumber(input, isFloat) {
+    var parsed = parseFloat(input.value);
+    if (isNaN(parsed))
+      parsed = 0;
+
+    return isFloat === false ? Math.round(parsed) : parsed;
+  }
+
+  function setValue(key, value) {
+    var split = key.indexOf("/");
+    values[key] = value;
+
+    send({
+      t: "set",
+      id: key.substring(0, split),
+      member: key.substring(split + 1),
+      value: value
+    });
+  }
+
+  function applyValues(changed) {
+    for (var key in changed) {
+      if (!Object.prototype.hasOwnProperty.call(changed, key))
+        continue;
+
+      values[key] = changed[key];
+
+      if (rows[key])
+        rows[key](changed[key]);
+
+      if (pickerKey === key)
+        pickerFromColor(changed[key]);
+    }
+  }
+
+  var schemaAsked = {};
+
+  function askForSchemaOnce(reason) {
+    if (schemaAsked[reason])
+      return;
+
+    schemaAsked[reason] = true;
+    send({ t: "schema" });
+  }
+
+  /* Colour picker
+     ----------------------------------------------------------------------------------------- */
+
+  //HSVA rather than a colour: a round trip through RGB loses the hue at S=0 or V=0, which is what
+  //makes a picker's hue bar jump as the pointer reaches the black corner.
+  var pickerHsva = [0, 0, 1, 1];
+  var pickerKey = null;
+  var picker = null;
+
+  function openPicker(key, event) {
+    if (!picker)
+      picker = buildPicker();
+
+    pickerKey = key;
+    pickerFromColor(values[key]);
+
+    popupEl.hidden = false;
+    placePopup(event.clientX, event.clientY);
+  }
+
+  function closePopup() {
+    popupEl.hidden = true;
+    pickerKey = null;
+  }
+
+  popupEl.addEventListener("pointerdown", function (event) {
+    if (event.target === popupEl)
+      closePopup();
+  });
+
+  //Moved back inside the window when it would hang over an edge, each axis resolving the far edge
+  //last so an oversized popup keeps its top-left corner - the rule UIFactory.ScreenNudge follows.
+  function placePopup(x, y) {
+    popupContentEl.style.left = "0px";
+    popupContentEl.style.top = "0px";
+
+    var size = popupContentEl.getBoundingClientRect();
+
+    var left = x;
+    if (left + size.width > window.innerWidth) left = window.innerWidth - size.width;
+    if (left < 0) left = 0;
+
+    var top = y;
+    if (top + size.height > window.innerHeight) top = window.innerHeight - size.height;
+    if (top < 0) top = 0;
+
+    popupContentEl.style.left = left + "px";
+    popupContentEl.style.top = top + "px";
+  }
+
+  function buildPicker() {
+    popupContentEl.innerHTML = "";
+
+    var sv = element("div", "picker-sv", popupContentEl);
+    var svMarker = element("div", "picker-sv-marker", sv);
+
+    var hue = element("div", "picker-bar", popupContentEl);
+    hue.style.background = "linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00)";
+    var hueMarker = element("div", "picker-bar-marker", hue);
+
+    //The ramp is drawn over the checkerboard, which is what the alpha is judged against.
+    var alpha = element("div", "picker-bar checkerboard", popupContentEl);
+    var alphaRamp = element("div", "overlay", alpha);
+    var alphaMarker = element("div", "picker-bar-marker", alpha);
+
+    //In bytes rather than in 0..1, so they agree digit for digit with the hex field under them.
+    var channels = element("div", "picker-channels", popupContentEl);
+    var names = ["R", "G", "B", "A"];
+    var channelInputs = [];
+    for (var i = 0; i < names.length; i++) {
+      var cell = element("div", "axis", channels);
+      element("span", "letter", cell).textContent = names[i];
+
+      var input = element("input", null, cell);
+      input.type = "text";
+      input.inputMode = "numeric";
+      input.maxLength = 3;
+      channelInputs.push(input);
+
+      bindChannel(input, i);
+    }
+
+    var hex = element("input", "picker-hex", popupContentEl);
+    hex.type = "text";
+    hex.maxLength = 9;
+    hex.addEventListener("change", function () {
+      var parsed = parseHex(hex.value);
+      if (parsed) {
+        setHsvaFromColor(parsed);
+        push();
+      } else {
+        //Rejected rather than kept: the field always shows the colour the picker holds.
+        refresh();
+      }
+    });
+
+    onDrag(sv, function (point) {
+      pickerHsva[1] = point.x;
+      pickerHsva[2] = point.y;
+      push();
+    });
+
+    onDrag(hue, function (point) {
+      pickerHsva[0] = point.x;
+      push();
+    });
+
+    onDrag(alpha, function (point) {
+      pickerHsva[3] = point.x;
+      push();
+    });
+
+    return { refresh: refresh };
+
+    function bindChannel(input, channel) {
+      input.addEventListener("change", function () {
+        var value = parseInt(input.value, 10);
+        if (isNaN(value)) {
+          refresh();
+          return;
+        }
+
+        //The other three come from the colour the picker holds, which is what they already show.
+        var color = pickerColor();
+        color[channel] = clamp(value, 0, 255) / 255;
+        setHsvaFromColor(color);
+        push();
+      });
+    }
+
+    function refresh() {
+      var color = pickerColor();
+      var opaque = hsvToRgb(pickerHsva[0], pickerHsva[1], pickerHsva[2]).concat(1);
+
+      //White to the hue across, black up: exactly the saturation and value axes.
+      sv.style.background =
+        "linear-gradient(to top, rgb(0,0,0), rgba(0,0,0,0)), " +
+        "linear-gradient(to right, rgb(255,255,255), " + cssColor(hsvToRgb(pickerHsva[0], 1, 1)) + ")";
+
+      svMarker.style.left = pickerHsva[1] * 100 + "%";
+      svMarker.style.bottom = pickerHsva[2] * 100 + "%";
+      svMarker.style.background = cssColor(opaque);
+
+      hueMarker.style.left = pickerHsva[0] * 100 + "%";
+
+      alphaMarker.style.left = pickerHsva[3] * 100 + "%";
+      alphaRamp.style.background = "linear-gradient(to right, rgba(0,0,0,0), " + cssColor(opaque) + ")";
+
+      for (var i = 0; i < channelInputs.length; i++)
+        writeUnfocused(channelInputs[i], String(Math.round(clamp(color[i], 0, 1) * 255)));
+
+      writeUnfocused(hex, toHex(color));
+    }
+
+    //Never while the box is being typed into, or the caret jumps to the end on every keystroke.
+    function writeUnfocused(input, value) {
+      if (document.activeElement !== input)
+        input.value = value;
+    }
+  }
+
+  function pickerColor() {
+    return hsvToRgb(pickerHsva[0], pickerHsva[1], pickerHsva[2]).concat(pickerHsva[3]);
+  }
+
+  function pickerFromColor(value) {
+    if (!value || value.length < 3)
+      return;
+
+    setHsvaFromColor(value);
+    picker.refresh();
+  }
+
+  function setHsvaFromColor(color) {
+    var hsv = rgbToHsv(color[0], color[1], color[2]);
+
+    //A grey has no hue of its own, so taking the one it reports would throw away the hue the user is
+    //holding on the bar.
+    if (hsv[1] > 0 && hsv[2] > 0)
+      pickerHsva[0] = hsv[0];
+
+    pickerHsva[1] = hsv[1];
+    pickerHsva[2] = hsv[2];
+    pickerHsva[3] = color.length > 3 ? color[3] : 1;
+  }
+
+  function push() {
+    picker.refresh();
+
+    if (pickerKey)
+      setValue(pickerKey, pickerColor());
+  }
+
+  /* Colour maths
+     ----------------------------------------------------------------------------------------- */
+
+  function hsvToRgb(h, s, v) {
+    h = (h - Math.floor(h)) * 6;
+    s = clamp(s, 0, 1);
+    v = clamp(v, 0, 1);
+
+    var sector = Math.floor(h);
+    var f = h - sector;
+    var p = v * (1 - s);
+    var q = v * (1 - s * f);
+    var t = v * (1 - s * (1 - f));
+
+    switch (sector % 6) {
+      case 0: return [v, t, p];
+      case 1: return [q, v, p];
+      case 2: return [p, v, t];
+      case 3: return [p, q, v];
+      case 4: return [t, p, v];
+      default: return [v, p, q];
+    }
+  }
+
+  function rgbToHsv(r, g, b) {
+    var max = Math.max(r, g, b);
+    var span = max - Math.min(r, g, b);
+
+    var h = 0;
+    if (span > 0) {
+      if (max === r) h = ((g - b) / span) % 6;
+      else if (max === g) h = (b - r) / span + 2;
+      else h = (r - g) / span + 4;
+
+      h /= 6;
+      if (h < 0) h += 1;
+    }
+
+    return [h, max > 0 ? span / max : 0, max];
+  }
+
+  //#RGB, #RRGGBB and #RRGGBBAA, with or without the '#', and nothing else - a colour name would
+  //otherwise be accepted by a field that only ever shows hex.
+  function parseHex(text) {
+    var hex = (text || "").trim();
+    if (hex.charAt(0) === "#")
+      hex = hex.substring(1);
+
+    if (!/^([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(hex))
+      return null;
+
+    if (hex.length === 3) {
+      hex = hex.charAt(0) + hex.charAt(0) + hex.charAt(1) + hex.charAt(1)
+        + hex.charAt(2) + hex.charAt(2);
+    }
+
+    return [
+      parseInt(hex.substring(0, 2), 16) / 255,
+      parseInt(hex.substring(2, 4), 16) / 255,
+      parseInt(hex.substring(4, 6), 16) / 255,
+      hex.length === 8 ? parseInt(hex.substring(6, 8), 16) / 255 : 1
+    ];
+  }
+
+  //Six digits, or eight when the colour is not fully opaque.
+  function toHex(color) {
+    var hex = "#" + byteHex(color[0]) + byteHex(color[1]) + byteHex(color[2]);
+    return color[3] >= 1 ? hex : hex + byteHex(color[3]);
+  }
+
+  function byteHex(channel) {
+    var byte = Math.round(clamp(channel, 0, 1) * 255);
+    return (byte < 16 ? "0" : "") + byte.toString(16).toUpperCase();
+  }
+
+  /* Pointer
+     ----------------------------------------------------------------------------------------- */
+
+  //Reports where the pointer falls inside an element, as a fraction of it on each axis, clamped so
+  //a drag that leaves it holds at the edge. A press reports too, since a drag alone never fires on
+  //a click - the same reason PickerAreaDrag handles pointer-down itself.
+  function onDrag(area, report) {
+    area.addEventListener("pointerdown", function (event) {
+      area.setPointerCapture(event.pointerId);
+      event.preventDefault();
+      point(event, true);
+    });
+
+    area.addEventListener("pointermove", function (event) {
+      if (area.hasPointerCapture(event.pointerId))
+        point(event, true);
+    });
+
+    area.addEventListener("pointerup", function (event) {
+      area.releasePointerCapture(event.pointerId);
+      point(event, false);
+    });
+
+    function point(event, down) {
+      var rect = area.getBoundingClientRect();
+
+      report({
+        x: rect.width > 0 ? clamp((event.clientX - rect.left) / rect.width, 0, 1) : 0,
+        //Measured from the bottom, as the SV square's value axis is.
+        y: rect.height > 0 ? clamp((rect.bottom - event.clientY) / rect.height, 0, 1) : 0,
+        down: down
+      });
+    }
+  }
+
+  /* Small helpers
+     ----------------------------------------------------------------------------------------- */
+
+  function element(tag, className, parent) {
+    var node = document.createElement(tag);
+    if (className)
+      node.className = className;
+
+    if (parent)
+      parent.appendChild(node);
+
+    return node;
+  }
+
+  function text(className, content) {
+    var node = element("div", className);
+    node.textContent = content;
+    return node;
+  }
+
+  function contains(select, value) {
+    for (var i = 0; i < select.options.length; i++) {
+      if (select.options[i].value === value)
+        return true;
+    }
+
+    return false;
+  }
+
+  function cssColor(color, alpha) {
+    if (!color || color.length < 3)
+      return "transparent";
+
+    var a = alpha === undefined ? (color.length > 3 ? color[3] : 1) : alpha;
+
+    return "rgba(" + Math.round(color[0] * 255) + ", " + Math.round(color[1] * 255) + ", "
+      + Math.round(color[2] * 255) + ", " + a + ")";
+  }
+
+  function cssNumber(token) {
+    var value = parseFloat(getComputedStyle(document.documentElement).getPropertyValue(token));
+    return isNaN(value) ? 0 : value;
+  }
+
+  function format(value) {
+    return value === null || value === undefined ? "" : String(value);
+  }
+
+  function clamp(value, min, max) {
+    return value < min ? min : (value > max ? max : value);
+  }
+
+  connect();
+})();
