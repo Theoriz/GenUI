@@ -484,129 +484,56 @@ public class UIMaster : MonoBehaviour
             if (showDebug)
                 Debug.Log("[UI] Adding control for (" + newControllable.GetType() + ") : " + property.Value.Name + " of type : " + propertyType.ToString());
 
-			bool propertyDrawn = false;
+            //Which widget the member gets is MemberDescriptor's decision, not this loop's; here we
+            //only build what it names.
+            var descriptor = MemberDescriptor.Describe(newControllable, property.Value, attribute);
 
-            //Add header if it exists
-            var headerAttribut = (HeaderAttribute[])property.Value.GetCustomAttributes(typeof(HeaderAttribute), false);
-            if (headerAttribut.Length != 0)
+            if (descriptor.Header != null)
+                CreateHeaderText(newPanel.transform, newControllable, descriptor.Header);
+
+            var isInteractible = !descriptor.ReadOnly;
+
+            switch (descriptor.Kind)
             {
-                CreateHeaderText(newPanel.transform, newControllable, headerAttribut[0].header);
+                case WidgetKind.Dropdown:
+                    CreateDropDown(newPanel.transform, newControllable, property.Value, isInteractible,
+                        targetListName: descriptor.TargetList, enumType: descriptor.EnumType);
+                    break;
+                case WidgetKind.Slider:
+                    CreateSlider(newPanel.transform, newControllable, property.Value,
+                        new RangeAttribute(descriptor.Min, descriptor.Max), isInteractible, descriptor.IsFloat);
+                    break;
+                case WidgetKind.Input:
+                    CreateInput(newPanel.transform, newControllable, property.Value, isInteractible);
+                    break;
+                case WidgetKind.Toggle:
+                    CreateCheckbox(newPanel.transform, newControllable, property.Value, isInteractible);
+                    break;
+                case WidgetKind.Color:
+                    CreateColor(newPanel.transform, newControllable, property.Value, isInteractible);
+                    break;
+                case WidgetKind.Vector2:
+                    CreateVector2(newPanel.transform, newControllable, property.Value, isInteractible);
+                    break;
+                case WidgetKind.Vector2Int:
+                    CreateVector2Int(newPanel.transform, newControllable, property.Value, isInteractible);
+                    break;
+                case WidgetKind.Vector3:
+                    CreateVector3(newPanel.transform, newControllable, property.Value, isInteractible);
+                    break;
+                case WidgetKind.Vector3Int:
+                    CreateVector3Int(newPanel.transform, newControllable, property.Value, isInteractible);
+                    break;
+                case WidgetKind.Vector4:
+                    CreateVector4(newPanel.transform, newControllable, property.Value, isInteractible);
+                    break;
+                default:
+                    Debug.LogWarning(descriptor.SkipReason);
+                    break;
             }
 
-			//Create list
-			if (!string.IsNullOrEmpty(attribute.targetList) && !propertyDrawn)
-            {
-                //The name is passed on rather than a resolved FieldInfo: the list may live on the
-                //mirror or on the target script, and its entries are read live on every refresh.
-                if (newControllable.GetTargetList(attribute.targetList) == null)
-                    Debug.LogWarning("[GenUI] No widget created for '" + property.Value.Name + "' on "
-                        + newControllable.controllableId + " : targetList '" + attribute.targetList
-                        + "' names no List<string> on the controllable or its target script.");
-                else
-                    CreateDropDown(newPanel.transform, newControllable, property.Value, !attribute.readOnly, targetListName: attribute.targetList);
-
-				propertyDrawn = true;
-                //continue;
-            }
-
-            if (propertyType.IsEnum && !propertyDrawn)
-            {
-                //A [Flags] enum holds a combination of its members, which one dropdown cannot show.
-                //Drawing a single-select control over it would silently discard every flag it leaves
-                //out, so the member is left to OSC and presets instead.
-                if (propertyType.IsDefined(typeof(FlagsAttribute), false))
-                    Debug.LogWarning("[GenUI] No widget created for '" + property.Value.Name + "' on "
-                        + newControllable.controllableId + " : " + propertyType.Name
-                        + " is a [Flags] enum. It stays controllable over OSC.");
-                else
-                    CreateDropDown(newPanel.transform, newControllable, property.Value, !attribute.readOnly, enumType: propertyType);
-
-                propertyDrawn = true;
-                //continue;
-            }
-            //property.Value.Attributes O
-            if ((propertyType.ToString() == "System.Single" || propertyType.ToString() == "System.Int32") && !propertyDrawn)
-            {
-                var rangeAttribut = (RangeAttribute[]) property.Value.GetCustomAttributes(typeof(RangeAttribute), false);
-
-                bool isFloat = propertyType.ToString() != "System.Int32";
-
-                if (rangeAttribut.Length == 0)
-                    CreateInput(newPanel.transform, newControllable, property.Value, !attribute.readOnly);
-                else
-                    CreateSlider(newPanel.transform, newControllable, property.Value, rangeAttribut[0], !attribute.readOnly, isFloat);
-
-				propertyDrawn = true;
-				//continue;
-			}
-            if (propertyType.ToString() == "System.Boolean" && !propertyDrawn)
-            {
-                CreateCheckbox(newPanel.transform, newControllable, property.Value, !attribute.readOnly);
-
-				propertyDrawn = true;
-				//continue;
-			}
-            if (propertyType.ToString() == "System.String" && !propertyDrawn)
-            {
-                CreateInput(newPanel.transform, newControllable, property.Value, !attribute.readOnly);
-
-				propertyDrawn = true;
-				//continue;
-			}
-
-            if (propertyType.ToString() == "UnityEngine.Color" && !propertyDrawn)
-            {
-                CreateColor(newPanel.transform, newControllable, property.Value, !attribute.readOnly);
-
-				propertyDrawn = true;
-				//continue;
-			}
-
-            if(propertyType.ToString() == "UnityEngine.Vector3" && !propertyDrawn)
-            {
-                CreateVector3(newPanel.transform, newControllable, property.Value, !attribute.readOnly);
-
-				propertyDrawn = true;
-				//continue;
-			}
-
-            if (propertyType.ToString() == "UnityEngine.Vector4" && !propertyDrawn)
-            {
-                CreateVector4(newPanel.transform, newControllable, property.Value, !attribute.readOnly);
-
-                propertyDrawn = true;
-                //continue;
-            }
-
-            if (propertyType.ToString() == "UnityEngine.Vector3Int" && !propertyDrawn) {
-                CreateVector3Int(newPanel.transform, newControllable, property.Value, !attribute.readOnly);
-
-                propertyDrawn = true;
-                //continue;
-            }
-
-            if (propertyType.ToString() == "UnityEngine.Vector2" && !propertyDrawn) {
-                CreateVector2(newPanel.transform, newControllable, property.Value, !attribute.readOnly);
-
-                propertyDrawn = true;
-                //continue;
-            }
-
-            if (propertyType.ToString() == "UnityEngine.Vector2Int" && !propertyDrawn) {
-                CreateVector2Int(newPanel.transform, newControllable, property.Value, !attribute.readOnly);
-
-                propertyDrawn = true;
-                //continue;
-            }
-
-            if (!propertyDrawn)
-                Debug.LogWarning("[GenUI] No widget created for '" + property.Value.Name + "' on " + newControllable.controllableId + " : unsupported type " + propertyType + ".");
-
-            //Add tooltip if it exists
-            var tooltipAttribut = (TooltipAttribute[])property.Value.GetCustomAttributes(typeof(TooltipAttribute), false);
-			if (tooltipAttribut.Length != 0) {
-				CreateTooltipText(newPanel.transform, newControllable, tooltipAttribut[0].tooltip);
-			}
+            if (descriptor.Tooltip != null)
+                CreateTooltipText(newPanel.transform, newControllable, descriptor.Tooltip);
 		}
 
         //Read all methods and add button

@@ -1,5 +1,4 @@
 using NUnit.Framework;
-using UnityEngine;
 
 namespace Theoriz.GenUI.Tests.Editor
 {
@@ -14,22 +13,6 @@ namespace Theoriz.GenUI.Tests.Editor
     /// </summary>
     public class ParseNameStringTests
     {
-        GameObject _go;
-        ControllableUI _ui;
-
-        [SetUp]
-        public void CreateWidget()
-        {
-            _go = new GameObject("parse-name-test");
-            _ui = _go.AddComponent<ControllableUI>();
-        }
-
-        [TearDown]
-        public void DestroyWidget()
-        {
-            Object.DestroyImmediate(_go);
-        }
-
         [TestCase("ControllableSave", "Save")]
         [TestCase("ControllableSaveAs", "Save As")]
         [TestCase("ControllableLoad", "Load")]
@@ -42,7 +25,7 @@ namespace Theoriz.GenUI.Tests.Editor
         [TestCase("controllableTargetScript", "Target Script")]
         public void PrefixedMembers_KeepTheLabelTheyHadBeforeThePrefix(string member, string expected)
         {
-            Assert.AreEqual(expected, _ui.ParseNameString(member));
+            Assert.AreEqual(expected, ControllableUI.ParseNameString(member));
         }
 
         [TestCase("speed", "Speed")]
@@ -50,7 +33,7 @@ namespace Theoriz.GenUI.Tests.Editor
         [TestCase("RandomizeColor", "Randomize Color")]
         public void UserMembers_AreUnaffected(string member, string expected)
         {
-            Assert.AreEqual(expected, _ui.ParseNameString(member));
+            Assert.AreEqual(expected, ControllableUI.ParseNameString(member));
         }
 
         /// <summary>
@@ -64,14 +47,14 @@ namespace Theoriz.GenUI.Tests.Editor
         [TestCase("control", "Control")]
         public void NamesThatOnlyLookPrefixed_KeepTheirLetters(string member, string expected)
         {
-            Assert.AreEqual(expected, _ui.ParseNameString(member));
+            Assert.AreEqual(expected, ControllableUI.ParseNameString(member));
         }
 
         [Test]
         public void EmptyAndNull_AreReturnedUnchanged()
         {
-            Assert.AreEqual("", _ui.ParseNameString(""));
-            Assert.IsNull(_ui.ParseNameString(null));
+            Assert.AreEqual("", ControllableUI.ParseNameString(""));
+            Assert.IsNull(ControllableUI.ParseNameString(null));
         }
     }
 }

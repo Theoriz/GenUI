@@ -302,7 +302,8 @@ public class ControllableUI : MonoBehaviour {
         return name.Substring(ControllablePrefix.Length);
     }
 
-    public string ParseNameString(string name) {
+    //Static so MemberDescriptor can label a member without a widget to ask.
+    public static string ParseNameString(string name) {
 
         if (string.IsNullOrEmpty(name))
             return name;
