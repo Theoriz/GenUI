@@ -159,7 +159,8 @@ Panel, browsers and the target script stay in sync in all directions: whatever c
 
 The browser is a mirror, not a copy. It draws the same rows from the same style values, with these differences:
 
-- No label scrubbing, Ctrl + Z, Tab traversal or **Copy OSC Control Address**.
+- No label scrubbing, Ctrl + Z or Tab traversal.
+- Right-clicking a row shows its OSC control address ready to copy, rather than copying it.
 - Each browser keeps its own folded/unfolded panels.
 - Text falls back to your system font unless Roboto is installed, and a long member name is cut short with an ellipsis rather than shrunk.
 

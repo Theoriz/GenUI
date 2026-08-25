@@ -13,7 +13,11 @@
 <div id="status" class="status">Connecting…</div>
 <div id="panels" class="panels"></div>
 
-<div id="popup" class="popup-backdrop" hidden><div id="popup-content" class="popup"></div></div>
+<!-- One backdrop, one popup shown inside it at a time: the colour picker, or a row's OSC address. -->
+<div id="popup" class="popup-backdrop" hidden>
+<div id="picker-popup" class="popup picker" hidden></div>
+<div id="address-popup" class="popup address" hidden></div>
+</div>
 
 <script src="/client.js"></script>
 </body>

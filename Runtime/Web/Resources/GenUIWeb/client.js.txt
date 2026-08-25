@@ -20,9 +20,13 @@ Unity widgets keep with SetValueWithoutNotify and SliderUI._updating.
   var tokensEl = document.getElementById("genui-tokens");
   var panelsEl = document.getElementById("panels");
   var popupEl = document.getElementById("popup");
-  var popupContentEl = document.getElementById("popup-content");
+  var pickerEl = document.getElementById("picker-popup");
+  var addressEl = document.getElementById("address-popup");
 
   var socket = null;
+
+  //First segment of every OSC address, from the schema: ControllableMaster's RootOSCAddress.
+  var oscRoot = "";
 
   //"id/member" -> the row that draws it. The key is the OSC address's tail, which is how the server
   //keys a values message too.
@@ -95,6 +99,7 @@ Unity widgets keep with SetValueWithoutNotify and SliderUI._updating.
 
   function applySchema(message) {
     tokensEl.textContent = message.css || "";
+    oscRoot = message.oscRoot || "";
 
     rows = {};
     values = {};
@@ -283,6 +288,11 @@ Unity widgets keep with SetValueWithoutNotify and SliderUI._updating.
       default: return null;
     }
 
+    //Read-only members are left out, as MouseButtonEvent's IsInteractible check leaves them out of
+    //the panel's menu: the address they would show cannot write them.
+    if (!member.readOnly)
+      bindAddressMenu(row, key);
+
     rows[key] = apply;
     values[key] = member.value;
     apply(member.value);
@@ -297,6 +307,8 @@ Unity widgets keep with SetValueWithoutNotify and SliderUI._updating.
     button.addEventListener("click", function () {
       send({ t: "invoke", id: id, method: method.name });
     });
+
+    bindAddressMenu(button, id + "/" + method.name);
 
     return button;
   }
@@ -550,6 +562,89 @@ Unity widgets keep with SetValueWithoutNotify and SliderUI._updating.
     send({ t: "schema" });
   }
 
+  /* Popups
+     ----------------------------------------------------------------------------------------- */
+
+  //One at a time inside the shared backdrop, so each keeps the children it built.
+  function openPopup(content, x, y) {
+    pickerEl.hidden = content !== pickerEl;
+    addressEl.hidden = content !== addressEl;
+
+    popupEl.hidden = false;
+    placePopup(content, x, y);
+  }
+
+  function closePopup() {
+    popupEl.hidden = true;
+    pickerKey = null;
+  }
+
+  popupEl.addEventListener("pointerdown", function (event) {
+    if (event.target === popupEl)
+      closePopup();
+  });
+
+  //Moved back inside the window when it would hang over an edge, each axis resolving the far edge
+  //last so an oversized popup keeps its top-left corner - the rule UIFactory.ScreenNudge follows.
+  function placePopup(content, x, y) {
+    content.style.left = "0px";
+    content.style.top = "0px";
+
+    var size = content.getBoundingClientRect();
+
+    var left = x;
+    if (left + size.width > window.innerWidth) left = window.innerWidth - size.width;
+    if (left < 0) left = 0;
+
+    var top = y;
+    if (top + size.height > window.innerHeight) top = window.innerHeight - size.height;
+    if (top < 0) top = 0;
+
+    content.style.left = left + "px";
+    content.style.top = top + "px";
+  }
+
+  /* OSC address
+     ----------------------------------------------------------------------------------------- */
+
+  //The address the panel's right-click menu copies, shown for the reader to copy rather than written
+  //to the clipboard: navigator.clipboard is a secure-context API, so it does not exist over plain
+  //http on a LAN address - which is every viewer but one browsing from the Unity machine itself.
+  var addressField = null;
+
+  //Anywhere on the row, over its fields included, as the panel's own menu opens: the browser's menu
+  //is given up with it, and pasting into a field is still Ctrl + V.
+  function bindAddressMenu(node, key) {
+    node.addEventListener("contextmenu", function (event) {
+      event.preventDefault();
+      openAddress(key, event.clientX, event.clientY);
+    });
+  }
+
+  function openAddress(key, x, y) {
+    if (!addressField)
+      buildAddressMenu();
+
+    addressField.value = "/" + oscRoot + "/" + key;
+    openPopup(addressEl, x, y);
+
+    //Selected as it opens, so copying is one keystroke - or, on touch, one tap-and-hold.
+    addressField.focus();
+    addressField.select();
+  }
+
+  function buildAddressMenu() {
+    addressEl.innerHTML = "";
+
+    element("div", "address-title", addressEl).textContent = "Copy OSC control address";
+
+    addressField = element("input", "address-field", addressEl);
+    addressField.type = "text";
+
+    //Read-only rather than disabled: the text still selects, and a phone opens no keyboard for it.
+    addressField.readOnly = true;
+  }
+
   /* Colour picker
      ----------------------------------------------------------------------------------------- */
 
@@ -566,57 +661,26 @@ Unity widgets keep with SetValueWithoutNotify and SliderUI._updating.
     pickerKey = key;
     pickerFromColor(values[key]);
 
-    popupEl.hidden = false;
-    placePopup(event.clientX, event.clientY);
-  }
-
-  function closePopup() {
-    popupEl.hidden = true;
-    pickerKey = null;
-  }
-
-  popupEl.addEventListener("pointerdown", function (event) {
-    if (event.target === popupEl)
-      closePopup();
-  });
-
-  //Moved back inside the window when it would hang over an edge, each axis resolving the far edge
-  //last so an oversized popup keeps its top-left corner - the rule UIFactory.ScreenNudge follows.
-  function placePopup(x, y) {
-    popupContentEl.style.left = "0px";
-    popupContentEl.style.top = "0px";
-
-    var size = popupContentEl.getBoundingClientRect();
-
-    var left = x;
-    if (left + size.width > window.innerWidth) left = window.innerWidth - size.width;
-    if (left < 0) left = 0;
-
-    var top = y;
-    if (top + size.height > window.innerHeight) top = window.innerHeight - size.height;
-    if (top < 0) top = 0;
-
-    popupContentEl.style.left = left + "px";
-    popupContentEl.style.top = top + "px";
+    openPopup(pickerEl, event.clientX, event.clientY);
   }
 
   function buildPicker() {
-    popupContentEl.innerHTML = "";
+    pickerEl.innerHTML = "";
 
-    var sv = element("div", "picker-sv", popupContentEl);
+    var sv = element("div", "picker-sv", pickerEl);
     var svMarker = element("div", "picker-sv-marker", sv);
 
-    var hue = element("div", "picker-bar", popupContentEl);
+    var hue = element("div", "picker-bar", pickerEl);
     hue.style.background = "linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00)";
     var hueMarker = element("div", "picker-bar-marker", hue);
 
     //The ramp is drawn over the checkerboard, which is what the alpha is judged against.
-    var alpha = element("div", "picker-bar checkerboard", popupContentEl);
+    var alpha = element("div", "picker-bar checkerboard", pickerEl);
     var alphaRamp = element("div", "overlay", alpha);
     var alphaMarker = element("div", "picker-bar-marker", alpha);
 
     //In bytes rather than in 0..1, so they agree digit for digit with the hex field under them.
-    var channels = element("div", "picker-channels", popupContentEl);
+    var channels = element("div", "picker-channels", pickerEl);
     var names = ["R", "G", "B", "A"];
     var channelInputs = [];
     for (var i = 0; i < names.length; i++) {
@@ -632,7 +696,7 @@ Unity widgets keep with SetValueWithoutNotify and SliderUI._updating.
       bindChannel(input, i);
     }
 
-    var hex = element("input", "picker-hex", popupContentEl);
+    var hex = element("input", "picker-hex", pickerEl);
     hex.type = "text";
     hex.maxLength = 9;
     hex.addEventListener("change", function () {
@@ -826,6 +890,10 @@ Unity widgets keep with SetValueWithoutNotify and SliderUI._updating.
   //a click - the same reason PickerAreaDrag handles pointer-down itself.
   function onDrag(area, report) {
     area.addEventListener("pointerdown", function (event) {
+      //Primary button only, as a Unity Slider answers: the right one opens the address menu over it.
+      if (event.button !== 0)
+        return;
+
       area.setPointerCapture(event.pointerId);
       event.preventDefault();
       point(event, true);

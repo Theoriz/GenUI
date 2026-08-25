@@ -31,6 +31,7 @@ public static class WebSchema
     {
         var json = new StringBuilder();
         json.Append("{\"t\":\"schema\",\"css\":").Append(WebJson.Quote(GenUIStyle.ToCss()));
+        json.Append(",\"oscRoot\":").Append(WebJson.Quote(OscRoot()));
         json.Append(",\"controllables\":[");
 
         var first = true;
@@ -98,6 +99,15 @@ public static class WebSchema
         }
 
         return json.Append("]}").ToString();
+    }
+
+    /// <summary>
+    /// The first segment of every OSC address, which the browser needs to show one: the rest of the
+    /// address is the "id/member" key it already holds.
+    /// </summary>
+    static string OscRoot()
+    {
+        return ControllableMaster.instance != null ? ControllableMaster.instance.RootOSCAddress : null;
     }
 
     /// <summary>Whether a method gets a button, on the same terms as <c>UIMaster.CreateButton</c>.</summary>

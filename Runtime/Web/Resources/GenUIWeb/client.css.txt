@@ -426,7 +426,7 @@ select:disabled {
   flex: 1;
 }
 
-/* Colour picker
+/* Popups
    ------------------------------------------------------------------------------------------- */
 
 .popup-backdrop {
@@ -435,7 +435,8 @@ select:disabled {
   background: var(--genui-popup-backdrop);
 }
 
-.popup-backdrop[hidden] {
+.popup-backdrop[hidden],
+.popup[hidden] {
   display: none;
 }
 
@@ -444,11 +445,38 @@ select:disabled {
   display: flex;
   flex-direction: column;
   gap: var(--genui-picker-bar-spacing);
-  width: var(--genui-picker-width);
   padding: var(--genui-picker-padding);
   background: var(--genui-picker-background);
   border-radius: var(--genui-corner-radius);
 }
+
+.popup.picker {
+  width: var(--genui-picker-width);
+}
+
+/* The address is read, not just clicked, so the box is as wide as one usually is - bounded by the
+   window on a phone. */
+.popup.address {
+  width: max-content;
+  min-width: var(--genui-picker-width);
+  max-width: calc(100vw - 16px);
+}
+
+.address-title {
+  font-size: var(--genui-label-font-size, 14px);
+  color: var(--genui-label-color, #fff);
+}
+
+.address-field {
+  height: var(--genui-picker-field-row-height);
+}
+
+.address-field::selection {
+  background: var(--genui-selection-color);
+}
+
+/* Colour picker
+   ------------------------------------------------------------------------------------------- */
 
 .picker-sv,
 .picker-bar {

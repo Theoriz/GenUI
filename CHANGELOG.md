@@ -14,6 +14,7 @@ The packages declare no UPM dependencies, so update OCF yourself.
 - A `GenUIWebServer` component, off by default, serves the panel to a browser on the local network, with panel, browsers and target scripts kept in sync in all directions.
 - The component is on the sample GenUI prefab, so switching the option on is all that is needed.
 - Its option and port appear in the GenUI panel as **Enable Web Server** and **Web Server Port**, so the server can be switched on and moved to another port during Play; connected browsers must be reloaded after a port change.
+- Right-clicking a row in the browser shows its OSC control address, selected and ready to copy.
 
 ### Changed
 
