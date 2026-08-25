@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using UnityEngine;
 
 /// <summary>
 /// A member's value as the browser sees it, and back again.
@@ -13,7 +12,8 @@ using UnityEngine;
 /// parsing Unity's <c>ToString</c> forms.
 ///
 /// The types handled here are the ones <see cref="MemberDescriptor.Describe"/> gives a widget to and
-/// <c>Controllable.SetFieldProp</c> can write, and the three lists have to keep agreeing.
+/// <c>Controllable.SetFieldProp</c> can write; the vectors and colours among them come from
+/// <c>OCFValueTypes</c>, so only the scalars are listed twice.
 /// Inbound values are handed back as the <c>List&lt;object&gt;</c> that <c>SetFieldProp</c> takes, so
 /// clamping, read-only refusal and write-through all stay where they already are.
 /// </remarks>
@@ -38,43 +38,15 @@ public static class WebValueCodec
         if (type == typeof(bool)) return WebJson.Bool((bool)value);
         if (type == typeof(string)) return WebJson.Quote(value as string);
 
-        if (type == typeof(Color))
-        {
-            var color = (Color)value;
-            return WebJson.Array(color.r, color.g, color.b, color.a);
-        }
+        //Every vector and colour is an array of its components, read from OCF's table.
+        var shape = OCFValueTypes.For(type);
+        if (shape == null || value == null)
+            return null;
 
-        if (type == typeof(Vector2))
-        {
-            var v = (Vector2)value;
-            return WebJson.Array(v.x, v.y);
-        }
+        var components = new float[shape.Count];
+        shape.ToFloats(value, components);
 
-        if (type == typeof(Vector2Int))
-        {
-            var v = (Vector2Int)value;
-            return WebJson.Array(v.x, v.y);
-        }
-
-        if (type == typeof(Vector3))
-        {
-            var v = (Vector3)value;
-            return WebJson.Array(v.x, v.y, v.z);
-        }
-
-        if (type == typeof(Vector3Int))
-        {
-            var v = (Vector3Int)value;
-            return WebJson.Array(v.x, v.y, v.z);
-        }
-
-        if (type == typeof(Vector4))
-        {
-            var v = (Vector4)value;
-            return WebJson.Array(v.x, v.y, v.z, v.w);
-        }
-
-        return null;
+        return WebJson.Array(components);
     }
 
     #endregion
@@ -143,13 +115,13 @@ public static class WebValueCodec
             return true;
         }
 
-        var components = ComponentCount(type);
-        if (components == 0)
+        //A vector or colour is read to the component count OCF's table declares, and refused below the
+        //fewest it accepts - three for a colour, whose alpha SetFieldProp fills with 1.
+        var shape = OCFValueTypes.For(type);
+        if (shape == null)
             return false;
 
-        //A three-component colour is the one short form accepted: SetFieldProp fills alpha with 1.
-        var minimum = type == typeof(Color) ? 3 : components;
-        return TryReadNumbers(json, minimum, components, out values);
+        return TryReadNumbers(json, shape.MinValues, shape.Count, out values);
     }
 
     static bool TryReadNumbers(object json, int minimum, int maximum, out List<object> values)
@@ -172,16 +144,6 @@ public static class WebValueCodec
 
         values = read;
         return true;
-    }
-
-    /// <summary>How many numbers a vector or colour carries; 0 for anything else.</summary>
-    public static int ComponentCount(Type type)
-    {
-        if (type == typeof(Vector2) || type == typeof(Vector2Int)) return 2;
-        if (type == typeof(Vector3) || type == typeof(Vector3Int)) return 3;
-        if (type == typeof(Vector4) || type == typeof(Color)) return 4;
-
-        return 0;
     }
 
     #endregion
