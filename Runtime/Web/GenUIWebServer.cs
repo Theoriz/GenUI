@@ -29,7 +29,7 @@ public class GenUIWebServer : MonoBehaviour
     public bool enableWebServer = false;
 
     [Tooltip("Port the browser connects to: http://<this machine's IP>:<port>.")]
-    public int port = 8080;
+    public int port = 6080;
 
     [Tooltip("Log connections and the messages they send.")]
     public bool showDebug = false;

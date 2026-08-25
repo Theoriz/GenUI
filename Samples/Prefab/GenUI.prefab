@@ -340,7 +340,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enableWebServer: 0
-  port: 8080
+  port: 6080
   showDebug: 0
 --- !u!1 &1583843473221896
 GameObject:

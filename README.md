@@ -148,7 +148,7 @@ It is also possible to load a specific file via the OSC method "ControllableLoad
 
 ## Web mirror
 
-The panel can also be served to a browser, so a phone or a laptop on the same network drives the same values. On the GenUI object, tick **Enable Web Server** on the **GenUI Web Server** component, press Play, and open `http://<the machine's IP>:8080` — the port is printed in the Console at start. The page needs no internet connection.
+The panel can also be served to a browser, so a phone or a laptop on the same network drives the same values. On the GenUI object, tick **Enable Web Server** on the **GenUI Web Server** component, press Play, and open `http://<the machine's IP>:6080` — the port is printed in the Console at start. The page needs no internet connection.
 
 Panel, browsers and the target script stay in sync in all directions: whatever changes anywhere shows everywhere.
 
