@@ -7,7 +7,7 @@ using UnityEngine;
 /// A <see cref="Controllable"/> mirrors one target script, and these two members live on a second one
 /// (<see cref="GenUIWebServer"/>). They are declared <c>selfBound</c> so OCF does not look for them on
 /// <c>controllableTargetScript</c>, and both directions are wired here: the write-through in
-/// <see cref="OnUiValueChanged"/>, the read-back in <see cref="PollTargetScript"/>.
+/// <see cref="OnExternalValueChanged"/>, the read-back in <see cref="PollTargetScript"/>.
 ///
 /// This exists so the web server's options sit in the GenUI panel rather than in a panel of their own.
 /// It is deliberately a one-off for this panel: GenUI has no general mechanism for hosting one
@@ -60,7 +60,7 @@ public class GenUIMasterControllable : ControllableMasterControllable
 
     #region Web server members
 
-    public override void OnUiValueChanged(string name)
+    public override void OnExternalValueChanged(string name)
     {
         //Every write route - UI, OSC, preset, the web mirror itself - ends here, so this is the one
         //place the value has to reach the second script.
@@ -79,7 +79,7 @@ public class GenUIMasterControllable : ControllableMasterControllable
             }
         }
 
-        base.OnUiValueChanged(name);
+        base.OnExternalValueChanged(name);
     }
 
     protected override void PollTargetScript()

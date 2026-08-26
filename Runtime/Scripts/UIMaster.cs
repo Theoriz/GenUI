@@ -593,7 +593,7 @@ public class UIMaster : MonoBehaviour
             }
 
             if (isGlobalPresetPanel &&
-                Array.IndexOf(ControllableMasterControllable.GlobalActionMethodNames, button.Method.Name) >= 0)
+                Array.IndexOf(GenUIPanelSettings.GlobalActionMethodNames, button.Method.Name) >= 0)
             {
                 button.transform.SetParent(globalActionHolder);
             }

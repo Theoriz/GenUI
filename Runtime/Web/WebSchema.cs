@@ -236,7 +236,7 @@ public static class WebSchema
             if (Array.IndexOf(ControllableMasterControllable.AllPresetMethodNames, method.Name) >= 0)
                 return "allPreset";
 
-            if (Array.IndexOf(ControllableMasterControllable.GlobalActionMethodNames, method.Name) >= 0)
+            if (Array.IndexOf(GenUIPanelSettings.GlobalActionMethodNames, method.Name) >= 0)
                 return "globalAction";
         }
 

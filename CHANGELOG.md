@@ -9,11 +9,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Every exposed member and every parameterless exposed method is drawn, since OCF 3.0.0 dropped `showInUI`.
+- A dropdown re-reads its entries as it opens, so a list that changed while the app runs is up to date.
+- `GlobalActionMethodNames`, which groups the global buttons into their row, moved from OCF's `ControllableMasterControllable` to `GenUIPanelSettings`.
 - Requires OCF 3.0.0.
 
 ### Fixed
 
 - The browser mirror insets its controls inside their rows, matching the panel's spacing.
+- A dropdown whose value is not one of its entries shows that value as a trailing entry, instead of the first one.
 
 ## [3.4.0] - 2026-08-26
 

@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Reflection;
 using NUnit.Framework;
 using Theoriz.GenUI.Editor;
 using UnityEditor;
@@ -11,6 +12,9 @@ namespace Theoriz.GenUI.Tests.Editor
     /// have to keep holding: a controllable without one still draws exactly as it did (which is what
     /// makes the component optional rather than required), and adding one preserves the colour the
     /// panel already had rather than resetting it to white.
+    ///
+    /// The class also owns the layout constants both renderers read, so the name sets that group the
+    /// global buttons into their rows are pinned here too.
     /// </summary>
     public class GenUIPanelSettingsTests
     {
@@ -165,6 +169,65 @@ namespace Theoriz.GenUI.Tests.Editor
             {
                 Object.DestroyImmediate(other);
             }
+        }
+
+        #endregion
+
+        #region Global button rows
+
+        static string[] ParameterlessOCFMethodNames(System.Type type)
+        {
+            return type.GetMethods(BindingFlags.Instance | BindingFlags.Public)
+                .Where(m => System.Attribute.GetCustomAttribute(m, typeof(OCFMethod)) != null)
+                .Where(m => m.GetParameters().Length == 0)
+                .Select(m => m.Name)
+                .ToArray();
+        }
+
+        /// <summary>
+        /// Dropping a name from this set does not fail anywhere else — the button simply stops being
+        /// reparented into its row at the top of the panel and reappears in the body, which is easy
+        /// to miss.
+        /// </summary>
+        [Test]
+        public void GlobalActionMethodNames_MatchesTheDocumentedSet()
+        {
+            CollectionAssert.AreEquivalent(
+                new[] { "ControllableOpenPresetsFolder" },
+                GenUIPanelSettings.GlobalActionMethodNames);
+        }
+
+        /// <summary>
+        /// The set names OCF methods that GenUI does not own, so a rename on OCF's side would leave
+        /// the button silently ungrouped rather than failing to compile.
+        /// </summary>
+        [Test]
+        public void GlobalActionMethodNames_AllExist_OnControllableMasterControllable()
+        {
+            var declared = ParameterlessOCFMethodNames(typeof(ControllableMasterControllable));
+
+            foreach (var name in GenUIPanelSettings.GlobalActionMethodNames)
+            {
+                Assert.Contains(name, declared,
+                    "GenUIPanelSettings.GlobalActionMethodNames lists '" + name +
+                    "', but no parameterless [OCFMethod] by that name exists on ControllableMasterControllable.");
+            }
+        }
+
+        /// <summary>
+        /// CleanGeneratedUI tests each set in turn and reparents on every match, so a name in both
+        /// would be moved twice and land in whichever row is checked last.
+        /// </summary>
+        [Test]
+        public void GlobalMethodNameSets_DoNotOverlap()
+        {
+            CollectionAssert.IsEmpty(
+                ControllableMasterControllable.AllPresetMethodNames
+                    .Intersect(GenUIPanelSettings.GlobalActionMethodNames));
+
+            CollectionAssert.IsEmpty(
+                Controllable.PresetMethodNames
+                    .Intersect(GenUIPanelSettings.GlobalActionMethodNames));
         }
 
         #endregion

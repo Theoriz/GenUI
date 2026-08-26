@@ -9,7 +9,7 @@ This plugin allows you to simply create a UI for your application, exposing scri
 |---|---|
 | **Unity 2022.3** or later | Set by the Input System dependency below. |
 | **com.unity.inputsystem** | No fallback to the legacy input backend, so set **Project Settings > Player > Active Input Handling** to *Input System Package* or *Both*. |
-| [**com.theoriz.ocf**](https://github.com/Theoriz/OCF) 2.4.0 or later | GenUI is the UI layer on top of OCF; the control model, OSC addressing and presets all live there. |
+| [**com.theoriz.ocf**](https://github.com/Theoriz/OCF) 3.0.0 or later | GenUI is the UI layer on top of OCF; the control model, OSC addressing and presets all live there. |
 | [**com.theoriz.unityosc**](https://github.com/Theoriz/UnityOSC) 1.3.0 or later | OCF's transport. Earlier versions still work but declare Unity 2019.4. |
 
 The packages declare no UPM `dependencies`, so nothing installs them for you and nothing warns you when a version is too old — install all three, in the order below.
@@ -136,6 +136,8 @@ A method without parameters shows as a button in the UI. A method with parameter
 
 To pick a value from a list of strings, keep the `List<string>` on your script and point a string member at it by name with [OCFExposed(targetList = "myList")]. It renders as a dropdown that writes the selected entry into that member.
 
+The entries are re-read each time the dropdown opens, so a list that changed while the app runs is up to date. If the member holds a value the list does not offer — your script assigned it, or the entry has since gone — the dropdown shows that value as a trailing entry.
+
 See [Exposing a list](https://github.com/Theoriz/OCF#exposing-a-list) in the OCF documentation for a full example.
 
 ## OSC Control
@@ -170,11 +172,11 @@ It is also possible to load a specific file via the OSC method "ControllableLoad
 
 ### Where presets are stored
 
-Presets go next to the application by default. The **Controllable Master** component on the GenUI object has two fields to change that:
+Presets go under the Documents directory by default. The **Controllable Master** component on the GenUI object has two fields to change that:
 
 | Field | Default | Effect |
 |---|---|---|
-| `Use Documents Directory` | on | Tick to keep presets under `Documents/<product name>/Presets` instead. |
+| `Use Documents Directory` | on | Presets live in `Documents/<product name>/Presets`. Untick to keep them next to the application instead. |
 | `Custom Preset Directory` | empty | An absolute path to keep presets in, overriding the above. A relative path is rejected with an error and the default is used. |
 
 The `-presetsPath "<absolute path>"` command-line argument wins over both. See [Where presets are stored](https://github.com/Theoriz/OCF#where-presets-are-stored) in the OCF documentation for the full folder layout.

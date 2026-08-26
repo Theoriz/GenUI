@@ -72,6 +72,10 @@ public class DropdownUI : ControllableUI
         template.gameObject.SetActive(false);
 
         UIFactory.AddMouseEvent(rect.gameObject, this);
+
+        //The press, not the click: the Dropdown clones its options into the open list on the click, so
+        //this is the last moment the entries can still be refreshed for the list about to be shown.
+        rect.gameObject.AddComponent<PressNotifier>().Pressed = RefreshBeforeOpening;
     }
 
     RectTransform BuildTemplate(Transform parent, out Text itemText)
@@ -184,10 +188,7 @@ public class DropdownUI : ControllableUI
 
         _label.text = ParseNameString(activeElement.Name);
 
-        _dropdown.AddOptions(GetListEntries());
-        //SetValueWithoutNotify: only a genuine user selection should fire onValueChanged (which loads
-        //the selected preset). Programmatic updates here and in HandleTargetChange must not.
-        _dropdown.SetValueWithoutNotify(Mathf.Max(0, GetSelectedListIndex()));
+        SyncSelection();
         _dropdown.onValueChanged.AddListener((value) =>
         {
             RecordUndo();
@@ -217,8 +218,7 @@ public class DropdownUI : ControllableUI
 
         _label.text = ParseNameString(activeElement.Name);
 
-        _dropdown.AddOptions(_enumNames.ToList());
-        _dropdown.SetValueWithoutNotify(Mathf.Max(0, GetSelectedEnumIndex()));
+        SyncSelection();
         _dropdown.onValueChanged.AddListener((value) =>
         {
             RecordUndo();
@@ -267,21 +267,59 @@ public class DropdownUI : ControllableUI
         return Array.IndexOf(_enumValues, Property.GetValue(LinkedControllable));
     }
 
+    //Rebuilds the options and points the dropdown at the current value. The entries themselves can have
+    //changed - controllablePresetList grows every time a preset is saved - and the value can sit outside
+    //them: a list can shrink under a held value (a preset file deleted), and a target script can assign
+    //an enum value no member defines. Unity's Dropdown.value setter clamps to [0, count-1] whenever there
+    //are options, so an off-list value would silently display as the first entry; it is appended as a
+    //trailing option and selected instead, so the widget shows what the field actually holds.
+    void SyncSelection()
+    {
+        //A copy: GetListEntries hands back the live List<string>, which the trailing entry must not join.
+        var options = enumType != null ? _enumNames.ToList() : new List<string>(GetListEntries());
+        int index = enumType != null ? GetSelectedEnumIndex() : GetSelectedListIndex();
+
+        if (index < 0)
+        {
+            var current = Property.GetValue(LinkedControllable);
+            string label = current == null ? "" : current.ToString();
+            if (!string.IsNullOrEmpty(label))
+            {
+                options.Add(label);
+                index = options.Count - 1;
+            }
+        }
+
+        _dropdown.ClearOptions();
+        _dropdown.AddOptions(options);
+        //SetValueWithoutNotify: only a genuine user selection should fire onValueChanged (which loads
+        //the selected preset). Programmatic updates must not.
+        _dropdown.SetValueWithoutNotify(Mathf.Max(0, index));
+    }
+
+    /// <summary>
+    /// Re-reads the entries as the dropdown is about to open, so what it shows is what the list holds
+    /// now - a preset saved or deleted outside the app included.
+    /// </summary>
+    /// <remarks>
+    /// An enum's members cannot change, so only the list route asks. The owner is asked to resync
+    /// first: entries can live outside the process, and only it knows where to look.
+    /// </remarks>
+    void RefreshBeforeOpening()
+    {
+        if (LinkedControllable == null || enumType != null)
+            return;
+
+        LinkedControllable.RefreshTargetList(TargetListName);
+        SyncSelection();
+    }
+
     public override void HandleTargetChange(string name)
     {
         if (name != Property.Name && !String.IsNullOrEmpty(name))
             return;
 
-        if (enumType != null)
-        {
-            _dropdown.SetValueWithoutNotify(Mathf.Max(0, GetSelectedEnumIndex()));
-            return;
-        }
-
-        //The entries themselves can have changed - controllablePresetList grows every time a preset is saved.
-        _dropdown.ClearOptions();
-        _dropdown.AddOptions(GetListEntries());
-        _dropdown.SetValueWithoutNotify(Mathf.Max(0, GetSelectedListIndex()));
+        SyncSelection();
     }
 
     #endregion

@@ -89,12 +89,20 @@ public class GenUIPanelSettings : MonoBehaviour
 
     #endregion
 
-    #region Panel order
+    #region The global panel and the panel order
 
     /// <summary>
     /// The global panel, which stays on top whatever its priority.
     /// </summary>
     public const string GlobalPanelId = "GenUI";
+
+    /// <summary>
+    /// The global panel's buttons that are not preset operations, by name. Both renderers give them
+    /// their own row under the preset row rather than squeezing them in beside Save All, because
+    /// their labels are too long to share a row. Every name must be a parameterless
+    /// <c>[OCFMethod]</c> on <see cref="ControllableMasterControllable"/>.
+    /// </summary>
+    public static readonly string[] GlobalActionMethodNames = { "ControllableOpenPresetsFolder" };
 
     /// <summary>
     /// The order panels are drawn in: the global panel first, then by ascending priority, then by ID.
