@@ -146,6 +146,17 @@ For example : "/OCF/id/method" or "/OCF/id/floatProperty 1.5". By default the id
 > [!TIP]
 > You can copy the OSC Control Address of any exposed parameter by right clicking anywhere on its row.
 
+### The input port
+
+GenUI listens on port 6001. If another application already holds it, the **Controllable Master** component on the GenUI object retries on the next port up:
+
+| Field | Default | Effect |
+|---|---|---|
+| `Incremental Connect` | on | If the input port is busy, increment it and retry. Uncheck to fail on 6001 instead. |
+| `Max Connect Attempts` | 60 | How many ports to try before giving up with a warning in the Console. |
+
+The port actually opened is printed in the Console at start, and advertised over Zeroconf/Bonjour, so send your OSC there rather than assuming 6001 if you use Incremental Connect.
+
 ## Presets
 This plugin comes with a preset system, you can save the state of a "Controllable" script. It saves each property to a file that can be loaded later so that you can create different settings for your script. To use it, click "Save", then simply select a preset in the dropdown menu — selecting it loads it immediately.
 

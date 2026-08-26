@@ -281,7 +281,7 @@ MonoBehaviour:
   OSCReceiverName: OCF
   RootOSCAddress: OCF
   IncrementalConnect: 1
-  maxConnectAttempts: 100
+  maxConnectAttempts: 60
   IsConnected: 0
   IPAddress: 
   useDocumentsDirectory: 1

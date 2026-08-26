@@ -19,6 +19,10 @@ what has no token of its own is written here, and each one says where its value 
   /* The 9-sliced sprites become rounded rectangles; see the deviations in the README. */
   --genui-corner-radius: 3px;
 
+  /* The transparent margin those sprites keep inside their rect, which is what separates one row's
+     control from the next in the panel - a CSS box has none, so the drawn controls are inset by it. */
+  --genui-control-inset: 1px;
+
   --genui-page-background: #101010;
 }
 
@@ -146,6 +150,14 @@ body {
   text-overflow: ellipsis;
 }
 
+/* Flex rather than block, so an inset control is placed by its margins rather than on the text
+   baseline an inline-block would sit on. */
+.row > .control,
+.slider-value,
+.button-row {
+  display: flex;
+}
+
 .row > .control {
   position: absolute;
   top: 0;
@@ -202,6 +214,18 @@ select {
   padding: 0 var(--genui-input-text-inset-x);
 }
 
+/* A panel row's controls draw inside the row, not across it; the popups keep their own spacing and
+   are left alone. Width is ignored where the control is a flex item, and the margin is what places
+   it there. */
+.row input,
+.row select,
+.button-row > button,
+.button-strip > button {
+  width: calc(100% - var(--genui-control-inset) * 2);
+  height: calc(100% - var(--genui-control-inset) * 2);
+  margin: var(--genui-control-inset);
+}
+
 input:hover:enabled,
 select:hover:enabled,
 button:hover:enabled {
@@ -240,10 +264,10 @@ select:disabled {
 
 .toggle-box {
   position: absolute;
-  top: 0;
-  bottom: 0;
-  left: var(--genui-label-width-ratio);
-  width: var(--genui-toggle-box-width);
+  top: var(--genui-control-inset);
+  bottom: var(--genui-control-inset);
+  left: calc(var(--genui-label-width-ratio) + var(--genui-control-inset));
+  width: calc(var(--genui-toggle-box-width) - var(--genui-control-inset) * 2);
   border-radius: var(--genui-corner-radius);
   background: var(--genui-control-normal);
   cursor: pointer;
@@ -362,10 +386,10 @@ select:disabled {
 
 .swatch {
   position: absolute;
-  top: 0;
-  bottom: 0;
-  left: var(--genui-label-width-ratio);
-  right: 0;
+  top: var(--genui-control-inset);
+  bottom: var(--genui-control-inset);
+  left: calc(var(--genui-label-width-ratio) + var(--genui-control-inset));
+  right: var(--genui-control-inset);
   border-radius: var(--genui-corner-radius);
   cursor: pointer;
 }
