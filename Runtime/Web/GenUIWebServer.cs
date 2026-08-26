@@ -349,8 +349,7 @@ public class GenUIWebServer : MonoBehaviour
         if (!controllable.controllableMethods.TryGetValue(method, out info))
             return;
 
-        //Only what the panel would draw a button for: a method hidden from the UI, or one taking
-        //arguments, has no press to mirror.
+        //Only what the panel would draw a button for: a method taking arguments has no press to mirror.
         if (!WebSchema.IsButton(info))
             return;
 

@@ -478,9 +478,6 @@ public class UIMaster : MonoBehaviour
             var propertyType = property.Value.FieldType;
             OCFProperty attribute = Attribute.GetCustomAttribute(property.Value, typeof(OCFProperty)) as OCFProperty;
 
-            //Check if needs to be in UI
-            if (!attribute.showInUI) continue;
-
             if (showDebug)
                 Debug.Log("[UI] Adding control for (" + newControllable.GetType() + ") : " + property.Value.Name + " of type : " + propertyType.ToString());
 
@@ -706,12 +703,6 @@ public class UIMaster : MonoBehaviour
 
     private void CreateButton(Transform parent, Controllable target, ClassMethodInfo method)
     {
-        //Methods marked [OCFMethod(showInUI = false)] stay OSC-callable but get no button. The
-        //options come from ClassMethodInfo, which knows which method they were declared on.
-        var ocfMethod = method.Options;
-        if (ocfMethod != null && !ocfMethod.showInUI)
-            return;
-
         //As we can't expose parameter in UI, ignore methods with arguments
         if (method.methodInfo.GetParameters().Length == 0)
         {

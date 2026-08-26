@@ -10,10 +10,9 @@ using System.Text;
 /// </summary>
 /// <remarks>
 /// Nothing here decides which widget a member gets - that is <c>MemberDescriptor.Describe</c>, the
-/// same call <c>UIMaster.CreateUI</c> builds from, so the two interfaces cannot disagree. The two
-/// checks that are not a member's own (a member's <c>showInUI</c>, and a method's <c>showInUI</c> and
-/// parameter count) are repeated here because methods get no descriptor, exactly as
-/// <c>UIMaster.CreateButton</c> does.
+/// same call <c>UIMaster.CreateUI</c> builds from, so the two interfaces cannot disagree. Whether a
+/// method gets a button is repeated here because a method gets no descriptor, on the same terms as
+/// <c>UIMaster.CreateButton</c>.
 ///
 /// A member the panel draws nothing for is still listed, as kind <c>None</c>: its header and tooltip
 /// are drawn either way, and leaving it out would move every row that follows it.
@@ -82,7 +81,7 @@ public static class WebSchema
             foreach (var member in controllable.controllableFields)
             {
                 var attribute = Attribute.GetCustomAttribute(member.Value, typeof(OCFProperty)) as OCFProperty;
-                if (attribute == null || !attribute.showInUI)
+                if (attribute == null)
                     continue;
 
                 if (!first) json.Append(',');
@@ -141,10 +140,6 @@ public static class WebSchema
     /// <summary>Whether a method gets a button, on the same terms as <c>UIMaster.CreateButton</c>.</summary>
     public static bool IsButton(ClassMethodInfo method)
     {
-        var attribute = method.Options;
-        if (attribute != null && !attribute.showInUI)
-            return false;
-
         //A method taking arguments has no control to supply them from.
         return method.methodInfo.GetParameters().Length == 0;
     }

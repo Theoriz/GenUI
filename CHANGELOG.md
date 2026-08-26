@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [4.0.0] - 2026-08-26
+
+### Changed
+
+- Every exposed member and every parameterless exposed method is drawn, since OCF 3.0.0 dropped `showInUI`.
+- Requires OCF 3.0.0.
+
+### Fixed
+
+- The browser mirror insets its controls inside their rows, matching the panel's spacing.
+
 ## [3.4.0] - 2026-08-26
 
 ### Changed

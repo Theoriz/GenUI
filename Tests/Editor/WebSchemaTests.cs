@@ -16,16 +16,10 @@ namespace Theoriz.GenUI.Tests.Editor
         public string chosen = "two";
         public List<string> choices = new List<string> { "one", "two" };
         public Quaternion rotation;
-        public float hidden;
         public float locked;
 
         public void Ping() { }
         public void WithArgument(int amount) { }
-
-        //Declared here as well as on the mirror, which is what a generated mirror looks like: the
-        //options stay readable through ClassMethodInfo even though the target's method is the one
-        //that gets invoked.
-        public void HiddenMethod() { }
     }
 
     /// <summary>
@@ -46,12 +40,10 @@ namespace Theoriz.GenUI.Tests.Editor
         [OCFProperty] public SchemaMode mode;
         [OCFProperty(targetList = "choices")] public string chosen;
         [OCFProperty] public Quaternion rotation;
-        [OCFProperty(showInUI = false)] public float hidden;
         [OCFProperty(readOnly = true)] public float locked;
 
         [OCFMethod] public void Ping() { }
         [OCFMethod] public void WithArgument(int amount) { }
-        [OCFMethod(showInUI = false)] public void HiddenMethod() { }
     }
 
     /// <summary>
@@ -194,12 +186,6 @@ namespace Theoriz.GenUI.Tests.Editor
             Assert.AreEqual(false, WebJson.Member(Member("speed"), "readOnly"));
         }
 
-        [Test]
-        public void AMemberHiddenFromTheUI_IsNotListed()
-        {
-            Assert.IsNull(Member("hidden"));
-        }
-
         //Listed, but as nothing to draw: its header and tooltip are still the panel's, and leaving it
         //out would shift every row after it.
         [Test]
@@ -221,9 +207,8 @@ namespace Theoriz.GenUI.Tests.Editor
             Assert.AreEqual("Ping", Text(Method("Ping"), "label"));
         }
 
-        //Same two exclusions UIMaster.CreateButton makes: no arguments, and not hidden from the UI.
+        //The same exclusion UIMaster.CreateButton makes: a method taking arguments gets no button.
         [TestCase("WithArgument")]
-        [TestCase("HiddenMethod")]
         [TestCase("ControllableLoadWithName")]
         public void AMethodWithNoButton_IsNotListed(string method)
         {
