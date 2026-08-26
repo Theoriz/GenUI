@@ -16,6 +16,9 @@ Unity widgets keep with SetValueWithoutNotify and SliderUI._updating.
   var PRESET_MEMBER = "controllableCurrentPreset";
   var RECONNECT_MS = 1000;
 
+  //How far a press has to travel before it is read as a drag rather than a click.
+  var DRAG_THRESHOLD = 3;
+
   var statusEl = document.getElementById("status");
   var tokensEl = document.getElementById("genui-tokens");
   var panelsEl = document.getElementById("panels");
@@ -27,6 +30,16 @@ Unity widgets keep with SetValueWithoutNotify and SliderUI._updating.
 
   //First segment of every OSC address, from the schema: ControllableMaster's RootOSCAddress.
   var oscRoot = "";
+
+  //What a label drag is worth per pixel, from the schema: DragValueUI's own constants, so the
+  //browser scrubs at the rate the panel does. Defaults only cover a schema from an older server.
+  var scrub = {
+    rangePixels: 400,
+    floatPerPixel: 0.05,
+    pixelsPerIntStep: 10,
+    coarse: 10,
+    fine: 0.1
+  };
 
   //"id/member" -> the row that draws it. The key is the OSC address's tail, which is how the server
   //keys a values message too.
@@ -100,6 +113,9 @@ Unity widgets keep with SetValueWithoutNotify and SliderUI._updating.
   function applySchema(message) {
     tokensEl.textContent = message.css || "";
     oscRoot = message.oscRoot || "";
+
+    if (message.scrub)
+      scrub = message.scrub;
 
     rows = {};
     values = {};
@@ -273,8 +289,8 @@ Unity widgets keep with SetValueWithoutNotify and SliderUI._updating.
 
     var apply;
     switch (member.kind) {
-      case "Slider": apply = buildSlider(row, key, member); break;
-      case "Input": apply = buildInput(row, key, member); break;
+      case "Slider": apply = buildSlider(row, key, member, label); break;
+      case "Input": apply = buildInput(row, key, member, label); break;
       case "Toggle": apply = buildToggle(row, key, member); break;
       case "Dropdown": apply = buildDropdown(row, key, member); break;
       case "Color": apply = buildColor(row, key, member); break;
@@ -313,7 +329,7 @@ Unity widgets keep with SetValueWithoutNotify and SliderUI._updating.
     return button;
   }
 
-  function buildInput(row, key, member) {
+  function buildInput(row, key, member, label) {
     //A string member and a float one are both kind Input; what tells them apart is the value's own
     //JSON type, which is also what has to be sent back.
     var isText = typeof member.value === "string";
@@ -325,12 +341,17 @@ Unity widgets keep with SetValueWithoutNotify and SliderUI._updating.
       return isText ? input.value : readNumber(input, member.isFloat);
     });
 
+    //Only the int and float widgets scrub, as InputFieldUI.GetScrubTargets answers: a string has
+    //nothing to scrub to.
+    if (!isText)
+      bindScrub(label, input, member, { isInt: member.isFloat === false });
+
     return function (value) {
       writeField(input, format(value));
     };
   }
 
-  function buildSlider(row, key, member) {
+  function buildSlider(row, key, member, label) {
     var slider = element("div", "slider", row);
     element("div", "slider-track", slider);
     var fill = element("div", "slider-fill", slider);
@@ -357,6 +378,15 @@ Unity widgets keep with SetValueWithoutNotify and SliderUI._updating.
 
     bindCommit(input, key, member, function () {
       return clamp(readNumber(input, member.isFloat), member.min, member.max);
+    });
+
+    //The track is redrawn as the label is dragged rather than on the value coming back, so the
+    //handle keeps up with the pointer.
+    bindScrub(label, input, member, {
+      isInt: member.isFloat === false,
+      min: member.min,
+      max: member.max,
+      onScrub: draw
     });
 
     return function (value) {
@@ -451,7 +481,8 @@ Unity widgets keep with SetValueWithoutNotify and SliderUI._updating.
 
     for (var i = 0; i < axes.length; i++) {
       var cell = element("div", "axis", control);
-      element("span", "letter", cell).textContent = axes[i];
+      var letter = element("span", "letter", cell);
+      letter.textContent = axes[i];
 
       var input = field(member, isFloat);
       cell.appendChild(input);
@@ -459,6 +490,9 @@ Unity widgets keep with SetValueWithoutNotify and SliderUI._updating.
 
       //Editing one axis sends the whole vector, as VectorUIBase does: SetFieldProp takes all of it.
       bindCommit(input, key, member, readAll);
+
+      //Each axis scrubs from its own letter, which is the label VectorUIBase pairs it with.
+      bindScrub(letter, input, member, { isInt: !isFloat });
     }
 
     return function (value) {
@@ -560,6 +594,178 @@ Unity widgets keep with SetValueWithoutNotify and SliderUI._updating.
 
     schemaAsked[reason] = true;
     send({ t: "schema" });
+  }
+
+  /* Scrubbing
+     ----------------------------------------------------------------------------------------- */
+
+  //Dragging a numeric member's label across scrubs its value, as DragValueUI does in the panel. The
+  //label, never the field: a handler on the field would scrub and select its text at once.
+  //`options` is { isInt, min, max, onScrub }, min and max only for a member that has a range.
+  function bindScrub(label, input, member, options) {
+    if (!label || member.readOnly)
+      return;
+
+    label.classList.add("scrub");
+
+    var pointerId = null;
+    var decided = false;
+    var scrubbing = false;
+
+    var pressX = 0;
+    var pressY = 0;
+    var startValue = 0;
+    var lastWritten = "";
+
+    //Not captured here: a drag that turns out to be vertical is still the page's to scroll, which is
+    //what OnBeginDrag forwarding to the ScrollRect does in the panel.
+    label.addEventListener("pointerdown", function (event) {
+      if (event.button !== 0)
+        return;
+
+      pointerId = event.pointerId;
+      decided = false;
+      scrubbing = false;
+
+      pressX = event.clientX;
+      pressY = event.clientY;
+      startValue = readNumber(input, true);
+      lastWritten = input.value;
+    });
+
+    label.addEventListener("pointermove", function (event) {
+      if (pointerId !== event.pointerId)
+        return;
+
+      //Measured from the press rather than from one move's delta, which is noisy at the threshold.
+      var travelled = event.clientX - pressX;
+      var vertical = event.clientY - pressY;
+
+      if (!decided) {
+        if (Math.abs(travelled) < DRAG_THRESHOLD && Math.abs(vertical) < DRAG_THRESHOLD)
+          return;
+
+        decided = true;
+        scrubbing = Math.abs(travelled) >= Math.abs(vertical);
+
+        if (!scrubbing) {
+          pointerId = null;
+          return;
+        }
+
+        label.setPointerCapture(event.pointerId);
+      }
+
+      event.preventDefault();
+
+      var value = startValue
+        + scrubDelta(travelled, options, event.shiftKey, event.ctrlKey || event.metaKey);
+
+      if (options.max !== undefined)
+        value = clamp(value, options.min, options.max);
+
+      var text = options.isInt ? String(Math.round(value)) : formatFloat(value);
+
+      //A press that has not moved far enough to change the value must not emit anything, or a
+      //stationary drag sends a message per move.
+      if (text === lastWritten)
+        return;
+
+      lastWritten = text;
+      input.value = text;
+
+      if (options.onScrub)
+        options.onScrub(parseFloat(text));
+
+      //The widget's own commit path, as raising onEndEdit is in the panel: clamping, and a vector's
+      //other axes, come from bindCommit unchanged.
+      input.dispatchEvent(new Event("change"));
+    });
+
+    label.addEventListener("pointerup", release);
+    label.addEventListener("pointercancel", release);
+
+    function release(event) {
+      if (pointerId !== event.pointerId)
+        return;
+
+      if (label.hasPointerCapture(event.pointerId))
+        label.releasePointerCapture(event.pointerId);
+
+      pointerId = null;
+      decided = false;
+      scrubbing = false;
+    }
+  }
+
+  //DragValueUI.ScrubDelta at the rates the schema carried. Nothing divides the travel here: a CSS
+  //pixel is the unit the page lays out in, where the panel has a canvas scale to undo.
+  function scrubDelta(pixels, options, coarse, fine) {
+    if (coarse)
+      pixels *= scrub.coarse;
+
+    if (fine)
+      pixels *= scrub.fine;
+
+    if (options.max !== undefined)
+      return pixels * (options.max - options.min) / scrub.rangePixels;
+
+    if (options.isInt)
+      return pixels / scrub.pixelsPerIntStep;
+
+    return pixels * scrub.floatPerPixel;
+  }
+
+  //Rounded where a double's own text would run to seventeen digits, which is not a value anyone
+  //asked for by dragging a label.
+  function formatFloat(value) {
+    return String(parseFloat(value.toFixed(5)));
+  }
+
+  /* Keyboard
+     ----------------------------------------------------------------------------------------- */
+
+  //Tab walks the editable member fields and wraps, as UIMaster.MoveFocus does - but only from inside
+  //one of them. From a button or a dropdown it stays the browser's own, so those keep their keyboard
+  //reach, and the popups' own fields keep theirs.
+  document.addEventListener("keydown", function (event) {
+    if (event.key !== "Tab" || event.altKey || event.ctrlKey || event.metaKey)
+      return;
+
+    var fields = collectInputFields();
+    var index = fields.indexOf(document.activeElement);
+    if (index < 0)
+      return;
+
+    event.preventDefault();
+
+    //Selecting the next field is all that is needed to commit the one being left: losing focus
+    //fires its change, which is what InputField.OnDeselect raising onEndEdit does.
+    var next = fields[nextIndex(index, fields.length, event.shiftKey)];
+    next.focus();
+    next.select();
+    next.scrollIntoView({ block: "nearest" });
+  });
+
+  //Document order is visual order, as the panel's hierarchy order is. Rebuilt per keypress rather
+  //than cached: panels come and go at runtime, and Tab is not a hot path.
+  function collectInputFields() {
+    var found = [];
+    var inputs = panelsEl.querySelectorAll("input");
+
+    for (var i = 0; i < inputs.length; i++) {
+      //Disabled is how a read-only member draws, and a folded panel's rows have no offsetParent:
+      //Tab passes over both, as it does in the panel.
+      if (!inputs[i].disabled && inputs[i].offsetParent !== null)
+        found.push(inputs[i]);
+    }
+
+    return found;
+  }
+
+  //UIMaster.NextIndex, for a field that is known to be in the list.
+  function nextIndex(current, count, backwards) {
+    return ((current + (backwards ? -1 : 1)) % count + count) % count;
   }
 
   /* Popups

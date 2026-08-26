@@ -32,6 +32,7 @@ public static class WebSchema
         var json = new StringBuilder();
         json.Append("{\"t\":\"schema\",\"css\":").Append(WebJson.Quote(GenUIStyle.ToCss()));
         json.Append(",\"oscRoot\":").Append(WebJson.Quote(OscRoot()));
+        json.Append(",\"scrub\":").Append(ScrubJson());
         json.Append(",\"controllables\":[");
 
         var first = true;
@@ -108,6 +109,24 @@ public static class WebSchema
     static string OscRoot()
     {
         return ControllableMaster.instance != null ? ControllableMaster.instance.RootOSCAddress : null;
+    }
+
+    /// <summary>
+    /// What a label drag is worth per pixel, straight from <c>DragValueUI</c>.
+    /// </summary>
+    /// <remarks>
+    /// Sent rather than named again in the client, so a rate changed in the panel changes in the
+    /// browser with it: the client has no test harness to catch the two drifting apart.
+    /// </remarks>
+    static string ScrubJson()
+    {
+        var json = new StringBuilder();
+        json.Append("{\"rangePixels\":").Append(WebJson.Number(DragValueUI.RangeDragPixels));
+        json.Append(",\"floatPerPixel\":").Append(WebJson.Number(DragValueUI.FloatUnitsPerPixel));
+        json.Append(",\"pixelsPerIntStep\":").Append(WebJson.Number(DragValueUI.PixelsPerIntStep));
+        json.Append(",\"coarse\":").Append(WebJson.Number(DragValueUI.CoarseMultiplier));
+        json.Append(",\"fine\":").Append(WebJson.Number(DragValueUI.FineMultiplier));
+        return json.Append('}').ToString();
     }
 
     /// <summary>Whether a method gets a button, on the same terms as <c>UIMaster.CreateButton</c>.</summary>

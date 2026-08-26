@@ -16,14 +16,17 @@ using UnityEngine.UI;
 [AddComponentMenu("")]
 public class DragValueUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
-    //A [Range] member crosses its whole span in this many screen pixels, so it feels like its slider.
-    const float RangeDragPixels = 400f;
-    //Unbounded members have no span to scale against, so they step at a fixed rate.
-    const float FloatUnitsPerPixel = 0.05f;
-    const float PixelsPerIntStep = 10f;
+    //Public because the web mirror scrubs at the same rate: WebSchema sends these to the browser
+    //rather than the client naming them again, so the two interfaces cannot drift apart.
 
-    const float CoarseMultiplier = 10f;
-    const float FineMultiplier = 0.1f;
+    //A [Range] member crosses its whole span in this many screen pixels, so it feels like its slider.
+    public const float RangeDragPixels = 400f;
+    //Unbounded members have no span to scale against, so they step at a fixed rate.
+    public const float FloatUnitsPerPixel = 0.05f;
+    public const float PixelsPerIntStep = 10f;
+
+    public const float CoarseMultiplier = 10f;
+    public const float FineMultiplier = 0.1f;
 
     ControllableUI _owner;
     InputField _field;

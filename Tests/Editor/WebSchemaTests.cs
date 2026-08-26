@@ -275,6 +275,20 @@ namespace Theoriz.GenUI.Tests.Editor
             CollectionAssert.Contains(ids, "Schema");
         }
 
+        //The browser scrubs a label at the panel's own rate because it is sent these, rather than
+        //naming them again in JavaScript where nothing would catch the two drifting apart.
+        [Test]
+        public void TheScrubRates_AreDragValueUIsOwnConstants()
+        {
+            var rates = WebJson.Member(WebJson.Parse(WebSchema.SchemaMessage()), "scrub");
+
+            Assert.AreEqual(DragValueUI.RangeDragPixels, Number(rates, "rangePixels"));
+            Assert.AreEqual(DragValueUI.FloatUnitsPerPixel, Number(rates, "floatPerPixel"));
+            Assert.AreEqual(DragValueUI.PixelsPerIntStep, Number(rates, "pixelsPerIntStep"));
+            Assert.AreEqual(DragValueUI.CoarseMultiplier, Number(rates, "coarse"));
+            Assert.AreEqual(DragValueUI.FineMultiplier, Number(rates, "fine"));
+        }
+
         //A controllable told to draw no panel has nothing to mirror either.
         [Test]
         public void AControllableWithNoPanel_IsLeftOutOfTheMessage()

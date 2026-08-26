@@ -154,6 +154,14 @@ body {
   right: 0;
 }
 
+/* A numeric member's label, and a vector axis's letter, scrub the value when dragged across.
+   pan-y leaves a vertical touch drag to the page, so only the sideways one is the scrub's. */
+.scrub {
+  cursor: ew-resize;
+  user-select: none;
+  touch-action: pan-y;
+}
+
 .header {
   display: flex;
   align-items: center;

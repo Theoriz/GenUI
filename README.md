@@ -154,15 +154,16 @@ The same two options sit in the GenUI panel and answer to OSC as `/OCF/GenUI/ena
 
 Panel, browsers and the target script stay in sync in all directions: whatever changes anywhere shows everywhere.
 
+Dragging a numeric member's label sideways scrubs its value there too, at the same rate and with the same Shift and Ctrl modifiers. On a phone, dragging a label up or down still scrolls the page.
+
 > [!WARNING]
 > There is no password and no HTTPS. Anyone who can reach that port can change every exposed value and press every button, so leave the option off unless you are on a network you trust.
 
 The browser is a mirror, not a copy. It draws the same rows from the same style values, with these differences:
 
-- No label scrubbing, Ctrl + Z or Tab traversal.
+- No Ctrl + Z.
+- Tab and Shift + Tab walk the fields once you are in one; from a button or a dropdown they move as your browser normally would.
 - Right-clicking a row shows its OSC control address ready to copy, rather than copying it.
-- Each browser keeps its own folded/unfolded panels.
-- Text falls back to your system font unless Roboto is installed, and a long member name is cut short with an ellipsis rather than shrunk.
 
 ## Advanced
 
