@@ -12,7 +12,11 @@ using UnityEngine;
 /// This exists so the web server's options sit in the GenUI panel rather than in a panel of their own.
 /// It is deliberately a one-off for this panel: GenUI has no general mechanism for hosting one
 /// controllable's rows inside another's.
+///
+/// The id this type reserves is the one <see cref="GenUIPanelSettings.ComparePanels"/> pins to the top
+/// of the stack, so no other Controllable can take that slot.
 /// </remarks>
+[OCFReservedId(GenUIPanelSettings.GlobalPanelId)]
 [RequireComponent(typeof(GenUIWebServer))]
 public class GenUIMasterControllable : ControllableMasterControllable
 {

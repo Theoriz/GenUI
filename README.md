@@ -90,7 +90,7 @@ To control the look of a Controllable's panel in GenUI, add a **GenUI Panel Sett
 
 The component is optional: a Controllable without one draws its panel with the defaults above, already colored from its ID.
 
-Panels are ordered by priority, lowest first, then alphabetically by ID; the GenUI panel always stays on top. The browser mirror follows the same order.
+Panels are ordered by priority, lowest first, then alphabetically by ID; the GenUI panel always stays on top. Its ID, `GenUI`, is reserved: a Controllable of your own asking for it is refused and left unregistered, so give it another ID and a low `panelPriority` if you want it near the top.
 
 ## Supported types
 You can expose the following types :

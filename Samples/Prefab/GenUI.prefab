@@ -261,7 +261,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _autoHideCursor: 1
-  HideUIAtStart: 0
+  HideUIAtStart: 1
   enableUIMovement: 1
   toggleUIKey: 94
   resetUIKey: 95
@@ -344,6 +344,7 @@ MonoBehaviour:
   barColor: {r: 0.877358, g: 0.2163677, b: 0.2027857, a: 1}
   usePanel: 1
   closePanelAtStart: 0
+  panelPriority: 0
 --- !u!1 &1583843473221896
 GameObject:
   m_ObjectHideFlags: 0

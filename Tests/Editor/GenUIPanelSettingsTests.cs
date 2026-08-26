@@ -133,6 +133,20 @@ namespace Theoriz.GenUI.Tests.Editor
             Assert.Greater(GenUIPanelSettings.ComparePanels("Alpha", -1000, GenUIPanelSettings.GlobalPanelId, 0), 0);
         }
 
+        /// <summary>
+        /// The pinned slot is only GenUI's if no other Controllable can register under that id, which
+        /// is what [OCFReservedId] on GenUIMasterControllable buys. Nothing else fails when the
+        /// attribute is dropped: the panel simply becomes takeable again.
+        /// </summary>
+        [Test]
+        public void TheGlobalPanelId_IsReservedForGenUIMasterControllable()
+        {
+            System.Type owner;
+            Assert.IsTrue(ControllableMaster.TryGetIdOwner(GenUIPanelSettings.GlobalPanelId, out owner),
+                "'" + GenUIPanelSettings.GlobalPanelId + "' must be a reserved controllable id.");
+            Assert.AreEqual(typeof(GenUIMasterControllable), owner);
+        }
+
         [Test]
         public void ComparePanels_ReadsThePriorityOffTheComponent()
         {
