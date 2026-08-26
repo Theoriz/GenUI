@@ -24,7 +24,7 @@ public class UIMaster : MonoBehaviour
     [Header("Global settings")]
     [SerializeField] private bool _autoHideCursor = true;
 
-    public bool HideUIAtStart;
+    public bool HideUIAtStart = true;
     public bool enableUIMovement = true;
 
     [Header("Shortcuts")]

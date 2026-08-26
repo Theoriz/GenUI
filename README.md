@@ -3,8 +3,6 @@ Generative UI and OSC Control for Unity.
 
 This plugin allows you to simply create a UI for your application, exposing script sliders, input fields and methods. This UI is also fully controllable via OSC, and accessible locally via a web browser.
 
-![Demo](https://github.com/Theoriz/GenUI-Demo/blob/master/gif/genui.gif) 
-
 ## Requirements
 
 | Requirement | Notes |
@@ -65,7 +63,7 @@ Scaling is ignored while you are typing in an input field.
 2. Generate controllables for the scripts you want to control using the controllable generation described below.
 3. Run the scene, press F1 to toggle the UI.
 
-### Automatic Controllable Generation
+### Controllable Generation
 
 1. In your MonoBehaviour script, add the [OCFExposed] attribute to the fields, properties and methods you want to expose to the UI and OSC.
 
@@ -76,6 +74,16 @@ Scaling is ignored while you are typing in an input field.
 
 > [!TIP]
 > You can also generate a controllable directly from the project window by right-clicking on a script and choosing Generate Controllable Script.
+
+## Global settings
+
+On the GenUI object, the **UI Master** component holds the settings that apply to the whole interface.
+
+| Field | Default | Effect |
+|---|---|---|
+| `Auto Hide Cursor` | on | Hides the mouse cursor while the UI is hidden. Ignored in the Editor, where the cursor always stays visible. |
+| `Hide UI At Start` | on | Tick to start with the UI hidden; F1 still brings it up. |
+| `Enable UI Movement` | on | Uncheck to pin the UI in place, disabling the Ctrl + arrow shortcuts. Scaling and F2 keep working. |
 
 ## Panel settings
 
@@ -149,6 +157,17 @@ It is also possible to load a specific file via the OSC method "ControllableLoad
 /OCF/id/ControllableLoadWithName "myPreset.pst"
 ```
 
+### Where presets are stored
+
+Presets go next to the application by default. The **Controllable Master** component on the GenUI object has two fields to change that:
+
+| Field | Default | Effect |
+|---|---|---|
+| `Use Documents Directory` | on | Tick to keep presets under `Documents/<product name>/Presets` instead. |
+| `Custom Preset Directory` | empty | An absolute path to keep presets in, overriding the above. A relative path is rejected with an error and the default is used. |
+
+The `-presetsPath "<absolute path>"` command-line argument wins over both. See [Where presets are stored](https://github.com/Theoriz/OCF#where-presets-are-stored) in the OCF documentation for the full folder layout.
+
 ## Web mirror
 
 The panel can also be served to a browser, so a phone or a laptop on the same network drives the same values. On the GenUI object, tick **Enable Web Server** on the **GenUI Web Server** component, press Play, and open `http://<the machine's IP>:6080` — the port is printed in the Console at start. The page needs no internet connection. Ticking the option during Play starts and stops the server there and then, and editing the port restarts it on the new one — connected browsers have to be reloaded.
@@ -172,16 +191,6 @@ The browser is a mirror, not a copy. It draws the same rows from the same style 
 ### Changing the look
 
 The interface is built from code, not from prefabs. Every size and colour comes from `GenUIStyle`, and the sprites and fonts come from the `GenUIAssets` asset in `Resources`. Changing a row height, a tint or the font in one of those two places applies to every widget at once, and to the web mirror with it.
-
-### Handling your own OSC messages
-
-To handle your own OSC messages — anything not addressed to /OCF/ — subscribe to the receiver directly :
-
-```C#
-using UnityOSC;
-
-OSCMaster.Receivers["myReceiver"].messageReceived += (OSCMessage m) => Debug.Log(m.Address);
-```
 
 ### Reserved names
 
