@@ -646,20 +646,26 @@ public class UIMaster : MonoBehaviour
         else
             panel.Open();
 
-        //Order panels by alphabetical order
+        //Order the panels. The rule is GenUIPanelSettings', so the browser mirror orders identically.
+        //Sibling order is all there is to set: the scroll content lays its children out top to bottom.
         var panelIds = _panels.Keys.ToArray();
-        Array.Sort(panelIds);
+        Array.Sort(panelIds, (idA, idB) =>
+            GenUIPanelSettings.ComparePanels(idA, PanelPriority(idA), idB, PanelPriority(idB)));
 
         for(int i = 0; i < panelIds.Length; i++)
         {
             _panels[panelIds[i]].transform.SetAsLastSibling();
         }
+    }
 
-        //Set GenUI on top
-        if (_panels.ContainsKey("GenUI"))
-        {
-            _panels["GenUI"].transform.SetAsFirstSibling();
-        }
+    //A panel outliving its controllable would be a bug, since RemoveUI destroys it on unregistration,
+    //but ordering is not where that should throw.
+    private static int PanelPriority(string controllableId)
+    {
+        return ControllableMaster.RegisteredControllables.TryGetValue(controllableId, out var controllable)
+               && controllable != null
+            ? GenUIPanelSettings.PanelPriority(controllable)
+            : 0;
     }
 
     private void CreateHeaderText(Transform parent, Controllable target, string text)

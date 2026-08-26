@@ -86,8 +86,11 @@ To control the look of a Controllable's panel in GenUI, add a **GenUI Panel Sett
 | `barColor` | a color derived from the controllable's ID | Color of the panel's title bar. |
 | `usePanel` | on | Uncheck to give this controllable no panel at all. It stays controllable over OSC. |
 | `closePanelAtStart` | on | Uncheck to have the panel start open. |
+| `panelPriority` | 0 | Lower values sit higher in the stack. |
 
 The component is optional: a Controllable without one draws its panel with the defaults above, already colored from its ID.
+
+Panels are ordered by priority, lowest first, then alphabetically by ID; the GenUI panel always stays on top. The browser mirror follows the same order.
 
 ## Supported types
 You can expose the following types :
@@ -150,11 +153,11 @@ It is also possible to load a specific file via the OSC method "ControllableLoad
 
 The panel can also be served to a browser, so a phone or a laptop on the same network drives the same values. On the GenUI object, tick **Enable Web Server** on the **GenUI Web Server** component, press Play, and open `http://<the machine's IP>:6080` — the port is printed in the Console at start. The page needs no internet connection. Ticking the option during Play starts and stops the server there and then, and editing the port restarts it on the new one — connected browsers have to be reloaded.
 
-The same two options sit in the GenUI panel and answer to OSC as `/OCF/GenUI/enableWebServer` and `/OCF/GenUI/webServerPort`, so the server can be switched on while the app runs. They are saved in the GenUI panel's presets like any other value — loading a preset that has the server on will start it. They also appear in the browser, where switching the server off ends that browser's own connection.
+The same two options sit in the GenUI panel and answer to OSC as `/OCF/GenUI/enableWebServer` and `/OCF/GenUI/webServerPort`, so the server can be switched on while the app runs.
 
 Panel, browsers and the target script stay in sync in all directions: whatever changes anywhere shows everywhere.
 
-Dragging a numeric member's label sideways scrubs its value there too, at the same rate and with the same Shift and Ctrl modifiers. On a phone, dragging a label up or down still scrolls the page.
+Dragging a numeric member's label sideways scrubs its value there too, with the same Shift and Ctrl modifiers. On a phone, dragging a label up or down still scrolls the page.
 
 > [!WARNING]
 > There is no password and no HTTPS. Anyone who can reach that port can change every exposed value and press every button, so leave the option off unless you are on a network you trust.
@@ -162,7 +165,6 @@ Dragging a numeric member's label sideways scrubs its value there too, at the sa
 The browser is a mirror, not a copy. It draws the same rows from the same style values, with these differences:
 
 - No Ctrl + Z.
-- Tab and Shift + Tab walk the fields once you are in one; from a button or a dropdown they move as your browser normally would.
 - Right-clicking a row shows its OSC control address ready to copy, rather than copying it.
 
 ## Advanced

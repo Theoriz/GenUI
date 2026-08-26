@@ -289,6 +289,43 @@ namespace Theoriz.GenUI.Tests.Editor
             Assert.AreEqual(DragValueUI.FineMultiplier, Number(rates, "fine"));
         }
 
+        //The browser appends the panels in the order it is sent them, so the message has to arrive
+        //ordered by the same rule the panel stack uses.
+        [Test]
+        public void TheMessage_ListsThePanelsInTheOrderTheyAreDrawn()
+        {
+            ControllableMaster.Register(_mirror);
+
+            var other = new GameObject("web-schema-other") { hideFlags = HideFlags.HideAndDontSave };
+            SchemaMirror otherMirror = null;
+            try
+            {
+                otherMirror = other.AddComponent<SchemaMirror>();
+                otherMirror.controllableTargetScript = other.AddComponent<SchemaTarget>();
+                otherMirror.controllableId = "Zulu";
+                otherMirror.controllableUsePresets = false;
+                otherMirror.Awake();
+                other.AddComponent<GenUIPanelSettings>().panelPriority = -1;
+
+                ControllableMaster.Register(otherMirror);
+
+                var ids = new List<string>();
+                foreach (var controllable in List(WebJson.Parse(WebSchema.SchemaMessage()), "controllables"))
+                    ids.Add(WebJson.AsString(WebJson.Member(controllable, "id")));
+
+                CollectionAssert.Contains(ids, "Schema");
+                CollectionAssert.Contains(ids, "Zulu");
+                Assert.Less(ids.IndexOf("Zulu"), ids.IndexOf("Schema"),
+                    "The lower priority wins over both the id and the registration order.");
+            }
+            finally
+            {
+                if (otherMirror != null)
+                    ControllableMaster.UnRegister(otherMirror);
+                UnityEngine.Object.DestroyImmediate(other);
+            }
+        }
+
         //A controllable told to draw no panel has nothing to mirror either.
         [Test]
         public void AControllableWithNoPanel_IsLeftOutOfTheMessage()

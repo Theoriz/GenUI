@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [3.3.0] - 2026-08-26
+
+### Added
+
+- `GenUIPanelSettings` has a `panelPriority` field ordering the panels, lowest first, before their IDs do.
+
+### Changed
+
+- The browser mirror lists its panels in the order the server sends them, which is the order the panel stack uses.
+
 ## [3.2.1] - 2026-08-26
 
 ### Added

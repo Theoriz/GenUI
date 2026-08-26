@@ -21,6 +21,9 @@ public class GenUIPanelSettings : MonoBehaviour
     [Tooltip("Check to have the panel start collapsed.")]
     public bool closePanelAtStart = true;
 
+    [Tooltip("Panels are ordered by priority, lowest first, then alphabetically by ID.")]
+    public int panelPriority = 0;
+
     #region MonoBehaviour
 
     //Called when the component is added in the Editor. Seeding the colour with the one the panel
@@ -55,6 +58,12 @@ public class GenUIPanelSettings : MonoBehaviour
         return settings == null || settings.closePanelAtStart;
     }
 
+    public static int PanelPriority(Controllable controllable)
+    {
+        var settings = controllable.GetComponent<GenUIPanelSettings>();
+        return settings != null ? settings.panelPriority : 0;
+    }
+
     /// <summary>
     /// The bar colour a controllable gets when it has no <see cref="GenUIPanelSettings"/>: a hue
     /// picked from its id, fully saturated enough to read against the panel. Deriving it rather
@@ -76,6 +85,39 @@ public class GenUIPanelSettings : MonoBehaviour
         }
 
         return Color.HSVToRGB((hash % 360) / 360f, 0.8f, 1f);
+    }
+
+    #endregion
+
+    #region Panel order
+
+    /// <summary>
+    /// The global panel, which stays on top whatever its priority.
+    /// </summary>
+    public const string GlobalPanelId = "GenUI";
+
+    /// <summary>
+    /// The order panels are drawn in: the global panel first, then by ascending priority, then by ID.
+    /// </summary>
+    /// <remarks>
+    /// Both renderers order through this, so the panel stack and the browser mirror cannot disagree.
+    /// The ID comparison is ordinal for the same reason: JavaScript has no culture-sensitive default.
+    /// </remarks>
+    public static int ComparePanels(string idA, int priorityA, string idB, int priorityB)
+    {
+        if (idA == idB) return 0;
+
+        if (idA == GlobalPanelId) return -1;
+        if (idB == GlobalPanelId) return 1;
+
+        if (priorityA != priorityB) return priorityA.CompareTo(priorityB);
+
+        return string.CompareOrdinal(idA, idB);
+    }
+
+    public static int ComparePanels(Controllable a, Controllable b)
+    {
+        return ComparePanels(a.controllableId, PanelPriority(a), b.controllableId, PanelPriority(b));
     }
 
     #endregion

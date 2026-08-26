@@ -35,13 +35,22 @@ public static class WebSchema
         json.Append(",\"scrub\":").Append(ScrubJson());
         json.Append(",\"controllables\":[");
 
-        var first = true;
+        //Ordered here rather than in the browser, through the rule the panel stack itself uses.
+        var panels = new List<Controllable>();
         foreach (var registered in ControllableMaster.RegisteredControllables)
         {
             var controllable = registered.Value;
             if (controllable == null || !GenUIPanelSettings.UsePanel(controllable))
                 continue;
 
+            panels.Add(controllable);
+        }
+
+        panels.Sort(GenUIPanelSettings.ComparePanels);
+
+        var first = true;
+        foreach (var controllable in panels)
+        {
             if (!first) json.Append(',');
             first = false;
 
