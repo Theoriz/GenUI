@@ -18,6 +18,10 @@ public class PressNotifier : MonoBehaviour, IPointerDownHandler
 
     public void OnPointerDown(PointerEventData eventData)
     {
+        //The left button alone: it is the one that opens the control this press prepares for.
+        if (eventData.button != PointerEventData.InputButton.Left)
+            return;
+
         if (Pressed != null)
             Pressed();
     }

@@ -60,7 +60,7 @@ public class DropdownUI : ControllableUI
         Text itemText;
         var template = BuildTemplate(rect, out itemText);
 
-        _dropdown = rect.gameObject.AddComponent<Dropdown>();
+        _dropdown = rect.gameObject.AddComponent<GenUIDropdown>();
         _dropdown.targetGraphic = background;
         _dropdown.colors = GenUIStyle.ControlColors();
         _dropdown.template = template;

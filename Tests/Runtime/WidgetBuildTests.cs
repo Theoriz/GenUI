@@ -175,6 +175,16 @@ namespace Theoriz.GenUI.Tests
             Assert.IsNotNull(dropdown.itemText);
         }
 
+        //Unity's Dropdown opens on any button, and its list is drawn above everything - so a stock one
+        //would show that list over the right-click menu the same click opens.
+        [Test]
+        public void Dropdown_OnlyOpensOnTheLeftButton()
+        {
+            var dropdown = Build<DropdownUI>().GetComponentInChildren<Dropdown>(true);
+
+            Assert.IsInstanceOf<GenUIDropdown>(dropdown, "The dropdown would open on a right click.");
+        }
+
         #endregion
 
         #region Colour picker

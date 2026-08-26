@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 - The browser mirror insets its controls inside their rows, matching the panel's spacing.
 - A dropdown whose value is not one of its entries shows that value as a trailing entry, instead of the first one.
+- A right click on a dropdown opens the right-click menu alone, instead of the dropdown's list over it.
 
 ## [3.4.0] - 2026-08-26
 
