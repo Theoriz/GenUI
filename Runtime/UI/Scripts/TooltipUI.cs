@@ -50,5 +50,7 @@ public class TooltipUI : ControllableUI, ILayoutElement
     public float minHeight { get { return -1; } }
     public float preferredHeight { get { return _label == null ? -1 : _label.preferredHeight + bottomSpacing; } }
     public float flexibleHeight { get { return -1; } }
+    public float maxWidth { get { return -1; } }
+    public float maxHeight { get { return -1; } }
     public int layoutPriority { get { return 1; } }
 }

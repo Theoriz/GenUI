@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [4.0.1] - 2026-09-03
+
+### Fixed
+
+- `TooltipUI` declares `maxWidth` and `maxHeight`, so it still implements `ILayoutElement` on Unity 6.3 and newer.
+
 ## [4.0.0] - 2026-08-26
 
 ### Changed
