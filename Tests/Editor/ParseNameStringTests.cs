@@ -18,7 +18,6 @@ namespace Theoriz.GenUI.Tests.Editor
         [TestCase("ControllableLoad", "Load")]
         [TestCase("ControllableShow", "Show")]
         [TestCase("ControllableSaveAll", "Save All")]
-        [TestCase("ControllableOpenPresetsFolder", "Open Presets Folder")]
         [TestCase("ControllableLoadWithName", "Load With Name")]
         [TestCase("controllableCurrentPreset", "Current Preset")]
         [TestCase("controllablePresetList", "Preset List")]

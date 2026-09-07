@@ -168,23 +168,20 @@ Unity widgets keep with SetValueWithoutNotify and SliderUI._updating.
         add(text("tooltip", member.tooltip));
     }
 
-    var groups = { preset: [], allPreset: [], globalAction: [], body: [] };
+    var groups = { preset: [], allPreset: [], body: [] };
     var methods = c.methods || [];
     for (var m = 0; m < methods.length; m++) {
       var group = groups[methods[m].group] || groups.body;
       group.push(buildButton(c.id, methods[m]));
     }
 
-    //The global blocks go to the top of the body, the panel's own preset block to the bottom.
+    //The global block goes to the top of the body, the panel's own preset block to the bottom.
     if (groups.allPreset.length)
       body.appendChild(section(strip(groups.allPreset)));
 
-    if (groups.globalAction.length)
-      body.appendChild(section(strip(groups.globalAction)));
-
     //An empty row above the first button that stays in the body - unless nothing precedes it, where
     //the gap would only push the button away from the title.
-    var hasRowAbove = firstIsHeader !== null || groups.allPreset.length > 0 || groups.globalAction.length > 0;
+    var hasRowAbove = firstIsHeader !== null || groups.allPreset.length > 0;
     if (groups.body.length && hasRowAbove)
       content.appendChild(element("div", "method-gap"));
 

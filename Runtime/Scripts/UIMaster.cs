@@ -557,20 +557,13 @@ public class UIMaster : MonoBehaviour
         var presetHolder = panel.PresetHolder;
         var isGlobalPresetPanel = controllable is ControllableMasterControllable;
 
-        //The global buttons get sections of their own, at the top of the panel.
+        //The global buttons get a section of their own, at the top of the panel.
         RectTransform globalPresetSection = null;
         RectTransform globalPresetHolder = null;
-        RectTransform globalActionSection = null;
-        RectTransform globalActionHolder = null;
         if (isGlobalPresetPanel)
         {
             globalPresetSection = panel.CreatePresetSection("AllPresetSection", out globalPresetHolder);
             globalPresetSection.SetSiblingIndex(panel.FirstRowIndex); //Set first
-
-            //Own row, directly under the preset row: these buttons have long labels and do not fit
-            //alongside Save All / Save As All.
-            globalActionSection = panel.CreatePresetSection("GlobalActionSection", out globalActionHolder);
-            globalActionSection.SetSiblingIndex(panel.FirstRowIndex + 1);
         }
 
         var allButtons = lastPanel.GetComponentsInChildren<ButtonUI>();
@@ -590,12 +583,6 @@ public class UIMaster : MonoBehaviour
                 Array.IndexOf(ControllableMasterControllable.AllPresetMethodNames, button.Method.Name) >= 0)
             {
                 button.transform.SetParent(globalPresetHolder);
-            }
-
-            if (isGlobalPresetPanel &&
-                Array.IndexOf(GenUIPanelSettings.GlobalActionMethodNames, button.Method.Name) >= 0)
-            {
-                button.transform.SetParent(globalActionHolder);
             }
         }
 
@@ -619,15 +606,7 @@ public class UIMaster : MonoBehaviour
             panel.HideSection(panel.PresetSection);
 
         if (isGlobalPresetPanel)
-        {
-            //Nothing landed in it, so it would otherwise render as an empty block.
-            if (globalActionHolder.childCount == 0)
-                panel.HideSection(globalActionSection);
-            else
-                panel.LayoutSection(globalActionSection);
-
             panel.LayoutSection(globalPresetSection);
-        }
 
         //After the preset buttons have left the body, so the gap lands above the first button that stays.
         panel.AddMethodGap();

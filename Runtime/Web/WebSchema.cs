@@ -231,14 +231,9 @@ public static class WebSchema
             return "preset";
 
         //Only the GenUI panel owns the global buttons: a target script may expose its own SaveAll.
-        if (controllable is ControllableMasterControllable)
-        {
-            if (Array.IndexOf(ControllableMasterControllable.AllPresetMethodNames, method.Name) >= 0)
-                return "allPreset";
-
-            if (Array.IndexOf(GenUIPanelSettings.GlobalActionMethodNames, method.Name) >= 0)
-                return "globalAction";
-        }
+        if (controllable is ControllableMasterControllable
+            && Array.IndexOf(ControllableMasterControllable.AllPresetMethodNames, method.Name) >= 0)
+            return "allPreset";
 
         return null;
     }

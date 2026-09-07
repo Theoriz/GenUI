@@ -162,7 +162,7 @@ The port actually opened is printed in the Console at start, and advertised over
 ## Presets
 This plugin comes with a preset system, you can save the state of a "Controllable" script. It saves each property to a file that can be loaded later so that you can create different settings for your script. To use it, click "Save", then simply select a preset in the dropdown menu — selecting it loads it immediately.
 
-Each panel has "Save", "Save As", "Load" and "Show" buttons plus the preset dropdown, at the bottom of the panel. The GenUI panel has "Save All", "Save As All" and "Load All" to apply the same action to every controllable at once, plus "Open Presets Folder" to reveal the presets root in your file browser.
+Each panel has "Save", "Save As", "Load" and "Show" buttons plus the preset dropdown, at the bottom of the panel. "Show" reveals the selected preset in your file browser, or its folder when no preset is selected. The GenUI panel has "Save All", "Save As All" and "Load All" to apply the same action to every controllable at once.
 
 It is also possible to load a specific file via the OSC method "ControllableLoadWithName", giving it the case-sensitive file name as its argument :
 
