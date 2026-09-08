@@ -36,12 +36,12 @@ public static class GenUIStyle
     /// <summary>Inset of the preset rows inside their section's backing.</summary>
     public const int PresetSectionPadding = 3;
 
-    /// <summary>Empty space kept above a preset section, holding the rule that separates it from the
-    /// member rows.</summary>
+    /// <summary>Empty space kept on a preset section's member-rows side, holding the rule that
+    /// separates it from them.</summary>
     public const int PresetSectionGap = 18;
 
-    /// <summary>How far into that gap the rule sits. More space above it than below, so the rule reads
-    /// as belonging to the block it heads rather than to the member row it follows.</summary>
+    /// <summary>How far into that gap the rule sits, measured from the member rows it separates the
+    /// block from. More space on their side, so the rule reads as belonging to the block.</summary>
     public const float SeparatorSpaceAbove = 10f;
 
     public const float SeparatorThickness = 1f;
@@ -131,9 +131,9 @@ public static class GenUIStyle
         return new Color(barColor.r, barColor.g, barColor.b, PanelTitleBackgroundAlpha);
     }
 
-    public const float PanelTitleBackgroundAlpha = 0.04f;
+    public const float PanelTitleBackgroundAlpha = 0.08f;
 
-    /// <summary>The rule above a preset section. Light rather than dark: the panel is drawn over
+    /// <summary>The rule bounding a preset section. Light rather than dark: the panel is drawn over
     /// whatever the scene shows, so only a line brighter than the rows reads on every background.</summary>
     public static readonly Color SeparatorColor = new Color(1f, 1f, 1f, 0.04f);
 

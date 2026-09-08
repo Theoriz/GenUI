@@ -563,12 +563,14 @@ public class UIMaster : MonoBehaviour
         var presetHolder = panel.PresetHolder;
         var isGlobalPresetPanel = controllable is ControllableMasterControllable;
 
-        //The global buttons get a section of their own, at the top of the panel.
+        //The global buttons get a section of their own, at the top of the panel - so its rule goes
+        //below them, there being no row above to set them off from.
         RectTransform globalPresetSection = null;
         RectTransform globalPresetHolder = null;
         if (isGlobalPresetPanel)
         {
-            globalPresetSection = panel.CreatePresetSection("AllPresetSection", out globalPresetHolder);
+            globalPresetSection = panel.CreatePresetSection("AllPresetSection", out globalPresetHolder,
+                ruleBelow: true);
             globalPresetSection.SetSiblingIndex(panel.FirstRowIndex); //Set first
         }
 

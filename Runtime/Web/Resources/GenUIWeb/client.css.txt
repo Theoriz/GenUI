@@ -449,6 +449,17 @@ select:disabled {
   background: var(--genui-separator-color);
 }
 
+/* A block opening the panel: nothing above it to be set off from, so the rule goes below. */
+.section.rule-below {
+  padding-top: var(--genui-preset-section-padding);
+  padding-bottom: calc(var(--genui-preset-section-padding) + var(--genui-preset-section-gap));
+}
+
+.section.rule-below::before {
+  top: auto;
+  bottom: var(--genui-separator-space-above);
+}
+
 .button-strip {
   display: flex;
   height: var(--genui-preset-row-height);

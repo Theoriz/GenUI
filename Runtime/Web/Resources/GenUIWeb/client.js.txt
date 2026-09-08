@@ -177,7 +177,7 @@ Unity widgets keep with SetValueWithoutNotify and SliderUI._updating.
 
     //The global block goes to the top of the body, the panel's own preset block to the bottom.
     if (groups.allPreset.length)
-      body.appendChild(section(strip(groups.allPreset)));
+      body.appendChild(section(strip(groups.allPreset), true));
 
     //An empty row above the first button that stays in the body - unless nothing precedes it, where
     //the gap would only push the button away from the title.
@@ -232,8 +232,8 @@ Unity widgets keep with SetValueWithoutNotify and SliderUI._updating.
   }
 
   //A block set off from the member rows by a rule and the space around it.
-  function section(child) {
-    var block = element("div", "section");
+  function section(child, ruleBelow) {
+    var block = element("div", ruleBelow ? "section rule-below" : "section");
     block.appendChild(child);
     return block;
   }

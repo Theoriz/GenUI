@@ -267,6 +267,24 @@ namespace Theoriz.GenUI.Tests
                 "A section holding one row is as tall as that row plus its gap and padding.");
         }
 
+        [Test]
+        public void Panel_PutsTheRuleUnderASectionThatOpensThePanel()
+        {
+            var panel = PanelUI.Build(_parent.transform, "Test Panel", Color.red);
+
+            RectTransform holder;
+            var section = panel.CreatePresetSection("AllPresetSection", out holder, ruleBelow: true);
+            panel.LayoutSection(section);
+
+            var separator = (RectTransform)section.Find("Separator");
+            Assert.AreEqual(0f, separator.anchorMin.y, 0.01f,
+                "The rule of a section nothing precedes belongs to its bottom edge.");
+            Assert.AreEqual(GenUIStyle.SeparatorSpaceAbove, separator.anchoredPosition.y, 0.01f,
+                "The rule sits as far into the gap as it does above a section, mirrored.");
+            Assert.AreEqual(panel.PresetSection.rect.height, section.rect.height, 0.01f,
+                "Moving the gap to the other side must not change what the section measures.");
+        }
+
         #endregion
     }
 }

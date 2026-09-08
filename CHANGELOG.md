@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - `UIMaster` no longer sets a custom script execution order.
+- The rule setting off the global preset buttons sits under them, since nothing precedes them in the panel.
 
 ## [4.1.0] - 2026-09-07
 

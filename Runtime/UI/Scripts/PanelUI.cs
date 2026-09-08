@@ -97,27 +97,33 @@ public class PanelUI : ControllableUI
     /// <summary>
     /// Creates a preset section - a block set off from the member rows by a rule and the space around
     /// it - and hands back the button row inside it. Further rows are parented to the section itself.
+    /// A section opening the panel takes <paramref name="ruleBelow"/>, having no row above to be set
+    /// off from.
     /// </summary>
     /// <remarks>
     /// Called once per block rather than cloning the panel's own: a clone would copy the separator and
     /// whatever has already been reparented into it.
     /// </remarks>
-    public RectTransform CreatePresetSection(string name, out RectTransform holder)
+    public RectTransform CreatePresetSection(string name, out RectTransform holder, bool ruleBelow = false)
     {
         var section = UIFactory.CreateRect(name, transform);
         var layout = UIFactory.AddVerticalLayout(section.gameObject, controlHeight: false);
         //The gap is part of the section's own height and holds the separator, so the block keeps its
-        //distance from the row above whatever ends up in it.
+        //distance from the row it is set off from whatever ends up in it.
+        var gapAbove = ruleBelow ? 0 : GenUIStyle.PresetSectionGap;
         layout.padding = new RectOffset(GenUIStyle.PresetSectionPadding, GenUIStyle.PresetSectionPadding,
-            GenUIStyle.PresetSectionPadding + GenUIStyle.PresetSectionGap, GenUIStyle.PresetSectionPadding);
+            GenUIStyle.PresetSectionPadding + gapAbove,
+            GenUIStyle.PresetSectionPadding + GenUIStyle.PresetSectionGap - gapAbove);
 
         //Placed in the gap rather than laid out as a row of its own, so the space around it stays the
         //same whatever the section holds.
+        var edge = ruleBelow ? 0f : 1f;
         var separator = UIFactory.CreateChild("Separator", section);
-        separator.anchorMin = new Vector2(0f, 1f);
-        separator.anchorMax = new Vector2(1f, 1f);
+        separator.anchorMin = new Vector2(0f, edge);
+        separator.anchorMax = new Vector2(1f, edge);
         separator.sizeDelta = new Vector2(0f, GenUIStyle.SeparatorThickness);
-        separator.anchoredPosition = new Vector2(0f, -GenUIStyle.SeparatorSpaceAbove);
+        separator.anchoredPosition = new Vector2(0f,
+            ruleBelow ? GenUIStyle.SeparatorSpaceAbove : -GenUIStyle.SeparatorSpaceAbove);
         UIFactory.AddImage(separator.gameObject, null, GenUIStyle.SeparatorColor, Image.Type.Simple);
         UIFactory.AddLayoutElement(separator.gameObject, ignoreLayout: true);
 
