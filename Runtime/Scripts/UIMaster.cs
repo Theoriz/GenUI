@@ -94,6 +94,12 @@ public class UIMaster : MonoBehaviour
         ControllableMaster.controllableAdded += CreateUI;
         ControllableMaster.controllableRemoved += RemoveUI;
 
+        //Controllables register in OnEnable, which can precede this Awake, and a UIMaster added at
+        //runtime misses every one of them. Catching up here is what removes the need for a custom
+        //execution order. No sort: CleanGeneratedUI re-orders the panels on each CreateUI.
+        foreach (var controllable in ControllableMaster.RegisteredControllables.Values)
+            CreateUI(controllable);
+
         displayUI = true;
 
         ResetUITransform();

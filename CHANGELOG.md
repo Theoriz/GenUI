@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [4.2.0] - 2026-09-08
+
+### Fixed
+
+- A `UIMaster` created after controllables have registered now builds a panel for each of them instead of coming up blank, so adding GenUI to a scene at runtime works.
+
+### Changed
+
+- `UIMaster` no longer sets a custom script execution order.
+
 ## [4.1.0] - 2026-09-07
 
 ### Changed
