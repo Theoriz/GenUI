@@ -14,6 +14,8 @@ public class ColorUI : ControllableUI
     Text _label;
     Image _swatch;
 
+    public override Text NameLabel { get { return _label; } }
+
     #region Widget
 
     protected override void BuildHierarchy()

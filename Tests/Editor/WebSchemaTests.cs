@@ -186,8 +186,8 @@ namespace Theoriz.GenUI.Tests.Editor
             Assert.AreEqual(false, WebJson.Member(Member("speed"), "readOnly"));
         }
 
-        //Listed, but as nothing to draw: its header and tooltip are still the panel's, and leaving it
-        //out would shift every row after it.
+        //Listed, but as nothing to draw: its header is still the panel's, and leaving it out would
+        //shift every row after it.
         [Test]
         public void AnUnsupportedMember_IsListedWithNoWidgetAndNoValue()
         {

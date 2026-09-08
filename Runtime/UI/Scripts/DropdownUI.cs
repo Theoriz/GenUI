@@ -21,6 +21,8 @@ public class DropdownUI : ControllableUI
     Dropdown _dropdown;
     Image _arrow;
 
+    public override Text NameLabel { get { return _label; } }
+
     #region Building
 
     //Unity's stock dropdown template, reproduced: a scrolling list under the closed control, whose

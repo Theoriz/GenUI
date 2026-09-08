@@ -227,7 +227,8 @@ namespace Theoriz.GenUI.Tests.Editor
             Assert.IsNull(descriptor.Tooltip);
         }
 
-        //A skipped member still carries its header and tooltip: they are drawn either way.
+        //A skipped member still carries its header, which is drawn either way. Its tooltip is not: with
+        //no row to hover there is nothing to show it on.
         [Test]
         public void ASkippedMember_StillCarriesItsHeader()
         {

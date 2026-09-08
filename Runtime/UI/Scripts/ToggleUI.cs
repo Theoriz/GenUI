@@ -10,6 +10,8 @@ public class ToggleUI : ControllableUI
 
     Text _label;
 
+    public override Text NameLabel { get { return _label; } }
+
     protected override void BuildHierarchy()
     {
         _label = UIFactory.CreateLabel(transform);

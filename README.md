@@ -116,7 +116,7 @@ You can expose the following types :
 
 An enum renders as a dropdown of its members — see [Exposing an enum](https://github.com/Theoriz/OCF#exposing-an-enum) in the OCF documentation. A `[Flags]` enum is the one exception: it logs a warning and draws no widget, because one dropdown cannot represent a combination of members. It is controllable over OSC.
 
-The Header, Range, and Tooltip attributes are also supported in Controllables.
+The Header, Range, and Tooltip attributes are also supported in Controllables. A Tooltip shows when the pointer rests on the member's name, as in the Inspector.
 
 ### The color picker
 
@@ -198,6 +198,7 @@ The browser is a mirror, not a copy. It draws the same rows from the same style 
 
 - No Ctrl + Z.
 - Right-clicking a row shows its OSC control address ready to copy, rather than copying it.
+- Tooltips are the browser's own rather than drawn by GenUI; both show on the member's name.
 
 ## Advanced
 

@@ -17,6 +17,8 @@ public class SliderUI : ControllableUI
     Slider _slider;
     InputField _input;
 
+    public override Text NameLabel { get { return _label; } }
+
     #region Widget
 
     protected override void BuildHierarchy()

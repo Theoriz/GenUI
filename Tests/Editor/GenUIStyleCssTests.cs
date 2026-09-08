@@ -3,13 +3,15 @@ using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Threading;
 using NUnit.Framework;
+using UnityEngine;
 
 namespace Theoriz.GenUI.Tests.Editor
 {
     /// <summary>
     /// Covers the CSS custom properties the web mirror draws its rows with. They are generated from
     /// GenUIStyle so the browser cannot drift from the panel, which is only true while every token is
-    /// emitted and every number is CSS-legal whatever the editor's locale.
+    /// emitted, carries the unit the client uses it as, and stays CSS-legal whatever the editor's
+    /// locale. The values themselves are a look to be tuned, and are nowhere written out here.
     /// </summary>
     public class GenUIStyleCssTests
     {
@@ -17,13 +19,13 @@ namespace Theoriz.GenUI.Tests.Editor
         //disappears fails here instead of silently leaving the client with no value.
         static readonly string[] ExpectedTokens =
         {
-            "row-height", "header-height", "tooltip-height", "panel-title-height", "preset-row-height",
+            "row-height", "header-height", "panel-title-height", "preset-row-height",
             "checkbox-size", "panel-arrow-size", "panel-arrow-inset", "color-bar-width", "panel-padding",
             "preset-section-padding", "preset-section-gap", "separator-space-above", "separator-thickness",
             "panel-bar-gap", "axis-spacing", "axis-label-gap", "slider-track-start", "slider-track-end",
             "slider-value-start", "slider-track-inset", "slider-handle-width", "slider-band-min",
             "slider-band-max", "label-width-ratio", "input-text-inset-x", "input-text-inset-y",
-            "tooltip-bottom-spacing", "method-gap-height", "panel-title-bottom-spacing",
+            "method-gap-height", "panel-title-bottom-spacing",
             "label-font-size", "panel-title-font-size", "tooltip-font-size", "label-min-font-size",
             "label-color", "input-text-color", "placeholder-color", "tooltip-color", "panel-background",
             "panel-title-background-alpha", "separator-color", "toggle-on", "toggle-off",
@@ -48,6 +50,18 @@ namespace Theoriz.GenUI.Tests.Editor
         static string ValueOf(string token)
         {
             return Declarations(GenUIStyle.ToCss())[token];
+        }
+
+        //What the assertions below are made of. Every value in GenUIStyle is a look to be tuned, so
+        //what is pinned here is the shape each one is emitted in - a number carrying the unit the
+        //client uses it as - and never the number itself, which a test would only restate.
+        const string Number = @"-?\d+(\.\d+)?";
+
+        static void AssertShape(string token, string pattern)
+        {
+            var value = ValueOf(token);
+            Assert.IsTrue(Regex.IsMatch(value, "^" + pattern + "$"),
+                token + " is not CSS the client can use: " + value);
         }
 
         [Test]
@@ -83,72 +97,91 @@ namespace Theoriz.GenUI.Tests.Editor
         [Test]
         public void AMetric_IsEmittedInPixels()
         {
-            Assert.AreEqual("25px", ValueOf("row-height"));
+            AssertShape("row-height", Number + "px");
+            AssertShape("input-text-inset-x", Number + "px");
         }
 
         [Test]
         public void AFontSize_IsEmittedInPixels()
         {
-            Assert.AreEqual("14px", ValueOf("label-font-size"));
+            AssertShape("label-font-size", Number + "px");
         }
 
         [Test]
         public void ARatio_IsEmittedAsAPercentage()
         {
-            Assert.AreEqual("50%", ValueOf("label-width-ratio"));
-            Assert.AreEqual("80%", ValueOf("slider-track-end"));
+            AssertShape("label-width-ratio", Number + "%");
+            AssertShape("slider-track-end", Number + "%");
         }
 
+        //A CSS channel is a byte, while Unity's is a float; the alpha stays the 0..1 number CSS wants.
         [Test]
         public void AColour_IsEmittedAsRgbaWithByteChannels()
         {
-            Assert.AreEqual("rgba(20, 20, 20, 0.451)", ValueOf("panel-background"));
-            Assert.AreEqual("rgba(255, 255, 255, 1)", ValueOf("label-color"));
+            AssertShape("panel-background", @"rgba\(\d{1,3}, \d{1,3}, \d{1,3}, " + Number + @"\)");
+            AssertShape("control-normal", @"rgba\(\d{1,3}, \d{1,3}, \d{1,3}, " + Number + @"\)");
+
+            var channels = Regex.Match(ValueOf("panel-background"), @"rgba\((\d+), (\d+), (\d+), ");
+            Assert.AreEqual(Mathf.RoundToInt(GenUIStyle.PanelBackground.r * 255f),
+                int.Parse(channels.Groups[1].Value), "The red channel is not the colour's, in bytes.");
         }
 
         [Test]
-        public void TheControlStates_CarryTheirTintsAndTheirFade()
+        public void AFadeDuration_IsEmittedInSeconds()
         {
-            Assert.AreEqual("rgba(58, 58, 58, 1)", ValueOf("control-normal"));
-            Assert.AreEqual("rgba(72, 72, 72, 1)", ValueOf("control-highlighted"));
-            Assert.AreEqual("rgba(23, 23, 23, 1)", ValueOf("control-pressed"));
-            Assert.AreEqual("0.1s", ValueOf("control-fade-duration"));
+            AssertShape("control-fade-duration", Number + "s");
         }
 
-        //Read-only leaves no frame in the panel, which is a fully transparent disabled tint.
+        //Read-only leaves no frame in the panel, which is a fully transparent disabled tint - whatever
+        //colour that tint is otherwise given.
         [Test]
         public void TheDisabledControlState_IsTransparent()
         {
-            Assert.AreEqual("rgba(0, 0, 0, 0)", ValueOf("control-disabled"));
+            Assert.IsTrue(ValueOf("control-disabled").EndsWith(", 0)"),
+                "The disabled tint is not transparent: " + ValueOf("control-disabled"));
         }
 
-        //The bar colour is per-controllable and arrives with the schema, so only the alpha is a token.
+        //The bar colour is per-controllable and arrives with the schema, so only the alpha is a token -
+        //an opacity, which CSS takes with no unit at all.
         [Test]
         public void ThePanelTitleTint_IsEmittedAsAPlainNumber()
         {
-            Assert.AreEqual("0.04", ValueOf("panel-title-background-alpha"));
+            AssertShape("panel-title-background-alpha", Number);
         }
 
+        //Derived rather than a number of its own, so resizing one part cannot leave a gap or clip the
+        //bottom row; the parts are what this adds up, so tuning any of them keeps it true.
         [Test]
         public void ThePickerHeight_IsDerivedFromItsParts()
         {
-            Assert.AreEqual("302px", ValueOf("picker-height"));
+            var parts = 2f * GenUIStyle.PickerPadding + GenUIStyle.PickerSvHeight
+                + 2f * (GenUIStyle.PickerBarSpacing + GenUIStyle.PickerBarThickness)
+                + 2f * (GenUIStyle.PickerBarSpacing + GenUIStyle.PickerFieldRowHeight);
+
+            Assert.AreEqual(parts.ToString("0.###", CultureInfo.InvariantCulture) + "px",
+                ValueOf("picker-height"));
         }
 
+        //The one place a locale can break the output: a French editor formats a float as "0,5", which
+        //is not a CSS number. Compared against the same call under the invariant culture rather than
+        //against written-out values, so nothing here has to be revisited when a colour is tuned.
         [Test]
         public void AFrenchLocale_StillEmitsCssNumbers()
         {
             var culture = Thread.CurrentThread.CurrentCulture;
             try
             {
+                Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+                var invariant = Declarations(GenUIStyle.ToCss());
+
                 Thread.CurrentThread.CurrentCulture = new CultureInfo("fr-FR");
-                var declarations = Declarations(GenUIStyle.ToCss());
-                Assert.AreEqual("rgba(20, 20, 20, 0.451)", declarations["panel-background"]);
-                Assert.AreEqual("0.1s", declarations["control-fade-duration"]);
-                Assert.AreEqual("0.04", declarations["panel-title-background-alpha"]);
+                var french = Declarations(GenUIStyle.ToCss());
+
+                CollectionAssert.AreEquivalent(invariant, french, "The output depends on the editor's locale.");
+
                 //rgba() separates its channels with commas, so only a comma between two digits is the
                 //locale leaking through.
-                foreach (var declaration in declarations)
+                foreach (var declaration in french)
                     Assert.IsFalse(Regex.IsMatch(declaration.Value, @"\d,\d"), "Decimal comma in "
                         + declaration.Key + ": " + declaration.Value);
             }

@@ -81,6 +81,21 @@ public class ControllableUI : MonoBehaviour {
         UIFactory.AddMouseEvent(gameObject, this);
     }
 
+    /// <summary>
+    /// Makes the member's name show <paramref name="text"/> while the pointer rests on it.
+    /// </summary>
+    /// <remarks>
+    /// On the label rather than on the row, so hovering a control the user is about to use pops
+    /// nothing, and so the panel and the browser - where the tooltip is the label's title attribute -
+    /// answer the same area. It carries no pointer-down handler: one on the label would take the press
+    /// from the row's MouseButtonEvent, which then never hears the release.
+    /// </remarks>
+    public void SetTooltip(string text)
+    {
+        if (NameLabel != null)
+            NameLabel.gameObject.AddComponent<TooltipTrigger>().text = text;
+    }
+
     public virtual void RemoveUI()
     {
         LinkedControllable.controllableValueChanged -= HandleTargetChange;
@@ -214,6 +229,12 @@ public class ControllableUI : MonoBehaviour {
     {
         return _noScrubTargets;
     }
+
+    /// <summary>
+    /// The label carrying the member's name, which its tooltip hangs from. Null on a row that shows no
+    /// name of its own.
+    /// </summary>
+    public virtual Text NameLabel { get { return null; } }
 
     /// <summary>
     /// The widget's editable fields, in the order Tab should visit them.

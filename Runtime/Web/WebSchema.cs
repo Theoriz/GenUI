@@ -14,8 +14,8 @@ using System.Text;
 /// method gets a button is repeated here because a method gets no descriptor, on the same terms as
 /// <c>UIMaster.CreateButton</c>.
 ///
-/// A member the panel draws nothing for is still listed, as kind <c>None</c>: its header and tooltip
-/// are drawn either way, and leaving it out would move every row that follows it.
+/// A member the panel draws nothing for is still listed, as kind <c>None</c>: its header is drawn either
+/// way, and leaving it out would move every row that follows it.
 /// </remarks>
 public static class WebSchema
 {
@@ -158,6 +158,7 @@ public static class WebSchema
         if (descriptor.Header != null)
             json.Append(",\"header\":").Append(WebJson.Quote(descriptor.Header));
 
+        //The client shows it on hover, through the row label's title attribute.
         if (descriptor.Tooltip != null)
             json.Append(",\"tooltip\":").Append(WebJson.Quote(descriptor.Tooltip));
 

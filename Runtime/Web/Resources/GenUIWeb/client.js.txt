@@ -163,9 +163,6 @@ Unity widgets keep with SetValueWithoutNotify and SliderUI._updating.
         else
           add(memberRow);
       }
-
-      if (member.tooltip !== undefined)
-        add(text("tooltip", member.tooltip));
     }
 
     var groups = { preset: [], allPreset: [], body: [] };
@@ -276,6 +273,8 @@ Unity widgets keep with SetValueWithoutNotify and SliderUI._updating.
     var row = element("div", "row" + (member.readOnly ? " read-only" : ""));
     var label = element("div", "label", row);
     label.textContent = member.label;
+    //The browser's own hover tooltip, which is what the panel shows over the row. With no tooltip it
+    //falls back to the label, so a name shortened to fit can still be read in full.
     label.title = member.tooltip || member.label;
 
     var apply;
@@ -291,7 +290,7 @@ Unity widgets keep with SetValueWithoutNotify and SliderUI._updating.
       case "Vector3Int": apply = buildVector(row, key, member, ["x", "y", "z"], false); break;
       case "Vector4": apply = buildVector(row, key, member, ["x", "y", "z", "w"], true); break;
 
-      //Kind None: the panel draws no widget either, and the member's header and tooltip still do.
+      //Kind None: the panel draws no widget either, and the member's header still does.
       default: return null;
     }
 

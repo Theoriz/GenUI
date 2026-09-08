@@ -47,6 +47,7 @@ public class UIMaster : MonoBehaviour
     private Transform MainPanel;
     private RightClickMenu rightClickMenu;
     private ColorPicker colorPicker;
+    private TooltipPopup tooltipPopup;
 
     private bool displayUI;
     private GameObject _rootCanvas;
@@ -181,12 +182,15 @@ public class UIMaster : MonoBehaviour
         else
             Debug.LogError("[GenUI] No ScrollRect found under UIMaster; the panel container is missing.");
 
-        //Last, so both popups draw over every panel.
+        //Last, so the popups draw over every panel; the tooltip last of all, over the other two.
         rightClickMenu = RightClickMenu.Build(_rootCanvas.transform);
         rightClickMenu.transform.SetAsLastSibling();
 
         colorPicker = ColorPicker.Build(_rootCanvas.transform);
         colorPicker.transform.SetAsLastSibling();
+
+        tooltipPopup = TooltipPopup.Build(_rootCanvas.transform);
+        tooltipPopup.transform.SetAsLastSibling();
     }
 
     #endregion
@@ -496,47 +500,50 @@ public class UIMaster : MonoBehaviour
 
             var isInteractible = !descriptor.ReadOnly;
 
+            ControllableUI widget;
             switch (descriptor.Kind)
             {
                 case WidgetKind.Dropdown:
-                    CreateDropDown(newPanel.transform, newControllable, property.Value, isInteractible,
+                    widget = CreateDropDown(newPanel.transform, newControllable, property.Value, isInteractible,
                         targetListName: descriptor.TargetList, enumType: descriptor.EnumType);
                     break;
                 case WidgetKind.Slider:
-                    CreateSlider(newPanel.transform, newControllable, property.Value,
+                    widget = CreateSlider(newPanel.transform, newControllable, property.Value,
                         new RangeAttribute(descriptor.Min, descriptor.Max), isInteractible, descriptor.IsFloat);
                     break;
                 case WidgetKind.Input:
-                    CreateInput(newPanel.transform, newControllable, property.Value, isInteractible);
+                    widget = CreateInput(newPanel.transform, newControllable, property.Value, isInteractible);
                     break;
                 case WidgetKind.Toggle:
-                    CreateCheckbox(newPanel.transform, newControllable, property.Value, isInteractible);
+                    widget = CreateCheckbox(newPanel.transform, newControllable, property.Value, isInteractible);
                     break;
                 case WidgetKind.Color:
-                    CreateColor(newPanel.transform, newControllable, property.Value, isInteractible);
+                    widget = CreateColor(newPanel.transform, newControllable, property.Value, isInteractible);
                     break;
                 case WidgetKind.Vector2:
-                    CreateVector2(newPanel.transform, newControllable, property.Value, isInteractible);
+                    widget = CreateVector2(newPanel.transform, newControllable, property.Value, isInteractible);
                     break;
                 case WidgetKind.Vector2Int:
-                    CreateVector2Int(newPanel.transform, newControllable, property.Value, isInteractible);
+                    widget = CreateVector2Int(newPanel.transform, newControllable, property.Value, isInteractible);
                     break;
                 case WidgetKind.Vector3:
-                    CreateVector3(newPanel.transform, newControllable, property.Value, isInteractible);
+                    widget = CreateVector3(newPanel.transform, newControllable, property.Value, isInteractible);
                     break;
                 case WidgetKind.Vector3Int:
-                    CreateVector3Int(newPanel.transform, newControllable, property.Value, isInteractible);
+                    widget = CreateVector3Int(newPanel.transform, newControllable, property.Value, isInteractible);
                     break;
                 case WidgetKind.Vector4:
-                    CreateVector4(newPanel.transform, newControllable, property.Value, isInteractible);
+                    widget = CreateVector4(newPanel.transform, newControllable, property.Value, isInteractible);
                     break;
                 default:
+                    widget = null;
                     Debug.LogWarning(descriptor.SkipReason);
                     break;
             }
 
-            if (descriptor.Tooltip != null)
-                CreateTooltipText(newPanel.transform, newControllable, descriptor.Tooltip);
+            //A skipped member has no label to hover, so it shows its header and nothing else.
+            if (descriptor.Tooltip != null && widget != null)
+                widget.SetTooltip(descriptor.Tooltip);
 		}
 
         //Read all methods and add button
@@ -657,35 +664,38 @@ public class UIMaster : MonoBehaviour
         ControllableUI.Create<HeaderUI>(parent).CreateUI(target, text);
     }
 
-    private void CreateTooltipText(Transform parent, Controllable target, string text)
-    {
-        ControllableUI.Create<TooltipUI>(parent).CreateUI(target, text);
-    }
-
     //One widget, two sources for its entries: the entries of a named List<string>, or the members of
     //the field's own enum type. Exactly one of the two is set by the caller.
-    private void CreateDropDown(Transform parent, Controllable target, FieldInfo activeElement, bool isInteractible, string targetListName = null, Type enumType = null)
+    private DropdownUI CreateDropDown(Transform parent, Controllable target, FieldInfo activeElement, bool isInteractible, string targetListName = null, Type enumType = null)
     {
         var newDropdown = ControllableUI.Create<DropdownUI>(parent);
         if (enumType != null)
             newDropdown.CreateUI(target, activeElement, enumType, isInteractible);
         else
             newDropdown.CreateUI(target, targetListName, activeElement, isInteractible);
+
+        return newDropdown;
     }
 
-    private void CreateSlider(Transform parent, Controllable target, FieldInfo property, RangeAttribute rangeAttribut, bool isInteractible, bool isFloat = true)
+    private SliderUI CreateSlider(Transform parent, Controllable target, FieldInfo property, RangeAttribute rangeAttribut, bool isInteractible, bool isFloat = true)
     {
-        ControllableUI.Create<SliderUI>(parent).CreateUI(target, property, rangeAttribut, isInteractible, isFloat);
+        var newSlider = ControllableUI.Create<SliderUI>(parent);
+        newSlider.CreateUI(target, property, rangeAttribut, isInteractible, isFloat);
+        return newSlider;
     }
 
-    private void CreateInput(Transform parent, Controllable target, FieldInfo property, bool isInteractible)
+    private InputFieldUI CreateInput(Transform parent, Controllable target, FieldInfo property, bool isInteractible)
     {
-        ControllableUI.Create<InputFieldUI>(parent).CreateUI(target, property, isInteractible);
+        var newInput = ControllableUI.Create<InputFieldUI>(parent);
+        newInput.CreateUI(target, property, isInteractible);
+        return newInput;
     }
 
-    private void CreateCheckbox(Transform parent, Controllable target, FieldInfo property, bool isInteractible)
+    private ToggleUI CreateCheckbox(Transform parent, Controllable target, FieldInfo property, bool isInteractible)
     {
-        ControllableUI.Create<ToggleUI>(parent).CreateUI(target, property, isInteractible);
+        var newToggle = ControllableUI.Create<ToggleUI>(parent);
+        newToggle.CreateUI(target, property, isInteractible);
+        return newToggle;
     }
 
     private void CreateButton(Transform parent, Controllable target, ClassMethodInfo method)
@@ -707,34 +717,46 @@ public class UIMaster : MonoBehaviour
         }
     }
 
-    private void CreateColor(Transform parent, Controllable target, FieldInfo property, bool isInteractible)
+    private ColorUI CreateColor(Transform parent, Controllable target, FieldInfo property, bool isInteractible)
     {
-        ControllableUI.Create<ColorUI>(parent).CreateUI(target, property, isInteractible);
+        var newColor = ControllableUI.Create<ColorUI>(parent);
+        newColor.CreateUI(target, property, isInteractible);
+        return newColor;
     }
 
-    private void CreateVector3(Transform parent, Controllable target, FieldInfo property, bool isInteractible)
+    private Vector3UI CreateVector3(Transform parent, Controllable target, FieldInfo property, bool isInteractible)
     {
-        ControllableUI.Create<Vector3UI>(parent).CreateUI(target, property, isInteractible);
+        var newVector = ControllableUI.Create<Vector3UI>(parent);
+        newVector.CreateUI(target, property, isInteractible);
+        return newVector;
     }
 
-    private void CreateVector4(Transform parent, Controllable target, FieldInfo property, bool isInteractible)
+    private Vector4UI CreateVector4(Transform parent, Controllable target, FieldInfo property, bool isInteractible)
     {
-        ControllableUI.Create<Vector4UI>(parent).CreateUI(target, property, isInteractible);
+        var newVector = ControllableUI.Create<Vector4UI>(parent);
+        newVector.CreateUI(target, property, isInteractible);
+        return newVector;
     }
 
-    private void CreateVector3Int(Transform parent, Controllable target, FieldInfo property, bool isInteractible)
+    private Vector3IntUI CreateVector3Int(Transform parent, Controllable target, FieldInfo property, bool isInteractible)
     {
-        ControllableUI.Create<Vector3IntUI>(parent).CreateUI(target, property, isInteractible);
+        var newVector = ControllableUI.Create<Vector3IntUI>(parent);
+        newVector.CreateUI(target, property, isInteractible);
+        return newVector;
     }
 
-    private void CreateVector2(Transform parent, Controllable target, FieldInfo property, bool isInteractible)
+    private Vector2UI CreateVector2(Transform parent, Controllable target, FieldInfo property, bool isInteractible)
     {
-        ControllableUI.Create<Vector2UI>(parent).CreateUI(target, property, isInteractible);
+        var newVector = ControllableUI.Create<Vector2UI>(parent);
+        newVector.CreateUI(target, property, isInteractible);
+        return newVector;
     }
 
-    private void CreateVector2Int(Transform parent, Controllable target, FieldInfo property, bool isInteractible)
+    private Vector2IntUI CreateVector2Int(Transform parent, Controllable target, FieldInfo property, bool isInteractible)
     {
-        ControllableUI.Create<Vector2IntUI>(parent).CreateUI(target, property, isInteractible);
+        var newVector = ControllableUI.Create<Vector2IntUI>(parent);
+        newVector.CreateUI(target, property, isInteractible);
+        return newVector;
     }
 
     public void ClickOnDropdown()
@@ -813,6 +835,22 @@ public class UIMaster : MonoBehaviour
     {
         if (colorPicker.linkedUI != null)
             colorPicker.linkedUI.EndPickerEdit();
+    }
+
+    #endregion
+
+    #region Tooltip
+
+    /// <summary>Asks for <paramref name="source"/>'s tooltip, which appears once the pointer has rested
+    /// on its row.</summary>
+    public void ShowTooltip(string text, TooltipTrigger source)
+    {
+        tooltipPopup.Request(text, source);
+    }
+
+    public void HideTooltip(TooltipTrigger source)
+    {
+        tooltipPopup.Release(source);
     }
 
     #endregion

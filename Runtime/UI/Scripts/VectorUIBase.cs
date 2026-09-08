@@ -30,6 +30,8 @@ public abstract class VectorUIBase : ControllableUI
     Text[] _axisLabels;
     Text _label;
 
+    public override Text NameLabel { get { return _label; } }
+
     #region Widget
 
     protected override void BuildHierarchy()

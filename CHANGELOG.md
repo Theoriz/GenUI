@@ -12,8 +12,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- A member's `[Tooltip]` shows on hover over the member's name, in the browser as that label's `title`, instead of taking a row of its own under the widget.
 - `UIMaster` no longer sets a custom script execution order.
 - The rule setting off the global preset buttons sits under them, since nothing precedes them in the panel.
+
+### Removed
+
+- `TooltipUI`, and the `GenUIStyle.TooltipHeight` and `GenUIStyle.TooltipBottomSpacing` values it was drawn with, along with their `tooltip-height` and `tooltip-bottom-spacing` CSS tokens.
+- A member no widget is drawn for no longer shows its tooltip, having no row to hover.
 
 ## [4.1.0] - 2026-09-07
 

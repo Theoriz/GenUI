@@ -20,7 +20,6 @@ public static class GenUIStyle
     public const float RowHeight = 25f;
 
     public const float HeaderHeight = 40f;
-    public const float TooltipHeight = 20f;
     public const float PanelTitleHeight = 35f;
     public const float PresetRowHeight = 25f;
 
@@ -81,8 +80,20 @@ public static class GenUIStyle
     /// <summary>Inset of an input field's text and placeholder from its box.</summary>
     public static readonly Vector2 InputTextInset = new Vector2(10f, 7f);
 
-    /// <summary>Empty space kept under a tooltip, so it reads as belonging to the row above it.</summary>
-    public const float TooltipBottomSpacing = 8f;
+    /// <summary>How long the pointer has to rest on a row before its tooltip appears.</summary>
+    public const float TooltipDelay = 0.5f;
+
+    /// <summary>Widest a tooltip gets before its text wraps. Shorter than a panel: a tooltip is read in
+    /// one glance beside the pointer, not laid out as a paragraph across the screen.</summary>
+    public const float TooltipMaxWidth = 300f;
+
+    /// <summary>Inset of a tooltip's text from its backing. An int because it is handed straight to the
+    /// layout group's RectOffset.</summary>
+    public const int TooltipPadding = 6;
+
+    /// <summary>Where a tooltip's top-left corner sits relative to the pointer, so the cursor does not
+    /// stand on the first word.</summary>
+    public static readonly Vector2 TooltipCursorOffset = new Vector2(16f, -8f);
 
     /// <summary>Empty space kept above the first method button, so the buttons read as a block of
     /// their own rather than as one more member row.</summary>
@@ -116,6 +127,11 @@ public static class GenUIStyle
     public static readonly Color PlaceholderColor = new Color(1f, 1f, 1f, 0.5f);
 
     public static readonly Color TooltipColor = new Color(0.7f, 0.7f, 0.7f, 1f);
+
+    /// <summary>Opaque, unlike the panel: a tooltip is drawn over the rows it explains, which a
+    /// translucent backing would leave showing through its text.</summary>
+    public static readonly Color TooltipBackground = new Color(0.13f, 0.13f, 0.13f, 1f);
+
     public static readonly Color PanelBackground = new Color(0.078431375f, 0.078431375f, 0.078431375f, 0.4509804f);
 
     /// <summary>
@@ -250,7 +266,8 @@ public static class GenUIStyle
     /// Generated rather than hand-written so the browser cannot drift from the panel: changing a
     /// metric here moves both. Ratios become percentages and lengths pixels, which is what the client
     /// uses them as; a colour that a panel's own bar tints (the title backing) is emitted as its alpha
-    /// alone, since the bar colour is per-controllable and arrives with the schema.
+    /// alone, since the bar colour is per-controllable and arrives with the schema. The tooltip popup's
+    /// own metrics are left out: the browser draws its tooltip itself, from the title attribute.
     /// </remarks>
     public static string ToCss()
     {
@@ -259,7 +276,6 @@ public static class GenUIStyle
 
         Length(css, "row-height", RowHeight);
         Length(css, "header-height", HeaderHeight);
-        Length(css, "tooltip-height", TooltipHeight);
         Length(css, "panel-title-height", PanelTitleHeight);
         Length(css, "preset-row-height", PresetRowHeight);
         Length(css, "checkbox-size", CheckboxSize);
@@ -284,7 +300,6 @@ public static class GenUIStyle
         Percent(css, "label-width-ratio", LabelWidthRatio);
         Length(css, "input-text-inset-x", InputTextInset.x);
         Length(css, "input-text-inset-y", InputTextInset.y);
-        Length(css, "tooltip-bottom-spacing", TooltipBottomSpacing);
         Length(css, "method-gap-height", MethodGapHeight);
         Length(css, "panel-title-bottom-spacing", PanelTitleBottomSpacing);
 

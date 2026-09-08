@@ -182,15 +182,6 @@ body {
   font-weight: bold;
 }
 
-.tooltip {
-  min-height: var(--genui-tooltip-height);
-  padding-bottom: var(--genui-tooltip-bottom-spacing);
-  font-size: var(--genui-tooltip-font-size);
-  line-height: 1.25;
-  color: var(--genui-tooltip-color);
-  white-space: pre-wrap;
-}
-
 /* Controls
    ------------------------------------------------------------------------------------------- */
 

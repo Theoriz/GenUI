@@ -52,7 +52,6 @@ namespace Theoriz.GenUI.Tests
         //The counts Tab navigation walks and the read-only pass covers. A widget that silently built
         //one field too few would still look right and would drop out of the Tab sequence.
         [TestCase(typeof(HeaderUI), 0)]
-        [TestCase(typeof(TooltipUI), 0)]
         [TestCase(typeof(ButtonUI), 0)]
         [TestCase(typeof(ToggleUI), 0)]
         [TestCase(typeof(ColorUI), 0)]
@@ -126,7 +125,6 @@ namespace Theoriz.GenUI.Tests
         //widget added its own, a bool row had none that ever fired and a slider's label had one that
         //could not: pointer-up only reaches the object that took the press.
         [TestCase(typeof(HeaderUI))]
-        [TestCase(typeof(TooltipUI))]
         [TestCase(typeof(ButtonUI))]
         [TestCase(typeof(ToggleUI))]
         [TestCase(typeof(ColorUI))]
@@ -142,6 +140,26 @@ namespace Theoriz.GenUI.Tests
                 widgetType.Name + " leaves its own row unclickable.");
             Assert.IsNotNull(built.GetComponent<Graphic>(),
                 widgetType.Name + " has no graphic on its row, so its bare parts are not raycast.");
+        }
+
+        //A tooltip is hovered on the member's name, as it is in the browser. A widget whose label the
+        //panel cannot reach would silently show no tooltip at all, which is what this pins.
+        [TestCase(typeof(ToggleUI))]
+        [TestCase(typeof(InputFieldUI))]
+        [TestCase(typeof(SliderUI))]
+        [TestCase(typeof(DropdownUI))]
+        [TestCase(typeof(ColorUI))]
+        [TestCase(typeof(Vector3UI))]
+        public void SetTooltip_HangsTheTextOnTheMemberLabel(Type widgetType)
+        {
+            var built = Build(widgetType);
+
+            built.SetTooltip("What this member does.");
+
+            Assert.IsNotNull(built.NameLabel, widgetType.Name + " reports no label to hover.");
+            var trigger = built.NameLabel.GetComponent<TooltipTrigger>();
+            Assert.IsNotNull(trigger, widgetType.Name + " shows no tooltip when its name is hovered.");
+            Assert.AreEqual("What this member does.", trigger.text);
         }
 
         //The swatch is the control of the colour row, so it is the only part that opens the picker: a
