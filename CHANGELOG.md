@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [4.3.0] - 2026-09-14
+
+### Added
+
+- Dragging the panel scrollbar left or right resizes the panel, through `ScrollbarResizeGrip` beside the `Scrollbar` in the sample prefab.
+- `GenUIStyle.SliderColors()` defines the slider handle's tints, emitted to the browser as the `slider-handle-*` tokens.
+- `GenUIStyle.PanelWidth`, `PanelSpacing`, `ScrollbarWidth`, `ScrollbarSpacing`, `ScrollViewBackground`, `ScrollbarTrack`, `ScrollbarHandle`, `ScrollbarColors()` and `ToggleBoxWidthRatio`, with `panel-width`, `panel-spacing`, `toggle-box-width` and `scroll-view-background` emitted to the browser.
+
+### Changed
+
+- `UIMaster` styles the scroll view and its scrollbar from `GenUIStyle` at startup, so the prefab's serialized look only shows in the Editor.
+- A panel no longer draws a translucent backing of its own; the scroll view's flat background is the one behind every panel, in the browser too.
+- A read-only slider dims its handle only, so the track still shows where the value sits.
+
+### Removed
+
+- `GenUIStyle.PanelBackground` and its `panel-background` CSS token.
+
 ## [4.2.0] - 2026-09-08
 
 ### Fixed

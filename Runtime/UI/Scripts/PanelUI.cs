@@ -50,7 +50,6 @@ public class PanelUI : ControllableUI
         UIFactory.AddLayoutElement(bar.gameObject, minWidth: GenUIStyle.ColorBarWidth);
 
         var control = UIFactory.CreateChild("ControlPanel", root);
-        UIFactory.AddImage(control.gameObject, GenUIAssets.Instance.Background, GenUIStyle.PanelBackground);
         UIFactory.AddVerticalLayout(control.gameObject, padding: GenUIStyle.PanelPadding, controlHeight: false);
 
         var panel = control.gameObject.AddComponent<PanelUI>();
@@ -62,8 +61,7 @@ public class PanelUI : ControllableUI
     void BuildTitle(string title, Color barColor)
     {
         _title = UIFactory.CreateRect("Title", transform, GenUIStyle.PanelTitleHeight);
-        UIFactory.AddImage(_title.gameObject, GenUIAssets.Instance.Background,
-            GenUIStyle.PanelTitleBackground(barColor));
+        UIFactory.AddImage(_title.gameObject, null, GenUIStyle.PanelTitleBackground(barColor), Image.Type.Simple);
 
         var arrow = UIFactory.CreateRect("Image", _title);
         arrow.anchorMin = new Vector2(0f, 0.5f);

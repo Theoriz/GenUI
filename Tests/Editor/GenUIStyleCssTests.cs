@@ -24,15 +24,16 @@ namespace Theoriz.GenUI.Tests.Editor
             "preset-section-padding", "preset-section-gap", "separator-space-above", "separator-thickness",
             "panel-bar-gap", "axis-spacing", "axis-label-gap", "slider-track-start", "slider-track-end",
             "slider-value-start", "slider-track-inset", "slider-handle-width", "slider-band-min",
-            "slider-band-max", "label-width-ratio", "input-text-inset-x", "input-text-inset-y",
-            "method-gap-height", "panel-title-bottom-spacing",
+            "slider-band-max", "label-width-ratio", "toggle-box-width", "input-text-inset-x", "input-text-inset-y",
+            "method-gap-height", "panel-title-bottom-spacing", "panel-width", "panel-spacing",
             "label-font-size", "panel-title-font-size", "tooltip-font-size", "label-min-font-size",
-            "label-color", "input-text-color", "placeholder-color", "tooltip-color", "panel-background",
+            "label-color", "input-text-color", "placeholder-color", "tooltip-color", "scroll-view-background",
             "panel-title-background-alpha", "separator-color", "toggle-on", "toggle-off",
             "dropdown-template-background", "dropdown-item-background", "dropdown-item-label",
             "popup-backdrop", "caret-color", "selection-color",
             "control-normal", "control-highlighted", "control-pressed", "control-selected",
             "control-disabled", "control-fade-duration",
+            "slider-handle-normal", "slider-handle-highlighted", "slider-handle-pressed", "slider-handle-disabled",
             "picker-padding", "picker-content-width", "picker-sv-height", "picker-bar-thickness",
             "picker-bar-spacing", "picker-field-row-height", "picker-width", "picker-height",
             "picker-marker-size", "picker-marker-thickness", "picker-checker-cell-size",
@@ -118,11 +119,11 @@ namespace Theoriz.GenUI.Tests.Editor
         [Test]
         public void AColour_IsEmittedAsRgbaWithByteChannels()
         {
-            AssertShape("panel-background", @"rgba\(\d{1,3}, \d{1,3}, \d{1,3}, " + Number + @"\)");
+            AssertShape("picker-background", @"rgba\(\d{1,3}, \d{1,3}, \d{1,3}, " + Number + @"\)");
             AssertShape("control-normal", @"rgba\(\d{1,3}, \d{1,3}, \d{1,3}, " + Number + @"\)");
 
-            var channels = Regex.Match(ValueOf("panel-background"), @"rgba\((\d+), (\d+), (\d+), ");
-            Assert.AreEqual(Mathf.RoundToInt(GenUIStyle.PanelBackground.r * 255f),
+            var channels = Regex.Match(ValueOf("picker-background"), @"rgba\((\d+), (\d+), (\d+), ");
+            Assert.AreEqual(Mathf.RoundToInt(GenUIStyle.PickerBackground.r * 255f),
                 int.Parse(channels.Groups[1].Value), "The red channel is not the colour's, in bytes.");
         }
 

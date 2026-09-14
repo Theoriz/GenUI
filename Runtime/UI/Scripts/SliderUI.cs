@@ -63,6 +63,7 @@ public class SliderUI : ControllableUI
         //only has to be a starting point.
         var slider = rect.gameObject.AddComponent<Slider>();
         slider.targetGraphic = handleImage;
+        slider.colors = GenUIStyle.SliderColors();
         slider.fillRect = fill;
         slider.handleRect = handle;
         slider.direction = Slider.Direction.LeftToRight;

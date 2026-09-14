@@ -77,6 +77,9 @@ public static class GenUIStyle
     /// <summary>Fraction of the row the label takes; the control fills the rest.</summary>
     public const float LabelWidthRatio = 0.5f;
 
+    /// <summary>Fraction of the row a toggle's box takes, starting where the label ends.</summary>
+    public const float ToggleBoxWidthRatio = 0.13f;
+
     /// <summary>Inset of an input field's text and placeholder from its box.</summary>
     public static readonly Vector2 InputTextInset = new Vector2(10f, 7f);
 
@@ -103,6 +106,18 @@ public static class GenUIStyle
     /// the heading. A row of its own rather than extra title height, which would grow the tinted
     /// backing behind the title text.</summary>
     public const float PanelTitleBottomSpacing = 10f;
+
+    /// <summary>Width of the scroll view holding the panels, as UIMaster sets it on the sample prefab;
+    /// the resize handle can change it afterwards.</summary>
+    public const float PanelWidth = 350f;
+
+    /// <summary>Space between one panel and the next in the scroll view.</summary>
+    public const float PanelSpacing = 4.5f;
+
+    public const float ScrollbarWidth = 10f;
+
+    /// <summary>Gap between the scrollbar and the panels; the viewport is inset by the two together.</summary>
+    public const float ScrollbarSpacing = 3f;
 
     #endregion
 
@@ -132,15 +147,22 @@ public static class GenUIStyle
     /// translucent backing would leave showing through its text.</summary>
     public static readonly Color TooltipBackground = new Color(0.13f, 0.13f, 0.13f, 1f);
 
-    public static readonly Color PanelBackground = new Color(0.078431375f, 0.078431375f, 0.078431375f, 0.4509804f);
+    /// <summary>The one backing behind the panels: the scroll view's, applied by UIMaster, and the
+    /// web page's.</summary>
+    public static readonly Color ScrollViewBackground = new Color(0.039215688f, 0.039215688f, 0.039215688f, 1f);
+
+    public static readonly Color ScrollbarTrack = new Color(0.13333334f, 0.13333334f, 0.13333334f, 1f);
+
+    /// <summary>The handle as drawn: ScrollbarColors() leaves it untinted at rest.</summary>
+    public static readonly Color ScrollbarHandle = new Color(0.35294116f, 0.35294116f, 0.35294116f, 1f);
 
     /// <summary>
     /// The backing behind a panel's title, tinted from that panel's own bar colour so the heading is
     /// told apart from the rows under it and still reads as belonging to the panel.
     /// </summary>
     /// <remarks>
-    /// Kept faint: the panel is translucent over whatever the scene shows, so a strong tint would
-    /// fight the bar rather than back the title.
+    /// Kept faint: the panel has no backing of its own, so a strong tint would fight the bar rather
+    /// than back the title.
     /// </remarks>
     public static Color PanelTitleBackground(Color barColor)
     {
@@ -149,8 +171,8 @@ public static class GenUIStyle
 
     public const float PanelTitleBackgroundAlpha = 0.08f;
 
-    /// <summary>The rule bounding a preset section. Light rather than dark: the panel is drawn over
-    /// whatever the scene shows, so only a line brighter than the rows reads on every background.</summary>
+    /// <summary>The rule bounding a preset section. Light rather than dark: the panel has no backing
+    /// of its own, so only a line brighter than the rows reads on the dark scroll view.</summary>
     public static readonly Color SeparatorColor = new Color(1f, 1f, 1f, 0.04f);
 
     public static readonly Color ToggleOn = new Color(0.43f, 0.9f, 0.47f, 0.75f);
@@ -190,6 +212,36 @@ public static class GenUIStyle
         colors.pressedColor = new Color(0.09019608f, 0.09019608f, 0.09019608f, 1f);
         colors.selectedColor = new Color(0.28235295f, 0.28235295f, 0.28235295f, 1f);
         colors.disabledColor = Color.clear;
+        colors.colorMultiplier = 1f;
+        colors.fadeDuration = 0.1f;
+        return colors;
+    }
+
+    /// <summary>The tints of a slider's handle: untinted at rest, dimming to half alpha when read-only
+    /// while the track behind it keeps showing where the value sits in its range.</summary>
+    public static ColorBlock SliderColors()
+    {
+        var colors = ColorBlock.defaultColorBlock;
+        colors.normalColor = Color.white;
+        colors.highlightedColor = new Color(0.9607843f, 0.9607843f, 0.9607843f, 1f);
+        colors.pressedColor = new Color(0.78431374f, 0.78431374f, 0.78431374f, 1f);
+        colors.selectedColor = new Color(0.9607843f, 0.9607843f, 0.9607843f, 1f);
+        colors.disabledColor = new Color(0.78431374f, 0.78431374f, 0.78431374f, 0.5f);
+        colors.colorMultiplier = 1f;
+        colors.fadeDuration = 0.1f;
+        return colors;
+    }
+
+    /// <summary>The tints of the panel scrollbar's handle: white except while pressed, so
+    /// ScrollbarHandle is the colour, not something to dim.</summary>
+    public static ColorBlock ScrollbarColors()
+    {
+        var colors = ColorBlock.defaultColorBlock;
+        colors.normalColor = Color.white;
+        colors.highlightedColor = Color.white;
+        colors.pressedColor = new Color(0.8f, 0.8f, 0.8f, 1f);
+        colors.selectedColor = Color.white;
+        colors.disabledColor = Color.white;
         colors.colorMultiplier = 1f;
         colors.fadeDuration = 0.1f;
         return colors;
@@ -298,10 +350,13 @@ public static class GenUIStyle
         Percent(css, "slider-band-min", SliderBandMin);
         Percent(css, "slider-band-max", SliderBandMax);
         Percent(css, "label-width-ratio", LabelWidthRatio);
+        Percent(css, "toggle-box-width", ToggleBoxWidthRatio);
         Length(css, "input-text-inset-x", InputTextInset.x);
         Length(css, "input-text-inset-y", InputTextInset.y);
         Length(css, "method-gap-height", MethodGapHeight);
         Length(css, "panel-title-bottom-spacing", PanelTitleBottomSpacing);
+        Length(css, "panel-width", PanelWidth);
+        Length(css, "panel-spacing", PanelSpacing);
 
         Length(css, "label-font-size", LabelFontSize);
         Length(css, "panel-title-font-size", PanelTitleFontSize);
@@ -312,7 +367,7 @@ public static class GenUIStyle
         Rgba(css, "input-text-color", InputTextColor);
         Rgba(css, "placeholder-color", PlaceholderColor);
         Rgba(css, "tooltip-color", TooltipColor);
-        Rgba(css, "panel-background", PanelBackground);
+        Rgba(css, "scroll-view-background", ScrollViewBackground);
         Number(css, "panel-title-background-alpha", PanelTitleBackgroundAlpha);
         Rgba(css, "separator-color", SeparatorColor);
         Rgba(css, "toggle-on", ToggleOn);
@@ -331,6 +386,12 @@ public static class GenUIStyle
         Rgba(css, "control-selected", controls.selectedColor);
         Rgba(css, "control-disabled", controls.disabledColor);
         Seconds(css, "control-fade-duration", controls.fadeDuration);
+
+        var slider = SliderColors();
+        Rgba(css, "slider-handle-normal", slider.normalColor);
+        Rgba(css, "slider-handle-highlighted", slider.highlightedColor);
+        Rgba(css, "slider-handle-pressed", slider.pressedColor);
+        Rgba(css, "slider-handle-disabled", slider.disabledColor);
 
         Length(css, "picker-padding", PickerPadding);
         Length(css, "picker-content-width", PickerContentWidth);

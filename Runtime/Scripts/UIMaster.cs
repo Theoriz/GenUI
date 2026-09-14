@@ -178,7 +178,10 @@ public class UIMaster : MonoBehaviour
     {
         _scrollRect = GetComponentInChildren<ScrollRect>(true);
         if (_scrollRect != null)
+        {
             MainPanel = _scrollRect.content;
+            StyleScrollView();
+        }
         else
             Debug.LogError("[GenUI] No ScrollRect found under UIMaster; the panel container is missing.");
 
@@ -191,6 +194,56 @@ public class UIMaster : MonoBehaviour
 
         tooltipPopup = TooltipPopup.Build(_rootCanvas.transform);
         tooltipPopup.transform.SetAsLastSibling();
+    }
+
+    //The scroll view is the prefab's, but its look is the style's: what the prefab serializes is only
+    //what the Editor shows before Play. Every part is optional, since a host can build a barer one.
+    void StyleScrollView()
+    {
+        var view = (RectTransform)_scrollRect.transform;
+        view.sizeDelta = new Vector2(GenUIStyle.PanelWidth, view.sizeDelta.y);
+
+        var background = _scrollRect.GetComponent<Image>();
+        if (background != null)
+        {
+            background.sprite = null;
+            background.color = GenUIStyle.ScrollViewBackground;
+        }
+
+        var layout = _scrollRect.content != null ? _scrollRect.content.GetComponent<VerticalLayoutGroup>() : null;
+        if (layout != null)
+            layout.spacing = GenUIStyle.PanelSpacing;
+
+        var scrollbar = _scrollRect.verticalScrollbar;
+        if (scrollbar == null)
+            return;
+
+        var scrollbarInset = GenUIStyle.ScrollbarWidth + GenUIStyle.ScrollbarSpacing;
+        _scrollRect.verticalScrollbarSpacing = GenUIStyle.ScrollbarSpacing;
+
+        var bar = (RectTransform)scrollbar.transform;
+        bar.sizeDelta = new Vector2(GenUIStyle.ScrollbarWidth, bar.sizeDelta.y);
+
+        //Permanent visibility leaves the viewport alone, so the room for the bar is set here.
+        if (_scrollRect.viewport != null)
+            _scrollRect.viewport.offsetMax = new Vector2(-scrollbarInset, _scrollRect.viewport.offsetMax.y);
+
+        var track = scrollbar.GetComponent<Image>();
+        if (track != null)
+        {
+            track.sprite = null;
+            track.color = GenUIStyle.ScrollbarTrack;
+        }
+
+        var handle = scrollbar.targetGraphic as Image;
+        if (handle != null)
+        {
+            handle.sprite = GenUIAssets.Instance.Background;
+            handle.type = Image.Type.Sliced;
+            handle.color = GenUIStyle.ScrollbarHandle;
+        }
+
+        scrollbar.colors = GenUIStyle.ScrollbarColors();
     }
 
     #endregion

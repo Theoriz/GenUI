@@ -137,7 +137,7 @@ Unity widgets keep with SetValueWithoutNotify and SliderUI._updating.
     var body = element("div", "panel-body", panel);
 
     var title = element("div", "panel-title", body);
-    //Faint, as PanelTitleBackground tints it: the panel is translucent over whatever is behind it.
+    //Faint, as PanelTitleBackground tints it: the panel has no backing of its own.
     title.style.background = cssColor(c.barColor, cssNumber("--genui-panel-title-background-alpha"));
     element("span", "panel-arrow", title).style.color = barColor;
     element("span", null, title).textContent = c.id;

@@ -51,6 +51,7 @@ https://github.com/Theoriz/GenUI.git
 - Tab / Shift + Tab : Move to the next/previous input field, selecting its text so you can type over it.
 - Ctrl + Z : Undo the last value you changed in the UI. A whole slider drag, label scrub or colour pick undoes in one press. Values arriving over OSC, and members restored by loading a preset, are not undone.
 - Drag a numeric member's label left/right : Scrub its value, one label per vector axis, with Shift for coarse steps and Ctrl for fine ones.
+- Drag the panel's right edge, or its scrollbar left/right : Resize the panel. Dragging the scrollbar up/down scrolls.
 
 Scaling is ignored while you are typing in an input field.
 

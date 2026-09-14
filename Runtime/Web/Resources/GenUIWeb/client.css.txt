@@ -7,23 +7,12 @@ what has no token of its own is written here, and each one says where its value 
 */
 
 :root {
-  /* The panel's width, from the sample prefab's scroll view rather than from GenUIStyle. */
-  --genui-panel-width: 323px;
-
-  /* Space between panels: the scroll view content's layout spacing. */
-  --genui-panel-spacing: 4.5px;
-
-  /* The checkbox's box, ToggleUI's own 0.13 of the row beside the label half. */
-  --genui-toggle-box-width: 13%;
-
   /* The 9-sliced sprites become rounded rectangles; see the deviations in the README. */
   --genui-corner-radius: 3px;
 
   /* The transparent margin those sprites keep inside their rect, which is what separates one row's
      control from the next in the panel - a CSS box has none, so the drawn controls are inset by it. */
   --genui-control-inset: 1px;
-
-  --genui-page-background: #101010;
 }
 
 * {
@@ -33,7 +22,7 @@ what has no token of its own is written here, and each one says where its value 
 body {
   margin: 0;
   padding: 8px;
-  background: var(--genui-page-background);
+  background: var(--genui-scroll-view-background, #0a0a0a);
   color: var(--genui-label-color, #fff);
   font-family: Roboto, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   font-size: var(--genui-label-font-size, 14px);
@@ -74,7 +63,6 @@ body {
   flex: 1;
   min-width: 0;
   padding: var(--genui-panel-padding);
-  background: var(--genui-panel-background);
 }
 
 .panel-title {
@@ -332,13 +320,27 @@ select:disabled {
   bottom: 0;
   width: var(--genui-slider-handle-width);
   border-radius: 50%;
-  background: var(--genui-label-color);
+  background: var(--genui-slider-handle-normal);
   transform: translateX(-50%);
+  transition: background-color var(--genui-control-fade-duration);
 }
 
+.slider:hover .slider-handle {
+  background: var(--genui-slider-handle-highlighted);
+}
+
+.slider:active .slider-handle {
+  background: var(--genui-slider-handle-pressed);
+}
+
+/* Read-only: only the handle dims, as the Slider's disabled tint does; the track still shows where
+   the value sits in its range. */
 .row.read-only .slider {
   cursor: default;
-  opacity: 0.5;
+}
+
+.row.read-only .slider .slider-handle {
+  background: var(--genui-slider-handle-disabled);
 }
 
 .slider-value {

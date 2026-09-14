@@ -17,7 +17,7 @@ public class ToggleUI : ControllableUI
         _label = UIFactory.CreateLabel(transform);
 
         //The box sits at the left of the control half, the width of the row it stands in.
-        var box = UIFactory.CreateSlice("Background", transform, GenUIStyle.LabelWidthRatio, GenUIStyle.LabelWidthRatio + 0.13f);
+        var box = UIFactory.CreateSlice("Background", transform, GenUIStyle.LabelWidthRatio, GenUIStyle.LabelWidthRatio + GenUIStyle.ToggleBoxWidthRatio);
         var background = UIFactory.AddImage(box.gameObject, GenUIAssets.Instance.Box, Color.white);
 
         var checkRect = UIFactory.CreateCentered("Checkmark", box, GenUIStyle.CheckboxSize, GenUIStyle.CheckboxSize);
