@@ -44,7 +44,7 @@ public class SliderUI : ControllableUI
         //handle visibly stops short of the ends it is supposed to reach.
         var background = Band("Background", rect);
         background.sizeDelta = new Vector2(-GenUIStyle.SliderHandleWidth, 0f);
-        UIFactory.AddImage(background.gameObject, GenUIAssets.Instance.Background, Color.white);
+        UIFactory.AddImage(background.gameObject, GenUIAssets.Instance.Background, GenUIStyle.SliderTrack);
 
         var fillArea = Band("Fill Area", rect);
         fillArea.sizeDelta = new Vector2(-GenUIStyle.SliderHandleWidth, 0f);

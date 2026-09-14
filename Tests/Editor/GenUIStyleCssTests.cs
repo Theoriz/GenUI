@@ -27,7 +27,7 @@ namespace Theoriz.GenUI.Tests.Editor
             "slider-band-max", "label-width-ratio", "toggle-box-width", "input-text-inset-x", "input-text-inset-y",
             "method-gap-height", "panel-title-bottom-spacing", "panel-width", "panel-spacing",
             "label-font-size", "panel-title-font-size", "tooltip-font-size", "label-min-font-size",
-            "label-color", "input-text-color", "placeholder-color", "tooltip-color", "scroll-view-background",
+            "label-color", "input-text-color", "placeholder-color", "tooltip-color", "scroll-view-background", "slider-track",
             "panel-title-background-alpha", "separator-color", "toggle-on", "toggle-off",
             "dropdown-template-background", "dropdown-item-background", "dropdown-item-label",
             "popup-backdrop", "caret-color", "selection-color",

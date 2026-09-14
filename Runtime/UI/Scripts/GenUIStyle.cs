@@ -153,6 +153,9 @@ public static class GenUIStyle
 
     public static readonly Color ScrollbarTrack = new Color(0.13333334f, 0.13333334f, 0.13333334f, 1f);
 
+    /// <summary>The empty part of a slider's bar, kept darker than the controls so the fill reads against it.</summary>
+    public static readonly Color SliderTrack = new Color(0.13333334f, 0.13333334f, 0.13333334f, 1f);
+
     /// <summary>The handle as drawn: ScrollbarColors() leaves it untinted at rest.</summary>
     public static readonly Color ScrollbarHandle = new Color(0.35294116f, 0.35294116f, 0.35294116f, 1f);
 
@@ -368,6 +371,7 @@ public static class GenUIStyle
         Rgba(css, "placeholder-color", PlaceholderColor);
         Rgba(css, "tooltip-color", TooltipColor);
         Rgba(css, "scroll-view-background", ScrollViewBackground);
+        Rgba(css, "slider-track", SliderTrack);
         Number(css, "panel-title-background-alpha", PanelTitleBackgroundAlpha);
         Rgba(css, "separator-color", SeparatorColor);
         Rgba(css, "toggle-on", ToggleOn);

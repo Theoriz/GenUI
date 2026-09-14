@@ -307,7 +307,7 @@ select:disabled {
 
 .slider-track {
   right: calc(var(--genui-slider-handle-width) / 2);
-  background: var(--genui-control-normal);
+  background: var(--genui-slider-track);
 }
 
 .slider-fill {
