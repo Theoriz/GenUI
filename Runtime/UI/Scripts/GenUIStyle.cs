@@ -154,7 +154,7 @@ public static class GenUIStyle
     public static readonly Color ScrollbarTrack = new Color(0.13333334f, 0.13333334f, 0.13333334f, 1f);
 
     /// <summary>The empty part of a slider's bar, kept darker than the controls so the fill reads against it.</summary>
-    public static readonly Color SliderTrack = new Color(0.13333334f, 0.13333334f, 0.13333334f, 1f);
+    public static readonly Color SliderTrack = new Color(0.2f, 0.2f, 0.2f, 1f);
 
     /// <summary>The handle as drawn: ScrollbarColors() leaves it untinted at rest.</summary>
     public static readonly Color ScrollbarHandle = new Color(0.35294116f, 0.35294116f, 0.35294116f, 1f);
