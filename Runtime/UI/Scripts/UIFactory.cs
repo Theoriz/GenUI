@@ -227,21 +227,52 @@ public static class UIFactory
     /// Puts a popup at a screen point, moved back inside the screen when it would hang over an edge.
     /// </summary>
     /// <remarks>
-    /// The canvas is a screen-space overlay, so a rect's world coordinates are screen pixels and the
-    /// point can be used as a position directly. The size is read after a forced layout pass: a popup
-    /// sized by a ContentSizeFitter has no size yet on the frame it is re-enabled, and would be
-    /// clamped as if it were empty.
+    /// The point is projected onto the popup's parent through the canvas's event camera, so it lands
+    /// under the pointer whatever the render mode; the clamp then works on the popup's corners
+    /// projected back to the screen. The size is read after a forced layout pass: a popup sized by a
+    /// ContentSizeFitter has no size yet on the frame it is re-enabled, and would be clamped as if it
+    /// were empty.
     /// </remarks>
     public static void PlacePopup(RectTransform content, Vector2 screenPoint)
     {
         LayoutRebuilder.ForceRebuildLayoutImmediate(content);
 
-        content.position = screenPoint;
+        var camera = EventCameraFor(content.GetComponentInParent<Canvas>());
+        var parent = (RectTransform)content.parent;
+
+        PlaceAt(content, parent, screenPoint, camera);
 
         var corners = new Vector3[4];
         content.GetWorldCorners(corners);
+        var min = RectTransformUtility.WorldToScreenPoint(camera, corners[0]);
+        var max = RectTransformUtility.WorldToScreenPoint(camera, corners[2]);
 
-        content.position += (Vector3)ScreenNudge(corners[0], corners[2], new Vector2(Screen.width, Screen.height));
+        var nudge = ScreenNudge(min, max, new Vector2(Screen.width, Screen.height));
+        if (nudge != Vector2.zero)
+            PlaceAt(content, parent, screenPoint + nudge, camera);
+    }
+
+    static void PlaceAt(RectTransform content, RectTransform parent, Vector2 screenPoint, Camera camera)
+    {
+        Vector2 local;
+        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(parent, screenPoint, camera, out local))
+            content.localPosition = local;
+    }
+
+    /// <summary>
+    /// The camera a screen point is read through for <paramref name="canvas"/>: null for an overlay,
+    /// otherwise the canvas's own, or the main camera when it has none - the rule GraphicRaycaster
+    /// applies, so placement agrees with what the pointer hits.
+    /// </summary>
+    public static Camera EventCameraFor(Canvas canvas)
+    {
+        if (canvas == null || canvas.renderMode == RenderMode.ScreenSpaceOverlay)
+            return null;
+
+        if (canvas.renderMode == RenderMode.ScreenSpaceCamera && canvas.worldCamera == null)
+            return null;
+
+        return canvas.worldCamera != null ? canvas.worldCamera : Camera.main;
     }
 
     /// <summary>

@@ -31,12 +31,17 @@ public class UIMaster : MonoBehaviour
     public Key toggleUIKey = Key.F1;
     public Key resetUIKey = Key.F2;
 
+    //A world-space CanvasScaler ignores scaleFactor, so there the canvas transform is scaled instead,
+    //relative to the scale the host authored.
     public float UIScale
     {
         get => _uiScale;
-        set { 
+        set {
             _uiScale = value;
-            _canvasScaler.scaleFactor = _uiScale;
+            if (_canvas.renderMode == RenderMode.WorldSpace)
+                _canvasRect.localScale = _canvasBaseScale * _uiScale;
+            else
+                _canvasScaler.scaleFactor = _uiScale;
         }
     }
 
@@ -51,6 +56,9 @@ public class UIMaster : MonoBehaviour
 
     private bool displayUI;
     private GameObject _rootCanvas;
+    private Canvas _canvas;
+    private RectTransform _canvasRect;
+    private Vector3 _canvasBaseScale;
     private Dictionary<string, GameObject> _panels;
     private CanvasScaler _canvasScaler;
     private RectTransform _scrollViewTransform;
@@ -81,8 +89,13 @@ public class UIMaster : MonoBehaviour
         Undo = new UndoStack();
 
         _rootCanvas = transform.GetChild(0).gameObject;
+        _canvas = _rootCanvas.GetComponent<Canvas>();
+        _canvasRect = (RectTransform)_rootCanvas.transform;
+        _canvasBaseScale = _canvasRect.localScale;
         _canvasScaler = _rootCanvas.GetComponent<CanvasScaler>();
         _scrollViewTransform = (RectTransform)_rootCanvas.transform.GetChild(0);
+
+        WarnIfWorldCanvasIsFlat();
 
         ResolveLinks();
 
@@ -194,6 +207,19 @@ public class UIMaster : MonoBehaviour
 
         tooltipPopup = TooltipPopup.Build(_rootCanvas.transform);
         tooltipPopup.transform.SetAsLastSibling();
+    }
+
+    //An overlay canvas drives its own rect, so a prefab instance made before the rect was authored
+    //for world space still carries a zero scale and size there, and draws nothing once flipped.
+    void WarnIfWorldCanvasIsFlat()
+    {
+        if (_canvas.renderMode != RenderMode.WorldSpace)
+            return;
+
+        var scale = _canvasRect.localScale;
+        var size = _canvasRect.rect.size;
+        if (scale.x == 0f || scale.y == 0f || size.x == 0f || size.y == 0f)
+            Debug.LogWarning("[GenUI] The world-space canvas has a zero scale or size, so nothing will draw; give its RectTransform a size (e.g. 1920x1080) and a scale (e.g. 0.002).", _canvas);
     }
 
     //The scroll view is the prefab's, but its look is the style's: what the prefab serializes is only
@@ -912,8 +938,9 @@ public class UIMaster : MonoBehaviour
 
     void ResetUITransform()
     {
-        //Set scale from screen size to always get a visible UI
-        UIScale = Screen.width * 1.5f / 1920;
+        //Set scale from screen size to always get a visible UI; in world space the visible size is the
+        //host's, so 1 puts the canvas back at its authored scale.
+        UIScale = _canvas.renderMode == RenderMode.WorldSpace ? 1f : Screen.width * 1.5f / 1920;
 
         _scrollViewTransform.anchoredPosition = Vector2.zero;
     }

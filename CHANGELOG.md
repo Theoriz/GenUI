@@ -4,7 +4,22 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
-## [4.3.0] - 2026-09-14
+## [4.4.0] - 2026-09-15
+
+### Added
+
+- The canvas can be set to World Space or Screen Space - Camera; set the Render Mode on the prefab's Canvas as for any Unity canvas.
+- `UIMaster` warns when a world-space canvas has a zero scale or size, which is what a prefab instance made before this version carries.
+
+### Changed
+
+- The prefab's Canvas rect is authored at 1920x1080, scale 1, for use in World Space.
+- The scaling shortcuts and F2 scale the canvas transform in World Space, where `CanvasScaler.scaleFactor` has no effect.
+
+### Fixed
+
+- Popups and the tooltip open under the pointer in every render mode, through `UIFactory.EventCameraFor`.
+- Resizing the panel follows the pointer under a scaled, camera or world-space canvas.
 
 ### Added
 

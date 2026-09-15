@@ -64,6 +64,10 @@ Scaling is ignored while you are typing in an input field.
 2. Generate controllables for the scripts you want to control using the controllable generation described below.
 3. Run the scene, press F1 to toggle the UI.
 
+### Render mode
+
+The UI draws as a Screen Space - Overlay canvas by default. To put it in the world or in front of a camera, change the **Render Mode** on the GenUI prefab's Canvas as for any Unity canvas: in **World Space**, give its RectTransform a size and a scale (e.g. 1920x1080 at 0.002) and place it in the scene, leaving **Event Camera** empty to use the main camera. The scaling shortcuts then scale that transform and F2 puts it back.
+
 ### Controllable Generation
 
 1. In your MonoBehaviour script, add the [OCFExposed] attribute to the fields, properties and methods you want to expose to the UI and OSC.
