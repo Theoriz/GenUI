@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- `GenUIPanelSettings.panelPriority` is renamed `panelOrder` and `PanelPriority()` becomes `PanelOrder()`, so a value set on an existing component must be entered again.
 - The prefab's Canvas rect is authored at 1920x1080, scale 1, for use in World Space.
 - The scaling shortcuts and F2 scale the canvas transform in World Space, where `CanvasScaler.scaleFactor` has no effect.
 

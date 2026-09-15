@@ -290,7 +290,7 @@ namespace Theoriz.GenUI.Tests.Editor
                 otherMirror.controllableId = "Zulu";
                 otherMirror.controllableUsePresets = false;
                 otherMirror.Awake();
-                other.AddComponent<GenUIPanelSettings>().panelPriority = -1;
+                other.AddComponent<GenUIPanelSettings>().panelOrder = -1;
 
                 ControllableMaster.Register(otherMirror);
 
@@ -301,7 +301,7 @@ namespace Theoriz.GenUI.Tests.Editor
                 CollectionAssert.Contains(ids, "Schema");
                 CollectionAssert.Contains(ids, "Zulu");
                 Assert.Less(ids.IndexOf("Zulu"), ids.IndexOf("Schema"),
-                    "The lower priority wins over both the id and the registration order.");
+                    "The lower order value wins over both the id and the registration order.");
             }
             finally
             {

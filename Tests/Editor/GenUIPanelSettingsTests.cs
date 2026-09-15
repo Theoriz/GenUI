@@ -87,8 +87,8 @@ namespace Theoriz.GenUI.Tests.Editor
             Assert.AreEqual(GenUIPanelSettings.DefaultBarColor("TestScript"),
                 GenUIPanelSettings.BarColorFor(_controllable),
                 "Without the component the bar colour comes from the id, not from white.");
-            Assert.AreEqual(0, GenUIPanelSettings.PanelPriority(_controllable),
-                "Without the component a panel takes the neutral priority, so ids alone order the stack.");
+            Assert.AreEqual(0, GenUIPanelSettings.PanelOrder(_controllable),
+                "Without the component a panel takes the neutral order, so ids alone order the stack.");
         }
 
         [Test]
@@ -98,12 +98,12 @@ namespace Theoriz.GenUI.Tests.Editor
             settings.usePanel = false;
             settings.closePanelAtStart = false;
             settings.barColor = Color.green;
-            settings.panelPriority = -10;
+            settings.panelOrder = -10;
 
             Assert.IsFalse(GenUIPanelSettings.UsePanel(_controllable));
             Assert.IsFalse(GenUIPanelSettings.ClosePanelAtStart(_controllable));
             Assert.AreEqual(Color.green, GenUIPanelSettings.BarColorFor(_controllable));
-            Assert.AreEqual(-10, GenUIPanelSettings.PanelPriority(_controllable));
+            Assert.AreEqual(-10, GenUIPanelSettings.PanelOrder(_controllable));
         }
 
         #endregion
@@ -111,14 +111,14 @@ namespace Theoriz.GenUI.Tests.Editor
         #region Panel order
 
         [Test]
-        public void ComparePanels_PutsTheLowerPriorityFirst()
+        public void ComparePanels_PutsTheLowerOrderFirst()
         {
             Assert.Less(GenUIPanelSettings.ComparePanels("Zebra", -10, "Alpha", 0), 0,
-                "Priority orders the stack before the id does, or it cannot lift a panel above one named earlier.");
+                "The order value sorts the stack before the id does, or it cannot lift a panel above one named earlier.");
         }
 
         [Test]
-        public void ComparePanels_FallsBackToTheIdAtEqualPriority()
+        public void ComparePanels_FallsBackToTheIdAtEqualOrder()
         {
             Assert.Less(GenUIPanelSettings.ComparePanels("Alpha", 0, "Zebra", 0), 0);
             Assert.Greater(GenUIPanelSettings.ComparePanels("Zebra", 0, "Alpha", 0), 0);
@@ -129,7 +129,7 @@ namespace Theoriz.GenUI.Tests.Editor
         public void ComparePanels_KeepsTheGlobalPanelOnTop()
         {
             Assert.Less(GenUIPanelSettings.ComparePanels(GenUIPanelSettings.GlobalPanelId, 0, "Alpha", -1000), 0,
-                "The global panel is pinned, so no priority can push it down.");
+                "The global panel is pinned, so no order value can push it down.");
             Assert.Greater(GenUIPanelSettings.ComparePanels("Alpha", -1000, GenUIPanelSettings.GlobalPanelId, 0), 0);
         }
 
@@ -148,9 +148,9 @@ namespace Theoriz.GenUI.Tests.Editor
         }
 
         [Test]
-        public void ComparePanels_ReadsThePriorityOffTheComponent()
+        public void ComparePanels_ReadsTheOrderOffTheComponent()
         {
-            _go.AddComponent<GenUIPanelSettings>().panelPriority = -5;
+            _go.AddComponent<GenUIPanelSettings>().panelOrder = -5;
 
             var other = new GameObject("panel-settings-other") { hideFlags = HideFlags.HideAndDontSave };
             try
@@ -158,7 +158,7 @@ namespace Theoriz.GenUI.Tests.Editor
                 var otherControllable = other.AddComponent<Controllable>();
                 otherControllable.controllableId = "AnotherScript";
 
-                //"TestScript" sorts after "AnotherScript" by id, so only the priority can explain it coming first.
+                //"TestScript" sorts after "AnotherScript" by id, so only the order value can explain it coming first.
                 Assert.Less(GenUIPanelSettings.ComparePanels(_controllable, otherControllable), 0);
             }
             finally
