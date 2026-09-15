@@ -620,6 +620,9 @@ public class UIMaster : MonoBehaviour
                     break;
             }
 
+            if (widget != null)
+                widget.SetLabel(descriptor.Label);
+
             //A skipped member has no label to hover, so it shows its header and nothing else.
             if (descriptor.Tooltip != null && widget != null)
                 widget.SetTooltip(descriptor.Tooltip);

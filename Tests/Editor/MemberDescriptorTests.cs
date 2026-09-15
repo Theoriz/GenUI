@@ -209,6 +209,20 @@ namespace Theoriz.GenUI.Tests.Editor
             Assert.AreEqual("Ranged Int", Describe("rangedInt").Label);
         }
 
+        //Verbatim, not parsed: the option exists to show what the member name cannot.
+        [Test]
+        public void ADisplayName_ReplacesTheParsedLabel()
+        {
+            Assert.AreEqual("Speed (m/s)",
+                Describe("speed", new OCFProperty { displayName = "Speed (m/s)" }).Label);
+        }
+
+        [Test]
+        public void AnEmptyDisplayName_FallsBackToTheParsedLabel()
+        {
+            Assert.AreEqual("Speed", Describe("speed", new OCFProperty { displayName = "" }).Label);
+        }
+
         [Test]
         public void HeaderAndTooltip_AreCarriedThrough()
         {

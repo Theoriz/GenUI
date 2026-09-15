@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 - The canvas can be set to World Space or Screen Space - Camera; set the Render Mode on the prefab's Canvas as for any Unity canvas.
 - `UIMaster` warns when a world-space canvas has a zero scale or size, which is what a prefab instance made before this version carries.
+- A member or button is labelled with its `displayName` when `[OCFExposed]` sets one (OCF 3.3.0), in the panel and in the browser.
 
 ### Changed
 

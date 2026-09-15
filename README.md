@@ -123,6 +123,8 @@ An enum renders as a dropdown of its members — see [Exposing an enum](https://
 
 The Header, Range, and Tooltip attributes are also supported in Controllables. A Tooltip shows when the pointer rests on the member's name, as in the Inspector.
 
+A member is labelled with its name split into words (`fadeDuration` → "Fade Duration"), or with its `displayName` when `[OCFExposed]` sets one — see [the OCF options](https://github.com/Theoriz/OCF#ocfproperty-options).
+
 ### The color picker
 
 A Color member is drawn as a swatch; left-clicking the swatch opens the picker. It holds a saturation/value square, a hue bar, an alpha bar, an R/G/B/A row and a hex field.

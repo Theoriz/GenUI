@@ -188,8 +188,6 @@ public class DropdownUI : ControllableUI
         LinkedControllable = target;
         LinkedControllable.controllableValueChanged += HandleTargetChange;
 
-        _label.text = ParseNameString(activeElement.Name);
-
         SyncSelection();
         _dropdown.onValueChanged.AddListener((value) =>
         {
@@ -217,8 +215,6 @@ public class DropdownUI : ControllableUI
         enumType = _enumType;
         _enumNames = Enum.GetNames(enumType);
         _enumValues = Enum.GetValues(enumType);
-
-        _label.text = ParseNameString(activeElement.Name);
 
         SyncSelection();
         _dropdown.onValueChanged.AddListener((value) =>

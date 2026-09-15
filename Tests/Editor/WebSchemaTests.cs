@@ -17,9 +17,11 @@ namespace Theoriz.GenUI.Tests.Editor
         public List<string> choices = new List<string> { "one", "two" };
         public Quaternion rotation;
         public float locked;
+        public float named;
 
         public void Ping() { }
         public void WithArgument(int amount) { }
+        public void Fire() { }
     }
 
     /// <summary>
@@ -41,9 +43,11 @@ namespace Theoriz.GenUI.Tests.Editor
         [OCFProperty(targetList = "choices")] public string chosen;
         [OCFProperty] public Quaternion rotation;
         [OCFProperty(readOnly = true)] public float locked;
+        [OCFProperty(displayName = "Speed (m/s)")] public float named;
 
         [OCFMethod] public void Ping() { }
         [OCFMethod] public void WithArgument(int amount) { }
+        [OCFMethod(displayName = "Fire!")] public void Fire() { }
     }
 
     /// <summary>
@@ -205,6 +209,22 @@ namespace Theoriz.GenUI.Tests.Editor
         public void AParameterlessMethod_GetsAButton()
         {
             Assert.AreEqual("Ping", Text(Method("Ping"), "label"));
+        }
+
+        //Awake rebinds the method to the target script's, which carries no attribute: the label has
+        //to come from the mirror's own declaration.
+        [Test]
+        public void ADisplayName_LabelsTheButton()
+        {
+            Assert.AreEqual("Fire!", Text(Method("Fire"), "label"));
+            Assert.AreEqual("Fire", Text(Method("Fire"), "name"));
+        }
+
+        [Test]
+        public void ADisplayName_LabelsTheMember()
+        {
+            Assert.AreEqual("Speed (m/s)", Text(Member("named"), "label"));
+            Assert.AreEqual("named", Text(Member("named"), "name"));
         }
 
         //The same exclusion UIMaster.CreateButton makes: a method taking arguments gets no button.

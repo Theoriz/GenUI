@@ -28,8 +28,6 @@ public class InputFieldUI : ControllableUI
         Property = property;
         target.controllableValueChanged += HandleTargetChange;
 
-        _label.text = ParseNameString(property.Name);
-
         if (property.FieldType.ToString() == "System.Int32")
             _input.contentType = InputField.ContentType.IntegerNumber;
         if (property.FieldType.ToString() == "System.Single")

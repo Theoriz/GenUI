@@ -38,7 +38,6 @@ public class ColorUI : ControllableUI
         LinkedControllable = target;
         target.controllableValueChanged += HandleTargetChange;
 
-        _label.text = ParseNameString(property.Name);
         _swatch.color = GetCurrentColorValue();
     }
 

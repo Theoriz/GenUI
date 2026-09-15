@@ -96,6 +96,12 @@ public class ControllableUI : MonoBehaviour {
             NameLabel.gameObject.AddComponent<TooltipTrigger>().text = text;
     }
 
+    public void SetLabel(string text)
+    {
+        if (NameLabel != null)
+            NameLabel.text = text;
+    }
+
     public virtual void RemoveUI()
     {
         LinkedControllable.controllableValueChanged -= HandleTargetChange;
@@ -321,6 +327,13 @@ public class ControllableUI : MonoBehaviour {
         if (!char.IsUpper(name[ControllablePrefix.Length])) return name;
 
         return name.Substring(ControllablePrefix.Length);
+    }
+
+    //The one label rule, shared by MemberDescriptor and the method renderers: a displayName is shown
+    //verbatim, anything else is derived from the member name.
+    public static string LabelFor(string name, string displayName)
+    {
+        return string.IsNullOrEmpty(displayName) ? ParseNameString(name) : displayName;
     }
 
     //Static so MemberDescriptor can label a member without a widget to ask.

@@ -23,7 +23,7 @@ public class ButtonUI : ControllableUI
         //A method has no read-only form: the button invokes it and its address is callable over OSC.
         IsInteractible = true;
 
-        _label.text = ParseNameString(method.methodInfo.Name);
+        _label.text = LabelFor(method.methodInfo.Name, method.attribute != null ? method.attribute.displayName : null);
         _button.onClick.AddListener(() =>
         {
             target.SetMethodProp(method, null);

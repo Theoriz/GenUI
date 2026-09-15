@@ -38,8 +38,6 @@ public class ToggleUI : ControllableUI
         target.controllableValueChanged += HandleTargetChange;
         HandleTargetChange(property.Name); //To set color
 
-        _label.text = ParseNameString(property.Name);
-
         toggle.isOn = (bool)property.GetValue(target);
         toggle.interactable = isInteractible;
         toggle.onValueChanged.AddListener((value) =>

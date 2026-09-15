@@ -105,7 +105,6 @@ public class SliderUI : ControllableUI
             target.SetFieldProp(property, list);
         });
 
-        _label.text = ParseNameString(property.Name);
         _input.text = FormatValue(property.GetValue(target));
 
         _slider.maxValue = rangeAttribut.max;

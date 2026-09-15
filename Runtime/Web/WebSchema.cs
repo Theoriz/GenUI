@@ -103,7 +103,7 @@ public static class WebSchema
                 if (!first) json.Append(',');
                 first = false;
 
-                json.Append(MethodJson(controllable, method.Value.methodInfo));
+                json.Append(MethodJson(controllable, method.Value));
             }
         }
 
@@ -205,14 +205,17 @@ public static class WebSchema
         return new List<string>();
     }
 
-    static string MethodJson(Controllable controllable, MethodInfo method)
+    static string MethodJson(Controllable controllable, ClassMethodInfo method)
     {
+        var name = method.methodInfo.Name;
+        var displayName = method.attribute != null ? method.attribute.displayName : null;
+
         var json = new StringBuilder();
         json.Append('{');
-        json.Append("\"name\":").Append(WebJson.Quote(method.Name));
-        json.Append(",\"label\":").Append(WebJson.Quote(ControllableUI.ParseNameString(method.Name)));
+        json.Append("\"name\":").Append(WebJson.Quote(name));
+        json.Append(",\"label\":").Append(WebJson.Quote(ControllableUI.LabelFor(name, displayName)));
 
-        var group = MethodGroup(controllable, method);
+        var group = MethodGroup(controllable, method.methodInfo);
         if (group != null)
             json.Append(",\"group\":").Append(WebJson.Quote(group));
 

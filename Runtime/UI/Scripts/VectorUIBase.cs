@@ -82,8 +82,6 @@ public abstract class VectorUIBase : ControllableUI
         LinkedControllable = target;
         target.controllableValueChanged += HandleTargetChange;
 
-        _label.text = ParseNameString(property.Name);
-
         var values = ReadAxisValues();
         for (var i = 0; i < _inputs.Length; i++)
         {

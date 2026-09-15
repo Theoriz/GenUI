@@ -59,7 +59,7 @@ public struct MemberDescriptor
         {
             Kind = WidgetKind.None,
             Name = field.Name,
-            Label = ControllableUI.ParseNameString(field.Name),
+            Label = ControllableUI.LabelFor(field.Name, attribute != null ? attribute.displayName : null),
             ReadOnly = attribute != null && attribute.readOnly,
             IsFloat = true
         };
